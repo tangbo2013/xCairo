@@ -592,7 +592,7 @@ _cairo_recording_surface_acquire_source_image (void			 *abstract_surface,
 	return CAIRO_STATUS_SUCCESS;
     }
 
-    assert (! surface->unbounded);
+    XASSERT (! surface->unbounded);
     image = _cairo_image_surface_create_with_content (surface->base.content,
 						      surface->extents.width,
 						      surface->extents.height);
@@ -1635,7 +1635,7 @@ _cairo_recording_surface_replay_internal (cairo_recording_surface_t	*surface,
     if (surface->base.is_clear)
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (_cairo_surface_is_recording (&surface->base));
+    XASSERT (_cairo_surface_is_recording (&surface->base));
 
     _cairo_surface_wrapper_init (&wrapper, target);
     if (surface_extents)
@@ -1775,7 +1775,7 @@ _cairo_recording_surface_replay_internal (cairo_recording_surface_t	*surface,
 		command->header.region = CAIRO_RECORDING_REGION_IMAGE_FALLBACK;
 		status = CAIRO_INT_STATUS_SUCCESS;
 	    } else {
-		assert (_cairo_int_status_is_error (status));
+		XASSERT (_cairo_int_status_is_error (status));
 	    }
 	}
 
@@ -1806,7 +1806,7 @@ _cairo_recording_surface_replay_one (cairo_recording_surface_t	*surface,
     if (unlikely (surface->base.finished))
 	return _cairo_error (CAIRO_STATUS_SURFACE_FINISHED);
 
-    assert (_cairo_surface_is_recording (&surface->base));
+    XASSERT (_cairo_surface_is_recording (&surface->base));
 
     /* XXX
      * Use a surface wrapper because we may want to do transformed

@@ -445,7 +445,7 @@ _cairo_operator_bounded_by_source (cairo_operator_t op)
     return FALSE;
 }
 
-uint32_t
+xuint32_t
 _cairo_operator_bounded_by_either (cairo_operator_t op)
 {
     switch (op) {
@@ -510,11 +510,11 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
 int
 _cairo_lround (double d)
 {
-    uint32_t top, shift_amount, output;
+    xuint32_t top, shift_amount, output;
     union {
         double d;
-        uint64_t ui64;
-        uint32_t ui32[2];
+        xuint64_t ui64;
+        xuint32_t ui32[2];
     } u;
 
     u.d = d;
@@ -531,7 +531,7 @@ _cairo_lround (double d)
 #if ( defined(FLOAT_WORDS_BIGENDIAN) && !defined(WORDS_BIGENDIAN)) || \
     (!defined(FLOAT_WORDS_BIGENDIAN) &&  defined(WORDS_BIGENDIAN))
     {
-        uint32_t temp = u.ui32[0];
+        xuint32_t temp = u.ui32[0];
         u.ui32[0] = u.ui32[1];
         u.ui32[1] = temp;
     }
@@ -703,11 +703,11 @@ _cairo_lround (double d)
 /* Convert a 32-bit IEEE single precision floating point number to a
  * 'half' representation (s10.5)
  */
-uint16_t
+xuint16_t
 _cairo_half_from_float (float f)
 {
     union {
-	uint32_t ui;
+	xuint32_t ui;
 	float f;
     } u;
     int s, e, m;
@@ -787,7 +787,7 @@ _cairo_win32_tmpfile (void)
     WCHAR file_name[MAX_PATH + 1];
     HANDLE handle;
     int fd;
-    FILE *fp;
+    xfile_t *fp;
 
     path_len = GetTempPathW (MAX_PATH, path_name);
     if (path_len <= 0 || path_len >= MAX_PATH)
@@ -801,7 +801,7 @@ _cairo_win32_tmpfile (void)
 			 0,
 			 NULL,
 			 CREATE_ALWAYS,
-			 FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE,
+             xfile_t_ATTRIBUTE_NORMAL | xfile_t_FLAG_DELETE_ON_CLOSE,
 			 NULL);
     if (handle == INVALID_HANDLE_VALUE) {
 	DeleteFileW (file_name);

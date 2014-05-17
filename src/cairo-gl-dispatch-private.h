@@ -33,7 +33,8 @@
 #define CAIRO_GL_DISPATCH_PRIVATE_H
 
 #include "cairo-gl-private.h"
-#include <stddef.h>
+//#include <stddef.h>
+#include <xC/xpointer.h>
 
 typedef enum _cairo_gl_dispatch_name {
     CAIRO_GL_DISPATCH_NAME_CORE,
@@ -48,15 +49,15 @@ typedef struct _cairo_gl_dispatch_entry {
 } cairo_gl_dispatch_entry_t;
 
 #define DISPATCH_ENTRY_ARB(name) { { "gl"#name, "gl"#name"ARB", "gl"#name }, \
-				   offsetof(cairo_gl_dispatch_t, name) }
+                   XOFFSETOF(cairo_gl_dispatch_t, name) }
 #define DISPATCH_ENTRY_EXT(name) { { "gl"#name, "gl"#name"EXT", "gl"#name }, \
-				   offsetof(cairo_gl_dispatch_t, name) }
+                   XOFFSETOF(cairo_gl_dispatch_t, name) }
 #define DISPATCH_ENTRY_ARB_OES(name) { { "gl"#name, "gl"#name"ARB", "gl"#name"OES" }, \
-				       offsetof(cairo_gl_dispatch_t, name) }
+                       XOFFSETOF(cairo_gl_dispatch_t, name) }
 #define DISPATCH_ENTRY_EXT_IMG(name) { { "gl"#name, "gl"#name"EXT", "gl"#name"IMG" }, \
-				       offsetof(cairo_gl_dispatch_t, name) }
+                       XOFFSETOF(cairo_gl_dispatch_t, name) }
 #define DISPATCH_ENTRY_CUSTOM(name, name2) { { "gl"#name, "gl"#name2, "gl"#name }, \
-			                     offsetof(cairo_gl_dispatch_t, name)}
+                                 XOFFSETOF(cairo_gl_dispatch_t, name)}
 #define DISPATCH_ENTRY_LAST { { NULL, NULL, NULL }, 0 }
 
 cairo_private cairo_gl_dispatch_entry_t dispatch_buffers_entries[] = {

@@ -49,7 +49,7 @@
 #include "cairo-scaled-font-private.h"
 #include "cairo-surface-private.h"
 
-#include <pixman.h>
+#include <xPixman/pixman.h>
 #include <string.h>
 
 typedef struct _cairo_xlib_display cairo_xlib_display_t;
@@ -88,9 +88,9 @@ struct _cairo_xlib_display {
     cairo_surface_t *white;
     cairo_surface_t *alpha[256];
     cairo_surface_t *solid[32];
-    uint32_t solid_cache[32]; /* low 16 are opaque, high 16 transparent */
+    xuint32_t solid_cache[32]; /* low 16 are opaque, high 16 transparent */
     struct {
-	uint32_t color;
+	xuint32_t color;
 	int index;
     } last_solid_cache[2];
 
@@ -118,11 +118,11 @@ struct _cairo_xlib_display {
 typedef struct _cairo_xlib_visual_info {
     cairo_list_t link;
     VisualID visualid;
-    struct { uint8_t a, r, g, b; } colors[256];
-    uint8_t cube_to_pseudocolor[CUBE_SIZE][CUBE_SIZE][CUBE_SIZE];
-    uint8_t field8_to_cube[256];
-    int8_t  dither8_to_cube[256];
-    uint8_t gray8_to_pseudocolor[256];
+    struct { xuint8_t a, r, g, b; } colors[256];
+    xuint8_t cube_to_pseudocolor[CUBE_SIZE][CUBE_SIZE][CUBE_SIZE];
+    xuint8_t field8_to_cube[256];
+    xint8_t  dither8_to_cube[256];
+    xuint8_t gray8_to_pseudocolor[256];
 } cairo_xlib_visual_info_t;
 
 struct _cairo_xlib_screen {
@@ -137,7 +137,7 @@ struct _cairo_xlib_screen {
     cairo_font_options_t font_options;
 
     GC gc[GC_CACHE_SIZE];
-    uint8_t gc_depths[GC_CACHE_SIZE];
+    xuint8_t gc_depths[GC_CACHE_SIZE];
 
     cairo_list_t visuals;
 };
@@ -194,10 +194,10 @@ struct _cairo_xlib_surface {
     int precision;
     XRenderPictFormat *xrender_format;
     /* XXX pixman_format instead of masks? */
-    uint32_t a_mask;
-    uint32_t r_mask;
-    uint32_t g_mask;
-    uint32_t b_mask;
+    xuint32_t a_mask;
+    xuint32_t r_mask;
+    xuint32_t g_mask;
+    xuint32_t b_mask;
 
     struct _cairo_xlib_source {
 	cairo_surface_t base;

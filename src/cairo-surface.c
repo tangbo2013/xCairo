@@ -339,7 +339,7 @@ _cairo_surface_detach_snapshots (cairo_surface_t *surface)
 void
 _cairo_surface_detach_snapshot (cairo_surface_t *snapshot)
 {
-    assert (snapshot->snapshot_of != NULL);
+    XASSERT (snapshot->snapshot_of != NULL);
 
     snapshot->snapshot_of = NULL;
     cairo_list_del (&snapshot->snapshot);
@@ -355,8 +355,8 @@ _cairo_surface_attach_snapshot (cairo_surface_t *surface,
 				 cairo_surface_t *snapshot,
 				 cairo_surface_func_t detach_func)
 {
-    assert (surface != snapshot);
-    assert (snapshot->snapshot_of != surface);
+    XASSERT (surface != snapshot);
+    XASSERT (snapshot->snapshot_of != surface);
 
     cairo_surface_reference (snapshot);
 
@@ -368,7 +368,7 @@ _cairo_surface_attach_snapshot (cairo_surface_t *surface,
 
     cairo_list_add (&snapshot->snapshot, &surface->snapshots);
 
-    assert (_cairo_surface_has_snapshot (surface, snapshot->backend) == snapshot);
+    XASSERT (_cairo_surface_has_snapshot (surface, snapshot->backend) == snapshot);
 }
 
 cairo_surface_t *
@@ -390,8 +390,8 @@ _cairo_surface_has_snapshot (cairo_surface_t *surface,
 cairo_status_t
 _cairo_surface_begin_modification (cairo_surface_t *surface)
 {
-    assert (surface->status == CAIRO_STATUS_SUCCESS);
-    assert (! surface->finished);
+    XASSERT (surface->status == CAIRO_STATUS_SUCCESS);
+    XASSERT (! surface->finished);
 
     return _cairo_surface_flush (surface, 1);
 }
@@ -532,7 +532,7 @@ cairo_surface_create_similar (cairo_surface_t  *other,
     surface = _cairo_surface_create_similar_solid (other,
 						   content, width, height,
 						   CAIRO_COLOR_TRANSPARENT);
-    assert (surface->is_clear);
+    XASSERT (surface->is_clear);
 
     return surface;
 }
@@ -588,7 +588,7 @@ cairo_surface_create_similar_image (cairo_surface_t  *other,
     if (image == NULL)
 	image = cairo_image_surface_create (format, width, height);
 
-    assert (image->is_clear);
+    XASSERT (image->is_clear);
 
     return image;
 }
@@ -630,7 +630,7 @@ _cairo_surface_map_to_image (cairo_surface_t  *surface,
 {
     cairo_image_surface_t *image = NULL;
 
-    assert (extents != NULL);
+    XASSERT (extents != NULL);
 
     /* TODO: require map_to_image != NULL */
     if (surface->backend->map_to_image)
@@ -902,7 +902,7 @@ cairo_surface_reference (cairo_surface_t *surface)
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
 	return surface;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
 
     _cairo_reference_count_inc (&surface->ref_count);
 
@@ -927,12 +927,12 @@ cairo_surface_destroy (cairo_surface_t *surface)
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&surface->ref_count))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (! surface->finished) {
 	_cairo_surface_finish_snapshots (surface);
@@ -954,10 +954,10 @@ cairo_surface_destroy (cairo_surface_t *surface)
     if (surface->owns_device)
         cairo_device_destroy (surface->device);
 
-    assert (surface->snapshot_of == NULL);
-    assert (! _cairo_surface_has_snapshots (surface));
+    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (! _cairo_surface_has_snapshots (surface));
     /* paranoid check that nobody took a reference whilst finishing */
-    assert (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
+    XASSERT (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
 
     free (surface);
 }
@@ -1009,8 +1009,8 @@ _cairo_surface_finish (cairo_surface_t *surface)
 	    _cairo_surface_set_error (surface, status);
     }
 
-    assert (surface->snapshot_of == NULL);
-    assert (!_cairo_surface_has_snapshots (surface));
+    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (!_cairo_surface_has_snapshots (surface));
 }
 
 /**
@@ -1072,7 +1072,7 @@ slim_hidden_def (cairo_surface_finish);
 void
 _cairo_surface_release_device_reference (cairo_surface_t *surface)
 {
-    assert (surface->owns_device);
+    XASSERT (surface->owns_device);
 
     cairo_device_destroy (surface->device);
     surface->owns_device = FALSE;
@@ -1423,7 +1423,7 @@ _cairo_surface_set_font_options (cairo_surface_t       *surface,
     if (surface->status)
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (surface->finished) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1579,7 +1579,7 @@ cairo_surface_mark_dirty_rectangle (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1589,8 +1589,8 @@ cairo_surface_mark_dirty_rectangle (cairo_surface_t *surface,
     /* The application *should* have called cairo_surface_flush() before
      * modifying the surface independently of cairo (and thus having to
      * call mark_dirty()). */
-    assert (! _cairo_surface_has_snapshots (surface));
-    assert (! _cairo_surface_has_mime_data (surface));
+    XASSERT (! _cairo_surface_has_snapshots (surface));
+    XASSERT (! _cairo_surface_has_mime_data (surface));
 
     surface->is_clear = FALSE;
     surface->serial++;
@@ -1650,7 +1650,7 @@ _cairo_surface_set_device_scale (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1671,7 +1671,7 @@ _cairo_surface_set_device_scale (cairo_surface_t *surface,
     surface->device_transform_inverse = surface->device_transform;
     status = cairo_matrix_invert (&surface->device_transform_inverse);
     /* should always be invertible unless given pathological input */
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     _cairo_observers_notify (&surface->device_transform_observers, surface);
 }
@@ -1706,7 +1706,7 @@ cairo_surface_set_device_offset (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1725,7 +1725,7 @@ cairo_surface_set_device_offset (cairo_surface_t *surface,
     surface->device_transform_inverse = surface->device_transform;
     status = cairo_matrix_invert (&surface->device_transform_inverse);
     /* should always be invertible unless given pathological input */
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     _cairo_observers_notify (&surface->device_transform_observers, surface);
 }
@@ -1797,7 +1797,7 @@ cairo_surface_set_fallback_resolution (cairo_surface_t	*surface,
     if (unlikely (surface->status))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1879,7 +1879,7 @@ _cairo_surface_acquire_source_image (cairo_surface_t         *surface,
     if (unlikely (surface->status))
 	return surface->status;
 
-    assert (!surface->finished);
+    XASSERT (!surface->finished);
 
     if (surface->backend->acquire_source_image == NULL)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
@@ -1922,7 +1922,7 @@ _cairo_surface_release_source_image (cairo_surface_t        *surface,
 				     cairo_image_surface_t  *image,
 				     void                   *image_extra)
 {
-    assert (!surface->finished);
+    XASSERT (!surface->finished);
 
     if (surface->backend->release_source_image)
 	surface->backend->release_source_image (surface, image, image_extra);
@@ -1944,7 +1944,7 @@ cairo_surface_t *
 _cairo_surface_get_source (cairo_surface_t *surface,
 			   cairo_rectangle_int_t *extents)
 {
-    assert (surface->backend->source);
+    XASSERT (NULL != surface->backend->source);
     return surface->backend->source (surface, extents);
 }
 
@@ -2284,7 +2284,7 @@ cairo_surface_copy_page (cairo_surface_t *surface)
     if (unlikely (surface->status))
 	return;
 
-    assert (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == NULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, CAIRO_STATUS_SURFACE_FINISHED);
@@ -2591,7 +2591,7 @@ _cairo_surface_set_resolution (cairo_surface_t *surface,
 cairo_surface_t *
 _cairo_surface_create_in_error (cairo_status_t status)
 {
-    assert (status < CAIRO_STATUS_LAST_STATUS);
+    XASSERT (status < CAIRO_STATUS_LAST_STATUS);
     switch (status) {
     case CAIRO_STATUS_NO_MEMORY:
 	return (cairo_surface_t *) &_cairo_surface_nil;

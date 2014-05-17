@@ -454,7 +454,7 @@ _cairo_rectilinear_stroker_line_to (void		*closure,
     cairo_status_t status;
 
     /* We only support horizontal or vertical elements. */
-    assert (a->x == b->x || a->y == b->y);
+    XASSERT (a->x == b->x || a->y == b->y);
 
     /* We don't draw anything for degenerate paths. */
     if (a->x == b->x && a->y == b->y)
@@ -489,7 +489,7 @@ _cairo_rectilinear_stroker_line_to_dashed (void		*closure,
 	return CAIRO_STATUS_SUCCESS;
 
     /* We only support horizontal or vertical elements. */
-    assert (a->x == b->x || a->y == b->y);
+    XASSERT (a->x == b->x || a->y == b->y);
 
     fully_in_bounds = TRUE;
     if (stroker->has_bounds &&
@@ -617,7 +617,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
     cairo_int_status_t status;
     cairo_box_t box;
 
-    assert (_cairo_path_fixed_stroke_is_rectilinear (path));
+    XASSERT (_cairo_path_fixed_stroke_is_rectilinear (path));
 
     if (! _cairo_rectilinear_stroker_init (&rectilinear_stroker,
 					   stroke_style, ctm, antialias,
@@ -640,7 +640,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
 	b.p1.y = box.p1.y - rectilinear_stroker.half_line_y;
 	b.p2.y = box.p1.y + rectilinear_stroker.half_line_y;
 	status = _cairo_boxes_add (boxes, antialias, &b);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	/* left  (excluding top/bottom) */
 	b.p1.x = box.p1.x - rectilinear_stroker.half_line_x;
@@ -648,7 +648,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
 	b.p1.y = box.p1.y + rectilinear_stroker.half_line_y;
 	b.p2.y = box.p2.y - rectilinear_stroker.half_line_y;
 	status = _cairo_boxes_add (boxes, antialias, &b);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	/* right  (excluding top/bottom) */
 	b.p1.x = box.p2.x - rectilinear_stroker.half_line_x;
@@ -656,7 +656,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
 	b.p1.y = box.p1.y + rectilinear_stroker.half_line_y;
 	b.p2.y = box.p2.y - rectilinear_stroker.half_line_y;
 	status = _cairo_boxes_add (boxes, antialias, &b);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	/* bottom */
 	b.p1.x = box.p1.x - rectilinear_stroker.half_line_x;
@@ -664,7 +664,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
 	b.p1.y = box.p2.y - rectilinear_stroker.half_line_y;
 	b.p2.y = box.p2.y + rectilinear_stroker.half_line_y;
 	status = _cairo_boxes_add (boxes, antialias, &b);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	goto done;
     }

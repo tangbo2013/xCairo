@@ -45,7 +45,7 @@
 #include "cairo-stroke-dash-private.h"
 #include "cairo-traps-private.h"
 
-#include <float.h>
+#include <xC/xfloat.h>
 
 struct stroker {
     const cairo_stroke_style_t	*style;
@@ -824,7 +824,7 @@ line_to_dashed (void *closure, const cairo_point_t *point)
     if (stroker->ctm_inverse)
 	cairo_matrix_transform_distance (stroker->ctm_inverse, &slope_dx, &slope_dy);
     mag = normalize_slope (&slope_dx, &slope_dy);
-    if (mag <= DBL_EPSILON)
+    if (mag <= XDBL_EPSILON)
 	return CAIRO_STATUS_SUCCESS;
 
     remain = mag;
@@ -1113,7 +1113,7 @@ _cairo_path_fixed_stroke_to_traps (const cairo_path_fixed_t	*path,
 					      curve_to,
 					      close_path,
 					      &stroker);
-    assert(status == CAIRO_STATUS_SUCCESS);
+    XASSERT(status == CAIRO_STATUS_SUCCESS);
     add_caps (&stroker);
 
     stroker_fini (&stroker);

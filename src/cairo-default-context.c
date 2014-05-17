@@ -226,7 +226,7 @@ _cairo_default_context_pop_group (void *abstract_cr)
     group_surface = cairo_surface_reference (group_surface);
 
     status = _cairo_gstate_restore (&cr->gstate, &cr->gstate_freelist);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     group_pattern = cairo_pattern_create_for_surface (group_surface);
     status = group_pattern->status;

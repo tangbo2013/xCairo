@@ -188,7 +188,7 @@ _cairo_surface_snapshot_copy_on_write (cairo_surface_t *surface)
     if (snapshot->target->backend->snapshot != NULL) {
 	clone = snapshot->target->backend->snapshot (snapshot->target);
 	if (clone != NULL) {
-	    assert (clone->status || ! _cairo_surface_is_snapshot (clone));
+	    XASSERT (clone->status || ! _cairo_surface_is_snapshot (clone));
 	    goto done;
 	}
     }

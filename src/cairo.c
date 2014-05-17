@@ -48,7 +48,7 @@
 #include "cairo-surface-private.h"
 #include "cairo-surface-backend-private.h"
 
-#include <assert.h>
+#include <xC/xdebug.h>
 
 /**
  * SECTION:cairo
@@ -185,10 +185,10 @@ _cairo_create_in_error (cairo_status_t status)
 {
     cairo_t *cr;
 
-    assert (status != CAIRO_STATUS_SUCCESS);
+    XASSERT (status != CAIRO_STATUS_SUCCESS);
 
     cr = (cairo_t *) &_cairo_nil[status - CAIRO_STATUS_NO_MEMORY];
-    assert (status == cr->status);
+    XASSERT (status == cr->status);
 
     return cr;
 }
@@ -269,7 +269,7 @@ cairo_reference (cairo_t *cr)
     if (cr == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
 	return cr;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
 
     _cairo_reference_count_inc (&cr->ref_count);
 
@@ -298,7 +298,7 @@ cairo_destroy (cairo_t *cr)
     if (cr == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&cr->ref_count))
 	return;

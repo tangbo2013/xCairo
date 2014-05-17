@@ -37,7 +37,7 @@
 #ifndef CAIRO_SKIA_H
 #define CAIRO_SKIA_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if CAIRO_HAS_SKIA_SURFACE
 

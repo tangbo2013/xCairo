@@ -214,9 +214,9 @@ void
 _cairo_hash_table_destroy (cairo_hash_table_t *hash_table)
 {
     /* The hash table must be empty. Otherwise, halt. */
-    assert (hash_table->live_entries == 0);
+    XASSERT (hash_table->live_entries == 0);
     /* No iterators can be running. Otherwise, halt. */
-    assert (hash_table->iterating == 0);
+    XASSERT (hash_table->iterating == 0);
 
     free (hash_table->entries);
     free (hash_table);
@@ -282,7 +282,7 @@ _cairo_hash_table_manage (cairo_hash_table_t *hash_table)
     {
 	tmp.table_size = hash_table->table_size + 1;
 	/* This code is being abused if we can't make a table big enough. */
-	assert (tmp.table_size - hash_table_sizes <
+	XASSERT (tmp.table_size - hash_table_sizes <
 		ARRAY_LENGTH (hash_table_sizes));
     }
     else if (hash_table->live_entries < live_low)
@@ -406,7 +406,7 @@ _cairo_hash_table_random_entry (cairo_hash_table_t	   *hash_table,
     unsigned long hash;
     unsigned long table_size, i, idx, step;
 
-    assert (predicate != NULL);
+    XASSERT (predicate != NULL);
 
     table_size = *hash_table->table_size;
     hash = rand ();
@@ -459,7 +459,7 @@ _cairo_hash_table_insert (cairo_hash_table_t *hash_table,
     cairo_status_t status;
 
     /* Insert is illegal while an iterator is running. */
-    assert (hash_table->iterating == 0);
+    XASSERT (hash_table->iterating == 0);
 
     status = _cairo_hash_table_manage (hash_table);
     if (unlikely (status))

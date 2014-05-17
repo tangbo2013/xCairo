@@ -280,7 +280,7 @@ _cairo_path_populate (cairo_path_t		*path,
 	return status;
 
     /* Sanity check the count */
-    assert (cpp.data - path->data == path->num_data);
+    XASSERT (cpp.data - path->data == path->num_data);
 
     return CAIRO_STATUS_SUCCESS;
 }

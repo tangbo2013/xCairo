@@ -92,7 +92,7 @@ static inline void *
 _cairo_freepool_alloc_from_pool (cairo_freepool_t *freepool)
 {
     cairo_freelist_pool_t *pool;
-    uint8_t *ptr;
+    xuint8_t *ptr;
 
     pool = freepool->pools;
     if (unlikely (freepool->nodesize > pool->rem))

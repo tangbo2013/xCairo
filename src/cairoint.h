@@ -54,21 +54,22 @@
 #define cairo_public __declspec(dllexport)
 #endif
 
-#include <assert.h>
+#include <xC/xdebug.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <stddef.h>
+//#include <stddef.h>
+#include <xC/xpointer.h>
 
 #ifdef _MSC_VER
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
 #include <limits.h>
-#include <stdio.h>
+#include <xC/xfile.h>
 
-#include "cairo.h"
-#include <pixman.h>
+#include "../cairo.h"
+#include <xPixman/pixman.h>
 
 #include "cairo-compiler-private.h"
 #include "cairo-error-private.h"
@@ -96,7 +97,7 @@
 CAIRO_BEGIN_DECLS
 
 #if _WIN32 && !_WIN32_WCE /* Permissions on WinCE? No worries! */
-cairo_private FILE *
+cairo_private xfile_t *
 _cairo_win32_tmpfile (void);
 #define tmpfile() _cairo_win32_tmpfile()
 #endif
@@ -138,7 +139,7 @@ _cairo_win32_tmpfile (void);
 #if defined (__GNUC__)
 #define cairo_container_of(ptr, type, member) ({ \
     const __typeof__ (((type *) 0)->member) *mptr__ = (ptr); \
-    (type *) ((char *) mptr__ - offsetof (type, member)); \
+    (type *) ((char *) mptr__ - XOFFSETOF (type, member)); \
 })
 #else
 #define cairo_container_of(ptr, type, member) \
@@ -148,7 +149,7 @@ _cairo_win32_tmpfile (void);
 
 #define ASSERT_NOT_REACHED		\
 do {					\
-    assert (!"reached");		\
+    XASSERT (!"reached");		\
 } while (0)
 #define COMPILE_TIME_ASSERT1(condition, line)		\
     typedef int compile_time_assertion_at_line_##line##_failed [(condition)?1:-1]
@@ -179,7 +180,7 @@ do {					\
  * good as the open-coded solution below, (which is "HACKMEM 169").
  */
 static inline int cairo_const
-_cairo_popcount (uint32_t mask)
+_cairo_popcount (xuint32_t mask)
 {
 #if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
     return __builtin_popcount (mask);
@@ -214,26 +215,26 @@ _cairo_is_little_endian (void)
 
 #else
 
-static inline uint16_t cairo_const
-cpu_to_be16(uint16_t v)
+static inline xuint16_t cairo_const
+cpu_to_be16(xuint16_t v)
 {
     return (v << 8) | (v >> 8);
 }
 
-static inline uint16_t cairo_const
-be16_to_cpu(uint16_t v)
+static inline xuint16_t cairo_const
+be16_to_cpu(xuint16_t v)
 {
     return cpu_to_be16 (v);
 }
 
-static inline uint32_t cairo_const
-cpu_to_be32(uint32_t v)
+static inline xuint32_t cairo_const
+cpu_to_be32(xuint32_t v)
 {
     return (cpu_to_be16 (v) << 16) | cpu_to_be16 (v >> 16);
 }
 
-static inline uint32_t cairo_const
-be32_to_cpu(uint32_t v)
+static inline xuint32_t cairo_const
+be32_to_cpu(xuint32_t v)
 {
     return cpu_to_be32 (v);
 }
@@ -496,7 +497,7 @@ struct _cairo_scaled_font_backend {
 
     unsigned long
     (*ucs4_to_index)		(void			     *scaled_font,
-				 uint32_t		      ucs4);
+                 xuint32_t		      ucs4);
 
     /* Read data from a sfnt font table.
      * @scaled_font: font
@@ -528,7 +529,7 @@ struct _cairo_scaled_font_backend {
     cairo_warn cairo_int_status_t
     (*index_to_ucs4)(void                       *scaled_font,
 		     unsigned long               index,
-                     uint32_t                   *ucs4);
+                     xuint32_t                   *ucs4);
 
     cairo_warn cairo_bool_t
     (*is_synthetic)(void                       *scaled_font);
@@ -724,7 +725,7 @@ _cairo_lround (double r)
 }
 #endif
 
-cairo_private uint16_t
+cairo_private xuint16_t
 _cairo_half_from_float (float f) cairo_const;
 
 cairo_private cairo_bool_t
@@ -738,7 +739,7 @@ enum {
     CAIRO_OPERATOR_BOUND_BY_SOURCE = 1 << 2,
 };
 
-cairo_private uint32_t
+cairo_private xuint32_t
 _cairo_operator_bounded_by_either (cairo_operator_t op) cairo_const;
 /* cairo-color.c */
 cairo_private const cairo_color_t *
@@ -748,7 +749,7 @@ _cairo_stock_color (cairo_stock_t stock) cairo_pure;
 #define CAIRO_COLOR_BLACK       _cairo_stock_color (CAIRO_STOCK_BLACK)
 #define CAIRO_COLOR_TRANSPARENT _cairo_stock_color (CAIRO_STOCK_TRANSPARENT)
 
-cairo_private uint16_t
+cairo_private xuint16_t
 _cairo_color_double_to_short (double d) cairo_const;
 
 cairo_private void
@@ -818,8 +819,8 @@ _cairo_font_face_twin_create_for_toy (cairo_toy_font_face_t   *toy_face,
 
 /* cairo-font-face-twin-data.c */
 
-extern const cairo_private int8_t _cairo_twin_outlines[];
-extern const cairo_private uint16_t _cairo_twin_charmap[128];
+extern const cairo_private xint8_t _cairo_twin_outlines[];
+extern const cairo_private xuint16_t _cairo_twin_charmap[128];
 
 /* cairo-font-options.c */
 
@@ -1467,7 +1468,7 @@ _cairo_surface_release_device_reference (cairo_surface_t *surface);
                                     (format) <= CAIRO_FORMAT_RGB30)
 
 /* pixman-required stride alignment in bytes. */
-#define CAIRO_STRIDE_ALIGNMENT (sizeof (uint32_t))
+#define CAIRO_STRIDE_ALIGNMENT (sizeof (xuint32_t))
 #define CAIRO_STRIDE_FOR_WIDTH_BPP(w,bpp) \
    ((((bpp)*(w)+7)/8 + CAIRO_STRIDE_ALIGNMENT-1) & -CAIRO_STRIDE_ALIGNMENT)
 
@@ -1813,16 +1814,16 @@ _cairo_pattern_reset_static_data (void);
 
 cairo_private int
 _cairo_utf8_get_char_validated (const char *p,
-				uint32_t   *unicode);
+                xuint32_t   *unicode);
 
 cairo_private cairo_status_t
 _cairo_utf8_to_ucs4 (const char *str,
 		     int	 len,
-		     uint32_t  **result,
+             xuint32_t  **result,
 		     int	*items_written);
 
 cairo_private int
-_cairo_ucs4_to_utf8 (uint32_t    unicode,
+_cairo_ucs4_to_utf8 (xuint32_t    unicode,
 		     char       *utf8);
 
 #if CAIRO_HAS_WIN32_FONT || CAIRO_HAS_QUARTZ_FONT || CAIRO_HAS_PDF_OPERATORS
@@ -1832,7 +1833,7 @@ _cairo_ucs4_to_utf8 (uint32_t    unicode,
 cairo_private cairo_status_t
 _cairo_utf8_to_utf16 (const char *str,
 		      int	  len,
-		      uint16_t  **result,
+		      xuint16_t  **result,
 		      int	 *items_written);
 #endif
 
@@ -2040,16 +2041,16 @@ _cairo_debug_check_image_surface_is_defined (const cairo_surface_t *surface);
 #endif
 
 cairo_private void
-_cairo_debug_print_path (FILE *stream, cairo_path_fixed_t *path);
+_cairo_debug_print_path (xfile_t *stream, cairo_path_fixed_t *path);
 
 cairo_private void
-_cairo_debug_print_polygon (FILE *stream, cairo_polygon_t *polygon);
+_cairo_debug_print_polygon (xfile_t *stream, cairo_polygon_t *polygon);
 
 cairo_private void
-_cairo_debug_print_traps (FILE *file, const cairo_traps_t *traps);
+_cairo_debug_print_traps (xfile_t *file, const cairo_traps_t *traps);
 
 cairo_private void
-_cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip);
+_cairo_debug_print_clip (xfile_t *stream, const cairo_clip_t *clip);
 
 #if 0
 #define TRACE(x) fprintf (stderr, "%s: ", __FILE__), fprintf x

@@ -106,7 +106,7 @@ _cairo_surface_wrapper_get_inverse_transform (cairo_surface_wrapper_t *wrapper,
 
 	inv = wrapper->transform;
 	status = cairo_matrix_invert (&inv);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	cairo_matrix_multiply (m, &inv, m);
     }
 
@@ -156,7 +156,7 @@ _cairo_surface_wrapper_paint (cairo_surface_wrapper_t *wrapper,
 	_cairo_surface_wrapper_get_transform (wrapper, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -194,7 +194,7 @@ _cairo_surface_wrapper_mask (cairo_surface_wrapper_t *wrapper,
 	_cairo_surface_wrapper_get_transform (wrapper, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -250,7 +250,7 @@ _cairo_surface_wrapper_stroke (cairo_surface_wrapper_t *wrapper,
 	cairo_matrix_multiply (&dev_ctm, &dev_ctm, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	cairo_matrix_multiply (&dev_ctm_inverse, &m, &dev_ctm_inverse);
 
@@ -318,7 +318,7 @@ _cairo_surface_wrapper_fill_stroke (cairo_surface_wrapper_t *wrapper,
 	cairo_matrix_multiply (&dev_ctm, &dev_ctm, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	cairo_matrix_multiply (&dev_ctm_inverse, &m, &dev_ctm_inverse);
 
@@ -381,7 +381,7 @@ _cairo_surface_wrapper_fill (cairo_surface_wrapper_t	*wrapper,
 	dev_path = &path_copy;
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -465,7 +465,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 	}
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -572,7 +572,7 @@ _cairo_surface_wrapper_set_inverse_transform (cairo_surface_wrapper_t *wrapper,
 	wrapper->transform = *transform;
 	status = cairo_matrix_invert (&wrapper->transform);
 	/* should always be invertible unless given pathological input */
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	wrapper->needs_transform = TRUE;
     }

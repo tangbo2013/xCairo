@@ -32,18 +32,18 @@
 #include <limits.h>
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 struct edge {
     struct edge *next, *prev;
 
-    int32_t height_left;
-    int32_t dir;
-    int32_t vertical;
+    xint32_t height_left;
+    xint32_t dir;
+    xint32_t vertical;
 
-    int32_t dy;
+    xint32_t dy;
     struct quorem x;
     struct quorem dxdy;
 };
@@ -53,7 +53,7 @@ struct edge {
  * converting. */
 struct polygon {
     /* The vertical clip extents. */
-    int32_t ymin, ymax;
+    xint32_t ymin, ymax;
 
     int num_edges;
     struct edge *edges;
@@ -79,8 +79,8 @@ struct mono_scan_converter {
     int num_spans;
 
     /* Clip box. */
-    int32_t xmin, xmax;
-    int32_t ymin, ymax;
+    xint32_t xmin, xmax;
+    xint32_t ymin, ymax;
 };
 
 #define I(x) _cairo_fixed_integer_round_down(x)
@@ -210,7 +210,7 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next, *prev;
-    int32_t x;
+    xint32_t x;
 
     prev = head_a->prev;
     next = &head;
@@ -550,7 +550,7 @@ _cairo_mono_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    FILE *file = fopen ("polygon.txt", "w");
+    xfile_t *file = fopen ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
     fclose (file);
 #endif

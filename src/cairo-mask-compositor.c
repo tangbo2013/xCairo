@@ -68,13 +68,13 @@ typedef cairo_int_status_t
 		cairo_clip_t			*clip);
 
 static void do_unaligned_row(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b,
 			     int tx, int y, int h,
-			     uint16_t coverage)
+			     xuint16_t coverage)
 {
     int x1 = _cairo_fixed_integer_part (b->p1.x) - tx;
     int x2 = _cairo_fixed_integer_part (b->p2.x) - tx;
@@ -97,9 +97,9 @@ static void do_unaligned_row(void (*blt)(void *closure,
 }
 
 static void do_unaligned_box(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b, int tx, int ty)
 {
@@ -129,9 +129,9 @@ struct blt_in {
 };
 
 static void blt_in(void *closure,
-		   int16_t x, int16_t y,
-		   int16_t w, int16_t h,
-		   uint16_t coverage)
+		   xint16_t x, xint16_t y,
+		   xint16_t w, xint16_t h,
+		   xuint16_t coverage)
 {
     struct blt_in *info = closure;
     cairo_color_t color;
@@ -633,7 +633,7 @@ fixup_unbounded_boxes (const cairo_mask_compositor_t *compositor,
     struct _cairo_boxes_chunk *chunk;
     int i;
 
-    assert (boxes->is_pixel_aligned);
+    XASSERT (boxes->is_pixel_aligned);
 
     clip_region = NULL;
     if (_cairo_clip_is_region (extents->clip) &&
@@ -659,7 +659,7 @@ fixup_unbounded_boxes (const cairo_mask_compositor_t *compositor,
 	_cairo_boxes_init (&tmp);
 
 	status = _cairo_boxes_add (&tmp, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	tmp.chunks.next = &boxes->chunks;
 	tmp.num_boxes += boxes->num_boxes;
@@ -676,7 +676,7 @@ fixup_unbounded_boxes (const cairo_mask_compositor_t *compositor,
 	_cairo_boxes_limit (&clear, (cairo_box_t *) pbox, i);
 
 	status = _cairo_boxes_add (&clear, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
 	    for (i = 0; i < chunk->count; i++) {
@@ -1004,7 +1004,7 @@ _cairo_mask_compositor_paint (const cairo_compositor_t *_compositor,
 
 struct composite_opacity_info {
     const cairo_mask_compositor_t *compositor;
-    uint8_t op;
+    xuint8_t op;
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
@@ -1012,9 +1012,9 @@ struct composite_opacity_info {
 };
 
 static void composite_opacity(void *closure,
-			      int16_t x, int16_t y,
-			      int16_t w, int16_t h,
-			      uint16_t coverage)
+			      xint16_t x, xint16_t y,
+			      xint16_t w, xint16_t h,
+			      xuint16_t coverage)
 {
     struct composite_opacity_info *info = closure;
     const cairo_mask_compositor_t *compositor = info->compositor;
@@ -1064,7 +1064,7 @@ composite_opacity_boxes (const cairo_mask_compositor_t *compositor,
     struct composite_opacity_info info;
     int i;
 
-    assert (clip);
+    XASSERT (NULL != clip);
 
     info.compositor = compositor;
     info.op = op;
@@ -1095,13 +1095,13 @@ struct composite_box_info {
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
-    uint8_t op;
+    xuint8_t op;
 };
 
 static void composite_box(void *closure,
-			  int16_t x, int16_t y,
-			  int16_t w, int16_t h,
-			  uint16_t coverage)
+			  xint16_t x, xint16_t y,
+			  xint16_t w, xint16_t h,
+			  xuint16_t coverage)
 {
     struct composite_box_info *info = closure;
     const cairo_mask_compositor_t *compositor = info->compositor;
@@ -1154,8 +1154,8 @@ composite_mask_clip_boxes (const cairo_mask_compositor_t *compositor,
     struct composite_box_info info;
     int i;
 
-    assert (src_pattern == NULL);
-    assert (op == CAIRO_OPERATOR_SOURCE);
+    XASSERT (src_pattern == NULL);
+    XASSERT (op == CAIRO_OPERATOR_SOURCE);
 
     info.compositor = compositor;
     info.op = CAIRO_OPERATOR_SOURCE;

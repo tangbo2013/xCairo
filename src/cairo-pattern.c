@@ -40,7 +40,7 @@
 #include "cairo-recording-surface-inline.h"
 #include "cairo-surface-snapshot-inline.h"
 
-#include <float.h>
+#include <xC/xfloat.h>
 
 #define PIXMAN_MAX_INT ((pixman_fixed_1 >> 1) - pixman_fixed_e) /* need to ensure deltas also fit */
 
@@ -367,7 +367,7 @@ _cairo_pattern_init_static_copy (cairo_pattern_t	*pattern,
 {
     int size;
 
-    assert (other->status == CAIRO_STATUS_SUCCESS);
+    XASSERT (other->status == CAIRO_STATUS_SUCCESS);
 
     switch (other->type) {
     default:
@@ -1059,7 +1059,7 @@ cairo_pattern_reference (cairo_pattern_t *pattern)
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&pattern->ref_count))
 	return pattern;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&pattern->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&pattern->ref_count));
 
     _cairo_reference_count_inc (&pattern->ref_count);
 
@@ -1122,7 +1122,7 @@ cairo_pattern_destroy (cairo_pattern_t *pattern)
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&pattern->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&pattern->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&pattern->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&pattern->ref_count))
 	return;
@@ -1449,8 +1449,8 @@ cairo_mesh_pattern_curve_to (cairo_pattern_t *pattern,
     if (mesh->current_side == -2)
 	cairo_mesh_pattern_move_to (pattern, x1, y1);
 
-    assert (mesh->current_side >= -1);
-    assert (pattern->status == CAIRO_STATUS_SUCCESS);
+    XASSERT (mesh->current_side >= -1);
+    XASSERT (pattern->status == CAIRO_STATUS_SUCCESS);
 
     mesh->current_side++;
 
@@ -1677,7 +1677,7 @@ _cairo_pattern_gradient_grow (cairo_gradient_pattern_t *pattern)
     if (CAIRO_INJECT_FAULT ())
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    assert (pattern->n_stops <= pattern->stops_size);
+    XASSERT (pattern->n_stops <= pattern->stops_size);
 
     if (pattern->stops == pattern->stops_embedded) {
 	new_stops = _cairo_malloc_ab (new_size, sizeof (cairo_gradient_stop_t));
@@ -1706,8 +1706,8 @@ _cairo_mesh_pattern_set_corner_color (cairo_mesh_pattern_t *mesh,
 {
     cairo_color_t *color;
 
-    assert (mesh->current_patch);
-    assert (corner_num <= 3);
+    XASSERT (NULL != mesh->current_patch);
+    XASSERT (corner_num <= 3);
 
     color = &mesh->current_patch->colors[corner_num];
     color->red   = red;
@@ -2140,8 +2140,8 @@ _cairo_pattern_transform (cairo_pattern_t	*pattern,
 static cairo_bool_t
 _linear_pattern_is_degenerate (const cairo_linear_pattern_t *linear)
 {
-    return fabs (linear->pd1.x - linear->pd2.x) < DBL_EPSILON &&
-	   fabs (linear->pd1.y - linear->pd2.y) < DBL_EPSILON;
+    return fabs (linear->pd1.x - linear->pd2.x) < XDBL_EPSILON &&
+       fabs (linear->pd1.y - linear->pd2.y) < XDBL_EPSILON;
 }
 
 static cairo_bool_t
@@ -2152,21 +2152,21 @@ _radial_pattern_is_degenerate (const cairo_radial_pattern_t *radial)
      * one of the two cases:
      *
      * 1) The radii are both very small:
-     *      |dr| < DBL_EPSILON && min (r0, r1) < DBL_EPSILON
+     *      |dr| < XDBL_EPSILON && min (r0, r1) < XDBL_EPSILON
      *
      * 2) The two circles have about the same radius and are very
      *    close to each other (approximately a cylinder gradient that
      *    doesn't move with the parameter):
-     *      |dr| < DBL_EPSILON && max (|dx|, |dy|) < 2 * DBL_EPSILON
+     *      |dr| < XDBL_EPSILON && max (|dx|, |dy|) < 2 * XDBL_EPSILON
      *
      * These checks are consistent with the assumptions used in
      * _cairo_radial_pattern_box_to_parameter ().
      */
 
-    return fabs (radial->cd1.radius - radial->cd2.radius) < DBL_EPSILON &&
-	(MIN (radial->cd1.radius, radial->cd2.radius) < DBL_EPSILON ||
+    return fabs (radial->cd1.radius - radial->cd2.radius) < XDBL_EPSILON &&
+    (MIN (radial->cd1.radius, radial->cd2.radius) < XDBL_EPSILON ||
 	 MAX (fabs (radial->cd1.center.x - radial->cd2.center.x),
-	      fabs (radial->cd1.center.y - radial->cd2.center.y)) < 2 * DBL_EPSILON);
+          fabs (radial->cd1.center.y - radial->cd2.center.y)) < 2 * XDBL_EPSILON);
 }
 
 static void
@@ -2178,7 +2178,7 @@ _cairo_linear_pattern_box_to_parameter (const cairo_linear_pattern_t *linear,
     double t0, tdx, tdy;
     double p1x, p1y, pdx, pdy, invsqnorm;
 
-    assert (! _linear_pattern_is_degenerate (linear));
+    XASSERT (! _linear_pattern_is_degenerate (linear));
 
     /*
      * Linear gradients are othrogonal to the line passing through
@@ -2281,11 +2281,11 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
     double mindr, minx, miny, maxx, maxy;
     cairo_bool_t valid;
 
-    assert (! _radial_pattern_is_degenerate (radial));
-    assert (x0 < x1);
-    assert (y0 < y1);
+    XASSERT (! _radial_pattern_is_degenerate (radial));
+    XASSERT (x0 < x1);
+    XASSERT (y0 < y1);
 
-    tolerance = MAX (tolerance, DBL_EPSILON);
+    tolerance = MAX (tolerance, XDBL_EPSILON);
 
     range[0] = range[1] = 0;
     valid = FALSE;
@@ -2307,21 +2307,21 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
 
     /* enlarge boundaries slightly to avoid rounding problems in the
      * parameter range computation */
-    x0 -= DBL_EPSILON;
-    y0 -= DBL_EPSILON;
-    x1 += DBL_EPSILON;
-    y1 += DBL_EPSILON;
+    x0 -= XDBL_EPSILON;
+    y0 -= XDBL_EPSILON;
+    x1 += XDBL_EPSILON;
+    y1 += XDBL_EPSILON;
 
     /* enlarge boundaries even more to avoid rounding problems when
      * testing if a point belongs to the box */
-    minx = x0 - DBL_EPSILON;
-    miny = y0 - DBL_EPSILON;
-    maxx = x1 + DBL_EPSILON;
-    maxy = y1 + DBL_EPSILON;
+    minx = x0 - XDBL_EPSILON;
+    miny = y0 - XDBL_EPSILON;
+    maxx = x1 + XDBL_EPSILON;
+    maxy = y1 + XDBL_EPSILON;
 
     /* we dont' allow negative radiuses, so we will be checking that
      * t*dr >= mindr to consider t valid */
-    mindr = -(cr + DBL_EPSILON);
+    mindr = -(cr + XDBL_EPSILON);
 
     /*
      * After the previous transformations, the start circle is
@@ -2343,7 +2343,7 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
      * If the radius is constant (dr == 0) there is no focus (the
      * gradient represents a cylinder instead of a cone).
      */
-    if (fabs (dr) >= DBL_EPSILON) {
+    if (fabs (dr) >= XDBL_EPSILON) {
 	double t_focus;
 
 	t_focus = -cr / dr;
@@ -2391,7 +2391,7 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
      * focus point case and/or by the a==0 case.
      */
 #define T_EDGE(num,den,delta,lower,upper)				\
-    if (fabs (den) >= DBL_EPSILON) {					\
+    if (fabs (den) >= XDBL_EPSILON) {					\
 	double t_edge, v;						\
 									\
 	t_edge = (num) / (den);						\
@@ -2423,7 +2423,7 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
      *   a*t^2 - 2*b*t + c == 0
      */
     a = dx * dx + dy * dy - dr * dr;
-    if (fabs (a) < DBL_EPSILON * DBL_EPSILON) {
+    if (fabs (a) < XDBL_EPSILON * XDBL_EPSILON) {
 	double b, maxd2;
 
 	/* Ensure that gradients with both a and dr small are
@@ -2432,33 +2432,33 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
 	 * in _radial_pattern_is_degenerate() is:
 	 *
 	 *  1) The circles are practically the same size:
-	 *     |dr| < DBL_EPSILON
+     *     |dr| < XDBL_EPSILON
 	 *  AND
 	 *  2a) The circles are both very small:
-	 *      min (r0, r1) < DBL_EPSILON
+     *      min (r0, r1) < XDBL_EPSILON
 	 *   OR
 	 *  2b) The circles are very close to each other:
-	 *      max (|dx|, |dy|) < 2 * DBL_EPSILON
+     *      max (|dx|, |dy|) < 2 * XDBL_EPSILON
 	 *
 	 * Assuming that the gradient is not degenerate, we want to
-	 * show that |a| < DBL_EPSILON^2 implies |dr| >= DBL_EPSILON.
+     * show that |a| < XDBL_EPSILON^2 implies |dr| >= XDBL_EPSILON.
 	 *
 	 * If the gradient is not degenerate yet it has |dr| <
-	 * DBL_EPSILON, (2b) is false, thus:
+     * XDBL_EPSILON, (2b) is false, thus:
 	 *
 	 *   max (|dx|, |dy|) >= 2*DBL_EPSILON
 	 * which implies:
 	 *   4*DBL_EPSILON^2 <= max (|dx|, |dy|)^2 <= dx^2 + dy^2
 	 *
 	 * From the definition of a, we get:
-	 *   a = dx^2 + dy^2 - dr^2 < DBL_EPSILON^2
-	 *   dx^2 + dy^2 - DBL_EPSILON^2 < dr^2
+     *   a = dx^2 + dy^2 - dr^2 < XDBL_EPSILON^2
+     *   dx^2 + dy^2 - XDBL_EPSILON^2 < dr^2
 	 *   3*DBL_EPSILON^2 < dr^2
 	 *
 	 * which is inconsistent with the hypotheses, thus |dr| <
-	 * DBL_EPSILON is false or the gradient is degenerate.
+     * XDBL_EPSILON is false or the gradient is degenerate.
 	 */
-	assert (fabs (dr) >= DBL_EPSILON);
+    XASSERT (fabs (dr) >= XDBL_EPSILON);
 
 	/*
 	 * If a == 0, all the circles are tangent to a line in the
@@ -2498,7 +2498,7 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
 	 *   v = -((edge) * (delta) + cr*dr) / (den) - v_focus
 	 */
 #define T_EDGE(edge,delta,den,lower,upper,u_origin,v_origin)	\
-	if (fabs (den) >= DBL_EPSILON) {			\
+    if (fabs (den) >= XDBL_EPSILON) {			\
 	    double v;						\
 								\
 	    v = -((edge) * (delta) + cr * dr) / (den);		\
@@ -2555,7 +2555,7 @@ _cairo_radial_pattern_box_to_parameter (const cairo_radial_pattern_t *radial,
 	 */
 #define T_CORNER(x,y)							\
 	b = (x) * dx + (y) * dy + cr * dr;				\
-	if (fabs (b) >= DBL_EPSILON) {					\
+    if (fabs (b) >= XDBL_EPSILON) {					\
 	    double t_corner;						\
 	    double x2 = (x) * (x);					\
 	    double y2 = (y) * (y);					\
@@ -2635,7 +2635,7 @@ _cairo_gradient_pattern_box_to_parameter (const cairo_gradient_pattern_t *gradie
 					  double tolerance,
 					  double out_range[2])
 {
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
     if (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR) {
@@ -2659,7 +2659,7 @@ _cairo_gradient_pattern_interpolate (const cairo_gradient_pattern_t *gradient,
 				     double			     t,
 				     cairo_circle_double_t	    *out_circle)
 {
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
 #define lerp(a,b) (a)*(1-t) + (b)*t
@@ -2699,7 +2699,7 @@ _cairo_gradient_pattern_fit_to_range (const cairo_gradient_pattern_t *gradient,
 {
     double dim;
 
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
     if (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR) {
@@ -2758,7 +2758,7 @@ _gradient_is_clear (const cairo_gradient_pattern_t *gradient,
 {
     unsigned int i;
 
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
     if (gradient->n_stops == 0 ||
@@ -2788,7 +2788,7 @@ _gradient_is_clear (const cairo_gradient_pattern_t *gradient,
 						  extents->y,
 						  extents->x + extents->width,
 						  extents->y + extents->height,
-						  DBL_EPSILON,
+                          XDBL_EPSILON,
 						  t);
 
 	if (gradient->base.extend == CAIRO_EXTEND_NONE &&
@@ -2817,8 +2817,8 @@ _gradient_color_average (const cairo_gradient_pattern_t *gradient,
     double r, g, b, a;
     unsigned int i, start = 1, end;
 
-    assert (gradient->n_stops > 0);
-    assert (gradient->base.extend != CAIRO_EXTEND_NONE);
+    XASSERT (gradient->n_stops > 0);
+    XASSERT (gradient->base.extend != CAIRO_EXTEND_NONE);
 
     if (gradient->n_stops == 1) {
 	_cairo_color_init_rgba (color,
@@ -2948,7 +2948,7 @@ _cairo_pattern_alpha_range (const cairo_pattern_t *pattern,
 	const cairo_gradient_pattern_t *gradient = (cairo_gradient_pattern_t *) pattern;
 	unsigned int i;
 
-	assert (gradient->n_stops >= 1);
+	XASSERT (gradient->n_stops >= 1);
 
 	alpha_min = alpha_max = gradient->stops[0].color.alpha;
 	for (i = 1; i < gradient->n_stops; i++) {
@@ -2966,7 +2966,7 @@ _cairo_pattern_alpha_range (const cairo_pattern_t *pattern,
 	const cairo_mesh_patch_t *patch = _cairo_array_index_const (&mesh->patches, 0);
 	unsigned int i, j, n = _cairo_array_num_elements (&mesh->patches);
 
-	assert (n >= 1);
+	XASSERT (n >= 1);
 
 	alpha_min = alpha_max = patch[0].colors[0].alpha;
 	for (i = 0; i < n; i++) {
@@ -3025,7 +3025,7 @@ _cairo_mesh_pattern_coord_box (const cairo_mesh_pattern_t *mesh,
     unsigned int num_patches, i, j, k;
     double x0, y0, x1, y1;
 
-    assert (mesh->current_patch == NULL);
+    XASSERT (mesh->current_patch == NULL);
 
     num_patches = _cairo_array_num_elements (&mesh->patches);
 
@@ -3074,7 +3074,7 @@ _cairo_gradient_pattern_is_solid (const cairo_gradient_pattern_t *gradient,
 {
     unsigned int i;
 
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
     /* TODO: radial */
@@ -3132,7 +3132,7 @@ _mesh_is_clear (const cairo_mesh_pattern_t *mesh)
     if (!is_valid)
 	return TRUE;
 
-    if (x2 - x1 < DBL_EPSILON || y2 - y1 < DBL_EPSILON)
+    if (x2 - x1 < XDBL_EPSILON || y2 - y1 < XDBL_EPSILON)
 	return TRUE;
 
     return FALSE;
@@ -3224,7 +3224,7 @@ _gradient_is_opaque (const cairo_gradient_pattern_t *gradient,
 {
     unsigned int i;
 
-    assert (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
+    XASSERT (gradient->base.type == CAIRO_PATTERN_TYPE_LINEAR ||
 	    gradient->base.type == CAIRO_PATTERN_TYPE_RADIAL);
 
     if (gradient->n_stops == 0 ||
@@ -3616,7 +3616,7 @@ _cairo_pattern_get_extents (const cairo_pattern_t         *pattern,
 	imatrix = pattern->matrix;
 	status = cairo_matrix_invert (&imatrix);
 	/* cairo_pattern_set_matrix ensures the matrix is invertible */
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_cairo_matrix_transform_bounding_box (&imatrix,
 					      &x1, &y1, &x2, &y2,
@@ -3677,7 +3677,7 @@ _cairo_pattern_get_ink_extents (const cairo_pattern_t         *pattern,
 	    imatrix = pattern->matrix;
 	    status = cairo_matrix_invert (&imatrix);
 	    /* cairo_pattern_set_matrix ensures the matrix is invertible */
-	    assert (status == CAIRO_STATUS_SUCCESS);
+	    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	    status = _cairo_recording_surface_get_ink_bbox ((cairo_recording_surface_t *)surface,
 						   &box, &imatrix);
@@ -4496,39 +4496,39 @@ _cairo_pattern_reset_static_data (void)
 }
 
 static void
-_cairo_debug_print_surface_pattern (FILE *file,
+_cairo_debug_print_surface_pattern (xfile_t *file,
 				    const cairo_surface_pattern_t *pattern)
 {
-    printf ("  surface type: %d\n", pattern->surface->type);
+    XDBGPRINTF ("  surface type: %d\n", pattern->surface->type);
 }
 
 static void
-_cairo_debug_print_raster_source_pattern (FILE *file,
+_cairo_debug_print_raster_source_pattern (xfile_t *file,
 					  const cairo_raster_source_pattern_t *raster)
 {
-    printf ("  content: %x, size %dx%d\n", raster->content, raster->extents.width, raster->extents.height);
+    XDBGPRINTF ("  content: %x, size %dx%d\n", raster->content, raster->extents.width, raster->extents.height);
 }
 
 static void
-_cairo_debug_print_linear_pattern (FILE *file,
+_cairo_debug_print_linear_pattern (xfile_t *file,
 				    const cairo_linear_pattern_t *pattern)
 {
 }
 
 static void
-_cairo_debug_print_radial_pattern (FILE *file,
+_cairo_debug_print_radial_pattern (xfile_t *file,
 				   const cairo_radial_pattern_t *pattern)
 {
 }
 
 static void
-_cairo_debug_print_mesh_pattern (FILE *file,
+_cairo_debug_print_mesh_pattern (xfile_t *file,
 				 const cairo_mesh_pattern_t *pattern)
 {
 }
 
 void
-_cairo_debug_print_pattern (FILE *file, const cairo_pattern_t *pattern)
+_cairo_debug_print_pattern (xfile_t *file, const cairo_pattern_t *pattern)
 {
     const char *s;
     switch (pattern->type) {
@@ -4541,7 +4541,7 @@ _cairo_debug_print_pattern (FILE *file, const cairo_pattern_t *pattern)
     default: s = "invalid"; ASSERT_NOT_REACHED; break;
     }
 
-    fprintf (file, "pattern: %s\n", s);
+    XDBGPRINTF ("pattern: %s\n", s);
     if (pattern->type == CAIRO_PATTERN_TYPE_SOLID)
 	return;
 
@@ -4552,7 +4552,7 @@ _cairo_debug_print_pattern (FILE *file, const cairo_pattern_t *pattern)
     case CAIRO_EXTEND_PAD: s = "pad"; break;
     default: s = "invalid"; ASSERT_NOT_REACHED; break;
     }
-    fprintf (file, "  extend: %s\n", s);
+    XDBGPRINTF ("  extend: %s\n", s);
 
     switch (pattern->filter) {
     case CAIRO_FILTER_FAST: s = "fast"; break;
@@ -4563,8 +4563,8 @@ _cairo_debug_print_pattern (FILE *file, const cairo_pattern_t *pattern)
     case CAIRO_FILTER_GAUSSIAN: s = "guassian"; break;
     default: s = "invalid"; ASSERT_NOT_REACHED; break;
     }
-    fprintf (file, "  filter: %s\n", s);
-    fprintf (file, "  matrix: [%g %g %g %g %g %g]\n",
+    XDBGPRINTF ("  filter: %s\n", s);
+    XDBGPRINTF ("  matrix: [%g %g %g %g %g %g]\n",
 	     pattern->matrix.xx, pattern->matrix.yx,
 	     pattern->matrix.xy, pattern->matrix.yy,
 	     pattern->matrix.x0, pattern->matrix.y0);

@@ -649,7 +649,7 @@ add_record (cairo_observation_t *log,
     r->index = log->record ? log->record->commands.num_elements : 0;
 
     status = _cairo_array_append (&log->timings, r);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static void
@@ -695,7 +695,7 @@ add_record_paint (cairo_observation_t *log,
     if (log->record) {
 	status = log->record->base.backend->paint (&log->record->base,
 						   op, source, clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->paint.slowest.elapsed))
@@ -780,7 +780,7 @@ add_record_mask (cairo_observation_t *log,
     if (log->record) {
 	status = log->record->base.backend->mask (&log->record->base,
 						  op, source, mask, clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->mask.slowest.elapsed))
@@ -879,7 +879,7 @@ add_record_fill (cairo_observation_t *log,
 						  path, fill_rule,
 						  tolerance, antialias,
 						  clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->fill.slowest.elapsed))
@@ -992,7 +992,7 @@ add_record_stroke (cairo_observation_t *log,
 						    path, style, ctm,ctm_inverse,
 						    tolerance, antialias,
 						    clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->stroke.slowest.elapsed))
@@ -1111,7 +1111,7 @@ add_record_glyphs (cairo_observation_t	*log,
 							      NULL, 0, 0,
 							      scaled_font,
 							      clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->glyphs.slowest.elapsed))
@@ -1218,7 +1218,7 @@ _cairo_surface_observer_mark_dirty (void *abstract_surface,
     cairo_surface_observer_t *surface = abstract_surface;
     cairo_status_t status;
 
-    printf ("mark-dirty (%d, %d) x (%d, %d)\n", x, y, width, height);
+    XDBGPRINTF ("mark-dirty (%d, %d) x (%d, %d)\n", x, y, width, height);
 
     status = CAIRO_STATUS_SUCCESS;
     if (surface->target->backend->mark_dirty_rectangle)
@@ -1577,7 +1577,7 @@ print_array (cairo_output_stream_t *stream,
     int order[64];
     int i, j;
 
-    assert (count < ARRAY_LENGTH (order));
+    XASSERT (count < ARRAY_LENGTH (order));
     for (i = j = 0; i < count; i++) {
 	if (array[i] != 0)
 	    order[j++] = i;
@@ -1794,7 +1794,7 @@ replay_record (cairo_observation_t *log,
 	_cairo_recording_surface_replay_one (log->record, r->index, surface);
     cairo_surface_destroy (surface);
 
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
     return TRUE;
 #else

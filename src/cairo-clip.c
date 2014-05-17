@@ -78,7 +78,7 @@ _cairo_clip_path_create (cairo_clip_t *clip)
 cairo_clip_path_t *
 _cairo_clip_path_reference (cairo_clip_path_t *clip_path)
 {
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
 
     _cairo_reference_count_inc (&clip_path->ref_count);
 
@@ -88,7 +88,7 @@ _cairo_clip_path_reference (cairo_clip_path_t *clip_path)
 void
 _cairo_clip_path_destroy (cairo_clip_path_t *clip_path)
 {
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&clip_path->ref_count))
 	return;
@@ -182,7 +182,7 @@ _cairo_clip_copy_path (const cairo_clip_t *clip)
     if (clip == NULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *) clip;
 
-    assert (clip->num_boxes);
+    XASSERT (clip->num_boxes);
 
     copy = _cairo_clip_create ();
     copy->extents = clip->extents;
@@ -201,7 +201,7 @@ _cairo_clip_copy_region (const cairo_clip_t *clip)
     if (clip == NULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *) clip;
 
-    assert (clip->num_boxes);
+    XASSERT (clip->num_boxes);
 
     copy = _cairo_clip_create ();
     copy->extents = clip->extents;
@@ -642,29 +642,29 @@ _cairo_clip_contains_extents (const cairo_clip_t *clip,
 }
 
 void
-_cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip)
+_cairo_debug_print_clip (xfile_t *stream, const cairo_clip_t *clip)
 {
     int i;
 
     if (clip == NULL) {
-	fprintf (stream, "no clip\n");
+    XDBGPRINTF ("no clip\n");
 	return;
     }
 
     if (_cairo_clip_is_all_clipped (clip)) {
-	fprintf (stream, "clip: all-clipped\n");
+    XDBGPRINTF ("clip: all-clipped\n");
 	return;
     }
 
-    fprintf (stream, "clip:\n");
-    fprintf (stream, "  extents: (%d, %d) x (%d, %d), is-region? %d",
+    XDBGPRINTF ("clip:\n");
+    XDBGPRINTF ("  extents: (%d, %d) x (%d, %d), is-region? %d",
 	     clip->extents.x, clip->extents.y,
 	     clip->extents.width, clip->extents.height,
 	     clip->is_region);
 
-    fprintf (stream, "  num_boxes = %d\n", clip->num_boxes);
+    XDBGPRINTF ("  num_boxes = %d\n", clip->num_boxes);
     for (i = 0; i < clip->num_boxes; i++) {
-	fprintf (stream, "  [%d] = (%f, %f), (%f, %f)\n", i,
+    XDBGPRINTF ("  [%d] = (%f, %f), (%f, %f)\n", i,
 		 _cairo_fixed_to_double (clip->boxes[i].p1.x),
 		 _cairo_fixed_to_double (clip->boxes[i].p1.y),
 		 _cairo_fixed_to_double (clip->boxes[i].p2.x),
@@ -674,12 +674,12 @@ _cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip)
     if (clip->path) {
 	cairo_clip_path_t *clip_path = clip->path;
 	do {
-	    fprintf (stream, "path: aa=%d, tolerance=%f, rule=%d: ",
+        XDBGPRINTF ("path: aa=%d, tolerance=%f, rule=%d: ",
 		     clip_path->antialias,
 		     clip_path->tolerance,
 		     clip_path->fill_rule);
 	    _cairo_debug_print_path (stream, &clip_path->path);
-	    fprintf (stream, "\n");
+        XDBGPRINTF ("\n");
 	} while ((clip_path = clip_path->prev) != NULL);
     }
 }

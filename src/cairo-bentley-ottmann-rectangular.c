@@ -58,7 +58,7 @@ struct _edge {
 
 struct _rectangle {
     edge_t left, right;
-    int32_t top, bottom;
+    xint32_t top, bottom;
 };
 
 #define UNROLL3(x) x x x
@@ -74,11 +74,11 @@ typedef struct _sweep_line {
     rectangle_t **rectangles;
     rectangle_t **stop;
     edge_t head, tail, *insert, *cursor;
-    int32_t current_y;
-    int32_t last_y;
+    xint32_t current_y;
+    xint32_t last_y;
     int stop_size;
 
-    int32_t insert_x;
+    xint32_t insert_x;
     cairo_fill_rule_t fill_rule;
 
     cairo_bool_t do_traps;
@@ -93,7 +93,7 @@ typedef struct _sweep_line {
 static void
 dump_traps (cairo_traps_t *traps, const char *filename)
 {
-    FILE *file;
+    xfile_t *file;
     int n;
 
     if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
@@ -242,7 +242,7 @@ sweep_line_init (sweep_line_t	 *sweep_line,
 }
 
 static void
-edge_end_box (sweep_line_t *sweep_line, edge_t *left, int32_t bot)
+edge_end_box (sweep_line_t *sweep_line, edge_t *left, xint32_t bot)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
@@ -328,7 +328,7 @@ static edge_t *
 merge_sorted_edges (edge_t *head_a, edge_t *head_b)
 {
     edge_t *head, *prev;
-    int32_t x;
+    xint32_t x;
 
     prev = head_a->prev;
     if (head_a->x <= head_b->x) {
@@ -476,7 +476,7 @@ active_edges_to_traps (sweep_line_t *sweep)
 	    /* Check if there is a co-linear edge with an existing trap */
 	    while (right->x == left->x) {
 		if (right->right != NULL) {
-		    assert (left->right == NULL);
+            XASSERT (left->right == NULL);
 		    /* continuation on left */
 		    left->top = right->top;
 		    left->right = right->right;
@@ -675,7 +675,7 @@ _cairo_bentley_ottmann_tessellate_rectangular_traps (cairo_traps_t *traps,
     if (unlikely (traps->num_traps <= 1))
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (traps->is_rectangular);
+    XASSERT (traps->is_rectangular);
 
     dump_traps (traps, "bo-rects-traps-in.txt");
 
@@ -772,7 +772,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 
 	    _cairo_boxes_clear (out);
 	    status = _cairo_boxes_add (out, CAIRO_ANTIALIAS_DEFAULT, &box);
-	    assert (status == CAIRO_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_STATUS_SUCCESS);
 	}
 	return CAIRO_STATUS_SUCCESS;
     }

@@ -42,7 +42,7 @@
 #include "cairo-compiler-private.h"
 #include "cairo-error-private.h"
 
-#include <assert.h>
+#include <xC/xdebug.h>
 
 /**
  * _cairo_error:
@@ -65,7 +65,7 @@ cairo_status_t
 _cairo_error (cairo_status_t status)
 {
     CAIRO_ENSURE_UNIQUE;
-    assert (_cairo_status_is_error (status));
+    XASSERT (_cairo_status_is_error (status));
 
     return status;
 }

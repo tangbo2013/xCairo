@@ -36,7 +36,7 @@
 #ifndef CAIRO_SCRIPT_PRIVATE_H
 #define CAIRO_SCRIPT_PRIVATE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 #include "cairo-script.h"
 
 #include "cairo-compiler-private.h"

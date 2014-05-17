@@ -41,7 +41,7 @@
 #include "cairo-error-private.h"
 #include "cairo-list-private.h"
 
-#include <stdio.h>
+#include <xC/xfile.h>
 
 CAIRO_BEGIN_DECLS
 
@@ -117,7 +117,7 @@ cairo_private void
 _cairo_contour_fini (cairo_contour_t *contour);
 
 cairo_private void
-_cairo_debug_print_contour (FILE *file, cairo_contour_t *contour);
+_cairo_debug_print_contour (xfile_t *file, cairo_contour_t *contour);
 
 CAIRO_END_DECLS
 

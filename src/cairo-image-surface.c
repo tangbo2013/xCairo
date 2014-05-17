@@ -157,7 +157,7 @@ _cairo_image_surface_init (cairo_image_surface_t *surface,
 
     surface->pixman_format = pixman_format;
     surface->format = _cairo_format_from_pixman_format (pixman_format);
-    surface->data = (uint8_t *) pixman_image_get_data (pixman_image);
+    surface->data = (xuint8_t *) pixman_image_get_data (pixman_image);
     surface->owns_data = FALSE;
     surface->transparency = CAIRO_IMAGE_UNKNOWN;
     surface->color = CAIRO_IMAGE_UNKNOWN_COLOR;
@@ -342,7 +342,7 @@ _cairo_image_surface_create_with_pixman_format (unsigned char		*data,
     }
 
     pixman_image = pixman_image_create_bits (pixman_format, width, height,
-					     (uint32_t *) data, stride);
+					     (xuint32_t *) data, stride);
 
     if (unlikely (pixman_image == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
@@ -805,7 +805,7 @@ _cairo_image_surface_map_to_image (void *abstract_other,
 {
     cairo_image_surface_t *other = abstract_other;
     cairo_surface_t *surface;
-    uint8_t *data;
+    xuint8_t *data;
 
     data = other->data;
     data += extents->y * other->stride;
@@ -1168,7 +1168,7 @@ _cairo_image_analyze_transparency (cairo_image_surface_t *image)
 	    return image->transparency = CAIRO_IMAGE_HAS_BILEVEL_ALPHA;
 	} else if (image->format == CAIRO_FORMAT_A8) {
 	    for (y = 0; y < image->height; y++) {
-		uint8_t *alpha = (uint8_t *) (image->data + y * image->stride);
+        xuint8_t *alpha = (xuint8_t *) (image->data + y * image->stride);
 
 		for (x = 0; x < image->width; x++, alpha++) {
 		    if (*alpha > 0 && *alpha < 255)
@@ -1191,7 +1191,7 @@ _cairo_image_analyze_transparency (cairo_image_surface_t *image)
 
     image->transparency = CAIRO_IMAGE_IS_OPAQUE;
     for (y = 0; y < image->height; y++) {
-	uint32_t *pixel = (uint32_t *) (image->data + y * image->stride);
+	xuint32_t *pixel = (xuint32_t *) (image->data + y * image->stride);
 
 	for (x = 0; x < image->width; x++, pixel++) {
 	    int a = (*pixel & 0xff000000) >> 24;
@@ -1223,7 +1223,7 @@ _cairo_image_analyze_color (cairo_image_surface_t      *image)
     if (image->format == CAIRO_FORMAT_ARGB32) {
 	image->color = CAIRO_IMAGE_IS_MONOCHROME;
 	for (y = 0; y < image->height; y++) {
-	    uint32_t *pixel = (uint32_t *) (image->data + y * image->stride);
+	    xuint32_t *pixel = (xuint32_t *) (image->data + y * image->stride);
 
 	    for (x = 0; x < image->width; x++, pixel++) {
 		int a = (*pixel & 0xff000000) >> 24;
@@ -1249,7 +1249,7 @@ _cairo_image_analyze_color (cairo_image_surface_t      *image)
     if (image->format == CAIRO_FORMAT_RGB24) {
 	image->color = CAIRO_IMAGE_IS_MONOCHROME;
 	for (y = 0; y < image->height; y++) {
-	    uint32_t *pixel = (uint32_t *) (image->data + y * image->stride);
+	    xuint32_t *pixel = (xuint32_t *) (image->data + y * image->stride);
 
 	    for (x = 0; x < image->width; x++, pixel++) {
 		int r = (*pixel & 0x00ff0000) >> 16;

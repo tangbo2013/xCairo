@@ -42,7 +42,7 @@
 #include "cairo-error-private.h"
 #include "cairo-compiler-private.h"
 
-#include <stdio.h>
+#include <xC/xfile.h>
 #include <locale.h>
 #include <errno.h>
 
@@ -241,7 +241,7 @@ _cairo_output_stream_destroy (cairo_output_stream_t *stream)
 {
     cairo_status_t status;
 
-    assert (stream != NULL);
+    XASSERT (stream != NULL);
 
     if (stream == &_cairo_output_stream_nil ||
 	stream == &_cairo_output_stream_nil_write_error)
@@ -318,7 +318,7 @@ _cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precisi
     decimal_point = locale_data->decimal_point;
     decimal_point_len = strlen (decimal_point);
 
-    assert (decimal_point_len != 0);
+    XASSERT (decimal_point_len != 0);
 
     if (limited_precision) {
 	snprintf (buffer, size, "%.*f", FIXED_POINT_DECIMAL_DIGITS, d);
@@ -388,7 +388,7 @@ enum {
     LENGTH_MODIFIER_LONG = 0x100
 };
 
-/* Here's a limited reimplementation of printf.  The reason for doing
+/* Here's a limited reimplementation of XDBGPRINTF.  The reason for doing
  * this is primarily to special case handling of doubles.  We want
  * locale independent formatting of doubles and we want to trim
  * trailing zeros.  This is handled by dtostr() above, and the code
@@ -449,7 +449,7 @@ _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
 	 * itself. So there's an internal consistency problem if any
 	 * of them is larger than our format buffer size. */
 	single_fmt_length = f - start + 1;
-	assert (single_fmt_length + 1 <= SINGLE_FMT_BUFFER_SIZE);
+	XASSERT (single_fmt_length + 1 <= SINGLE_FMT_BUFFER_SIZE);
 
 	/* Reuse the format string for this conversion. */
 	memcpy (single_fmt, start, single_fmt_length);
@@ -548,7 +548,7 @@ _cairo_output_stream_get_status (cairo_output_stream_t *stream)
 
 typedef struct _stdio_stream {
     cairo_output_stream_t	 base;
-    FILE			*file;
+    xfile_t			*file;
 } stdio_stream_t;
 
 static cairo_status_t
@@ -566,14 +566,14 @@ stdio_write (cairo_output_stream_t *base,
 static cairo_status_t
 stdio_flush (cairo_output_stream_t *base)
 {
-    stdio_stream_t *stream = (stdio_stream_t *) base;
+//    stdio_stream_t *stream = (stdio_stream_t *) base;
 
-    fflush (stream->file);
+//    fflush (stream->file);
 
-    if (ferror (stream->file))
-	return _cairo_error (CAIRO_STATUS_WRITE_ERROR);
-    else
-	return CAIRO_STATUS_SUCCESS;
+//    if (ferror (stream->file))
+    return _cairo_error (CAIRO_STATUS_WRITE_ERROR);
+//    else
+//	return CAIRO_STATUS_SUCCESS;
 }
 
 static cairo_status_t
@@ -590,7 +590,7 @@ stdio_close (cairo_output_stream_t *base)
 }
 
 cairo_output_stream_t *
-_cairo_output_stream_create_for_file (FILE *file)
+_cairo_output_stream_create_for_file (xfile_t *file)
 {
     stdio_stream_t *stream;
 
@@ -616,7 +616,7 @@ cairo_output_stream_t *
 _cairo_output_stream_create_for_filename (const char *filename)
 {
     stdio_stream_t *stream;
-    FILE *file;
+    xfile_t *file;
 
     if (filename == NULL)
 	return _cairo_null_stream_create ();
@@ -707,7 +707,7 @@ _cairo_memory_stream_destroy (cairo_output_stream_t *abstract_stream,
     *data_out = malloc (*length_out);
     if (unlikely (*data_out == NULL)) {
 	status = _cairo_output_stream_destroy (abstract_stream);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
     memcpy (*data_out, _cairo_array_index (&stream->array, 0), *length_out);

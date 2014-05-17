@@ -247,7 +247,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
 	! _cairo_box_contains_point (&stroker->bounds, midpt))
 	goto BEVEL;
 
-    assert (stroker->pen.num_vertices);
+    XASSERT (stroker->pen.num_vertices);
 
     if (clockwise) {
 	_cairo_pen_find_active_ccw_vertices (pen,
@@ -1023,7 +1023,7 @@ _cairo_stroker_spline_to (void *closure,
 		   slope_dx, slope_dy,
 		   stroker, &new_face);
 
-    assert (stroker->has_current_face);
+    XASSERT (stroker->has_current_face);
 
     if ((new_face.dev_slope.x * stroker->current_face.dev_slope.x +
          new_face.dev_slope.y * stroker->current_face.dev_slope.y) < stroker->spline_cusp_tolerance) {

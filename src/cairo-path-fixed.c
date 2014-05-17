@@ -363,7 +363,7 @@ _cairo_path_fixed_last_op (cairo_path_fixed_t *path)
     cairo_path_buf_t *buf;
 
     buf = cairo_path_tail (path);
-    assert (buf->num_ops != 0);
+    XASSERT (buf->num_ops != 0);
 
     return buf->op[buf->num_ops - 1];
 }
@@ -379,7 +379,7 @@ _cairo_path_fixed_penultimate_point (cairo_path_fixed_t *path)
     } else {
 	cairo_path_buf_t *prev_buf = cairo_path_buf_prev (buf);
 
-	assert (prev_buf->num_points >= 2 - buf->num_points);
+	XASSERT (prev_buf->num_points >= 2 - buf->num_points);
 	return &prev_buf->points[prev_buf->num_points - (2 - buf->num_points)];
     }
 }
@@ -389,7 +389,7 @@ _cairo_path_fixed_drop_line_to (cairo_path_fixed_t *path)
 {
     cairo_path_buf_t *buf;
 
-    assert (_cairo_path_fixed_last_op (path) == CAIRO_PATH_OP_LINE_TO);
+    XASSERT (_cairo_path_fixed_last_op (path) == CAIRO_PATH_OP_LINE_TO);
 
     buf = cairo_path_tail (path);
     buf->num_points--;
@@ -588,7 +588,7 @@ _cairo_path_fixed_curve_to (cairo_path_fixed_t	*path,
     /* make sure subpaths are started properly */
     if (! path->has_current_point) {
 	status = _cairo_path_fixed_move_to (path, x0, y0);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
     }
 
     status = _cairo_path_fixed_move_to_apply (path);
@@ -729,7 +729,7 @@ _cairo_path_fixed_add (cairo_path_fixed_t   *path,
 	len += snprintf (buf + len, sizeof (buf), "]");
 
 #define STRINGIFYFLAG(x)  (path->x ? #x " " : "")
-	fprintf (stderr,
+    XDBGPRINTF (
 		 "_cairo_path_fixed_add (%s, %s) [%s%s%s%s%s%s%s%s]\n",
 		 op_str[(int) op], buf,
 		 STRINGIFYFLAG(has_current_point),
@@ -1087,7 +1087,7 @@ _cairo_path_fixed_transform (cairo_path_fixed_t	*path,
 	    cairo_bool_t has_extents;
 
 	    has_extents = _cairo_path_bounder_extents (path, &extents);
-	    assert (has_extents);
+	    XASSERT (has_extents);
 	}
 	path->extents = extents;
     }

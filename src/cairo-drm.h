@@ -33,7 +33,7 @@
 #ifndef CAIRO_DRM_H
 #define CAIRO_DRM_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if CAIRO_HAS_DRM_SURFACE
 

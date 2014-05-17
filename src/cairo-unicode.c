@@ -120,35 +120,35 @@ static const char utf8_skip_data[256] = {
  * If @p does not point to a valid UTF-8 encoded character, results are
  * undefined.
  **/
-static uint32_t
+static xuint32_t
 _utf8_get_char (const unsigned char *p)
 {
     int i, mask = 0, len;
-    uint32_t result;
+    xuint32_t result;
     unsigned char c = (unsigned char) *p;
 
     UTF8_COMPUTE (c, mask, len);
     if (len == -1)
-	return (uint32_t)-1;
+	return (xuint32_t)-1;
     UTF8_GET (result, p, i, mask, len);
 
     return result;
 }
 
 /* Like _utf8_get_char, but take a maximum length
- * and return (uint32_t)-2 on incomplete trailing character
+ * and return (xuint32_t)-2 on incomplete trailing character
  */
-static uint32_t
+static xuint32_t
 _utf8_get_char_extended (const unsigned char *p,
 			 long		      max_len)
 {
     int i, len;
-    uint32_t wc = (unsigned char) *p;
+    xuint32_t wc = (unsigned char) *p;
 
     if (wc < 0x80) {
 	return wc;
     } else if (wc < 0xc0) {
-	return (uint32_t)-1;
+	return (xuint32_t)-1;
     } else if (wc < 0xe0) {
 	len = 2;
 	wc &= 0x1f;
@@ -165,25 +165,25 @@ _utf8_get_char_extended (const unsigned char *p,
 	len = 6;
 	wc &= 0x01;
     } else {
-	return (uint32_t)-1;
+	return (xuint32_t)-1;
     }
 
     if (max_len >= 0 && len > max_len) {
 	for (i = 1; i < max_len; i++) {
 	    if ((((unsigned char *)p)[i] & 0xc0) != 0x80)
-		return (uint32_t)-1;
+		return (xuint32_t)-1;
 	}
-	return (uint32_t)-2;
+	return (xuint32_t)-2;
     }
 
     for (i = 1; i < len; ++i) {
-	uint32_t ch = ((unsigned char *)p)[i];
+    xuint32_t ch = ((unsigned char *)p)[i];
 
 	if ((ch & 0xc0) != 0x80) {
 	    if (ch)
-		return (uint32_t)-1;
+		return (xuint32_t)-1;
 	    else
-		return (uint32_t)-2;
+		return (xuint32_t)-2;
 	}
 
 	wc <<= 6;
@@ -191,7 +191,7 @@ _utf8_get_char_extended (const unsigned char *p,
     }
 
     if (UTF8_LENGTH(wc) != len)
-	return (uint32_t)-1;
+	return (xuint32_t)-1;
 
     return wc;
 }
@@ -211,16 +211,16 @@ _utf8_get_char_extended (const unsigned char *p,
  **/
 int
 _cairo_utf8_get_char_validated (const char *p,
-				uint32_t   *unicode)
+                xuint32_t   *unicode)
 {
     int i, mask = 0, len;
-    uint32_t result;
+    xuint32_t result;
     unsigned char c = (unsigned char) *p;
 
     UTF8_COMPUTE (c, mask, len);
     if (len == -1) {
 	if (unicode)
-	    *unicode = (uint32_t)-1;
+	    *unicode = (xuint32_t)-1;
 	return 1;
     }
     UTF8_GET (result, p, i, mask, len);
@@ -253,10 +253,10 @@ _cairo_utf8_get_char_validated (const char *p,
 cairo_status_t
 _cairo_utf8_to_ucs4 (const char *str,
 		     int	 len,
-		     uint32_t  **result,
+		     xuint32_t  **result,
 		     int	*items_written)
 {
-    uint32_t *str32 = NULL;
+    xuint32_t *str32 = NULL;
     int n_chars, i;
     const unsigned char *in;
     const unsigned char * const ustr = (const unsigned char *) str;
@@ -265,7 +265,7 @@ _cairo_utf8_to_ucs4 (const char *str,
     n_chars = 0;
     while ((len < 0 || ustr + len - in > 0) && *in)
     {
-	uint32_t wc = _utf8_get_char_extended (in, ustr + len - in);
+    xuint32_t wc = _utf8_get_char_extended (in, ustr + len - in);
 	if (wc & 0x80000000 || !UNICODE_VALID (wc))
 	    return _cairo_error (CAIRO_STATUS_INVALID_STRING);
 
@@ -277,7 +277,7 @@ _cairo_utf8_to_ucs4 (const char *str,
     }
 
     if (result) {
-	str32 = _cairo_malloc_ab (n_chars + 1, sizeof (uint32_t));
+	str32 = _cairo_malloc_ab (n_chars + 1, sizeof (xuint32_t));
 	if (!str32)
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -309,7 +309,7 @@ _cairo_utf8_to_ucs4 (const char *str,
  * unicode character
  **/
 int
-_cairo_ucs4_to_utf8 (uint32_t  unicode,
+_cairo_ucs4_to_utf8 (xuint32_t  unicode,
 		     char     *utf8)
 {
     int bytes;
@@ -367,10 +367,10 @@ _cairo_ucs4_to_utf8 (uint32_t  unicode,
 cairo_status_t
 _cairo_utf8_to_utf16 (const char *str,
 		      int	  len,
-		      uint16_t **result,
+		      xuint16_t **result,
 		      int	*items_written)
 {
-    uint16_t *str16 = NULL;
+    xuint16_t *str16 = NULL;
     int n16, i;
     const unsigned char *in;
     const unsigned char * const ustr = (const unsigned char *) str;
@@ -378,7 +378,7 @@ _cairo_utf8_to_utf16 (const char *str,
     in = ustr;
     n16 = 0;
     while ((len < 0 || ustr + len - in > 0) && *in) {
-	uint32_t wc = _utf8_get_char_extended (in, ustr + len - in);
+    xuint32_t wc = _utf8_get_char_extended (in, ustr + len - in);
 	if (wc & 0x80000000 || !UNICODE_VALID (wc))
 	    return _cairo_error (CAIRO_STATUS_INVALID_STRING);
 
@@ -393,13 +393,13 @@ _cairo_utf8_to_utf16 (const char *str,
 	in = UTF8_NEXT_CHAR (in);
     }
 
-    str16 = _cairo_malloc_ab (n16 + 1, sizeof (uint16_t));
+    str16 = _cairo_malloc_ab (n16 + 1, sizeof (xuint16_t));
     if (!str16)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     in = ustr;
     for (i = 0; i < n16;) {
-	uint32_t wc = _utf8_get_char (in);
+    xuint32_t wc = _utf8_get_char (in);
 
 	if (wc < 0x10000) {
 	    str16[i++] = wc;

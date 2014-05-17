@@ -50,7 +50,7 @@ _expand_four_tuple_to_five (unsigned char four_tuple[4],
 			    unsigned char five_tuple[5],
 			    cairo_bool_t *all_zero)
 {
-    uint32_t value;
+    xuint32_t value;
     int digit, i;
 
     value = four_tuple[0] << 24 | four_tuple[1] << 16 | four_tuple[2] << 8 | four_tuple[3];

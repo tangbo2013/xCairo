@@ -92,7 +92,7 @@ _cairo_rtree_node_collapse (cairo_rtree_t *rtree, cairo_rtree_node_t *node)
     int i;
 
     do {
-	assert (node->state == CAIRO_RTREE_NODE_DIVIDED);
+	XASSERT (node->state == CAIRO_RTREE_NODE_DIVIDED);
 
 	for (i = 0;  i < 4 && node->children[i] != NULL; i++)
 	    if (node->children[i]->state != CAIRO_RTREE_NODE_AVAILABLE)
@@ -116,8 +116,8 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 {
     int w, h, i;
 
-    assert (node->state == CAIRO_RTREE_NODE_AVAILABLE);
-    assert (node->pinned == FALSE);
+    XASSERT (node->state == CAIRO_RTREE_NODE_AVAILABLE);
+    XASSERT (node->pinned == FALSE);
 
     if (node->width  - width  > rtree->min_size ||
 	node->height - height > rtree->min_size)
@@ -181,8 +181,8 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 void
 _cairo_rtree_node_remove (cairo_rtree_t *rtree, cairo_rtree_node_t *node)
 {
-    assert (node->state == CAIRO_RTREE_NODE_OCCUPIED);
-    assert (node->pinned == FALSE);
+    XASSERT (node->state == CAIRO_RTREE_NODE_OCCUPIED);
+    XASSERT (node->pinned == FALSE);
 
     rtree->destroy (node);
 
@@ -210,11 +210,11 @@ _cairo_rtree_insert (cairo_rtree_t	     *rtree,
     return CAIRO_INT_STATUS_UNSUPPORTED;
 }
 
-static uint32_t
+static xuint32_t
 hars_petruska_f54_1_random (void)
 {
 #define rol(x,k) ((x << k) | (x >> (32-k)))
-    static uint32_t x;
+    static xuint32_t x;
     return x = (x ^ rol (x, 5) ^ rol (x, 24)) + 0x37798849;
 #undef rol
 }
@@ -305,7 +305,7 @@ _cairo_rtree_init (cairo_rtree_t	*rtree,
 		   int			 node_size,
 		   void (*destroy) (cairo_rtree_node_t *))
 {
-    assert (node_size >= (int) sizeof (cairo_rtree_node_t));
+    XASSERT (node_size >= (int) sizeof (cairo_rtree_node_t));
     _cairo_freepool_init (&rtree->node_freepool, node_size);
 
     cairo_list_init (&rtree->available);

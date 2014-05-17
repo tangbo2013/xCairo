@@ -59,7 +59,7 @@ struct _edge {
 
 struct _rectangle {
     edge_t left, right;
-    int32_t top, bottom;
+    xint32_t top, bottom;
 };
 
 #define UNROLL3(x) x x x
@@ -83,8 +83,8 @@ typedef struct _sweep_line {
     pqueue_t pq;
     edge_t head, tail;
     edge_t *insert_left, *insert_right;
-    int32_t current_y;
-    int32_t last_y;
+    xint32_t current_y;
+    xint32_t last_y;
 
     jmp_buf unwind;
 } sweep_line_t;
@@ -95,7 +95,7 @@ typedef struct _sweep_line {
 static void
 dump_traps (cairo_traps_t *traps, const char *filename)
 {
-    FILE *file;
+    xfile_t *file;
     int n;
 
     if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
@@ -289,7 +289,7 @@ sweep_line_fini (sweep_line_t *sweep_line)
 }
 
 static void
-end_box (sweep_line_t *sweep_line, edge_t *left, int32_t bot, cairo_boxes_t *out)
+end_box (sweep_line_t *sweep_line, edge_t *left, xint32_t bot, cairo_boxes_t *out)
 {
     if (likely (left->top < bot)) {
 	cairo_status_t status;
@@ -679,7 +679,7 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
 	    j++;
 	}
     }
-    assert (j == count);
+    XASSERT (j == count);
 
     _cairo_boxes_clear (out);
     status = intersect (rectangles_ptrs, j, out);

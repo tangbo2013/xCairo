@@ -49,7 +49,7 @@ typedef struct _cairo_bo_trap cairo_bo_trap_t;
 /* A deferred trapezoid of an edge */
 struct _cairo_bo_trap {
     cairo_bo_edge_t *right;
-    int32_t top;
+    xint32_t top;
 };
 
 struct _cairo_bo_edge {
@@ -74,7 +74,7 @@ typedef struct _cairo_bo_sweep_line {
     cairo_bo_event_t **events;
     cairo_bo_edge_t *head;
     cairo_bo_edge_t *stopped;
-    int32_t current_y;
+    xint32_t current_y;
     cairo_bo_edge_t *current_edge;
 } cairo_bo_sweep_line_t;
 
@@ -217,7 +217,7 @@ edges_collinear (const cairo_bo_edge_t *a, const cairo_bo_edge_t *b)
 
 static cairo_status_t
 _cairo_bo_edge_end_trap (cairo_bo_edge_t	*left,
-			 int32_t		 bot,
+			 xint32_t		 bot,
 			 cairo_bool_t		 do_traps,
 			 void			*container)
 {
@@ -287,7 +287,7 @@ _cairo_bo_edge_start_or_continue_trap (cairo_bo_edge_t	*left,
 
 static inline cairo_status_t
 _active_edges_to_traps (cairo_bo_edge_t		*left,
-			int32_t			 top,
+            xint32_t			 top,
 			cairo_fill_rule_t	 fill_rule,
 			cairo_bool_t		 do_traps,
 			void			*container)
@@ -519,7 +519,7 @@ _cairo_bentley_ottmann_tessellate_rectilinear_traps (cairo_traps_t *traps,
     if (unlikely (traps->num_traps == 0))
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (traps->is_rectilinear);
+    XASSERT (traps->is_rectilinear);
 
     i = 4 * traps->num_traps;
 

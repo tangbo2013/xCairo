@@ -162,7 +162,7 @@ _cairo_type3_glyph_surface_emit_image_pattern (cairo_type3_glyph_surface_t *surf
     status = cairo_matrix_invert (&mat);
 
     /* cairo_pattern_set_matrix ensures the matrix is invertible */
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     /* Make this a pattern space to Type 3 font space matrix */
     cairo_matrix_multiply (&mat, &mat, &surface->cairo_to_pdf);
@@ -508,7 +508,7 @@ _cairo_type3_glyph_surface_emit_glyph (void		     *abstract_surface,
     /* The invertability of font_matrix is tested in
      * pdf_operators_show_glyphs before any glyphs are mapped to the
      * subset. */
-    assert (status2 == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status2 == CAIRO_INT_STATUS_SUCCESS);
 
     cairo_matrix_transform_distance (&font_matrix_inverse, &x_advance, &y_advance);
     *width = x_advance;

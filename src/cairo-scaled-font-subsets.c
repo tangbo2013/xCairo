@@ -113,7 +113,7 @@ typedef struct _cairo_sub_font_glyph {
     cairo_bool_t is_latin;
     int		 latin_character;
     cairo_bool_t is_mapped;
-    uint32_t     unicode;
+    xuint32_t     unicode;
     char  	*utf8;
     int          utf8_len;
 } cairo_sub_font_glyph_t;
@@ -160,7 +160,7 @@ _cairo_sub_font_glyph_create (unsigned long	scaled_font_glyph_index,
                               double            x_advance,
                               double            y_advance,
 			      int	        latin_character,
-			      uint32_t          unicode,
+			      xuint32_t          unicode,
 			      char             *utf8,
 			      int          	utf8_len)
 {
@@ -220,7 +220,7 @@ _cairo_sub_font_glyph_collect (void *entry, void *closure)
     subset_glyph_index = sub_font_glyph->subset_glyph_index;
 
     /* Ensure we don't exceed the allocated bounds. */
-    assert (subset_glyph_index < collection->glyphs_size);
+    XASSERT (subset_glyph_index < collection->glyphs_size);
 
     collection->glyphs[subset_glyph_index] = scaled_font_glyph_index;
     collection->utf8[subset_glyph_index] = sub_font_glyph->utf8;
@@ -370,11 +370,11 @@ _cairo_unicode_to_winansi (unsigned long uni)
 static cairo_status_t
 _cairo_sub_font_glyph_lookup_unicode (cairo_scaled_font_t    *scaled_font,
 				      unsigned long	      scaled_font_glyph_index,
-				      uint32_t     	     *unicode_out,
+				      xuint32_t     	     *unicode_out,
 				      char  		    **utf8_out,
 				      int          	     *utf8_len_out)
 {
-    uint32_t unicode;
+    xuint32_t unicode;
     char buf[8];
     int len;
     cairo_status_t status;
@@ -388,7 +388,7 @@ _cairo_sub_font_glyph_lookup_unicode (cairo_scaled_font_t    *scaled_font,
     if (_cairo_status_is_error (status))
 	return status;
 
-    if (unicode == (uint32_t)-1 && scaled_font->backend->index_to_ucs4) {
+    if (unicode == (xuint32_t)-1 && scaled_font->backend->index_to_ucs4) {
 	status = scaled_font->backend->index_to_ucs4 (scaled_font,
 						      scaled_font_glyph_index,
 						      &unicode);
@@ -399,7 +399,7 @@ _cairo_sub_font_glyph_lookup_unicode (cairo_scaled_font_t    *scaled_font,
     *unicode_out = unicode;
     *utf8_out = NULL;
     *utf8_len_out = 0;
-    if (unicode != (uint32_t) -1) {
+    if (unicode != (xuint32_t) -1) {
 	len = _cairo_ucs4_to_utf8 (unicode, buf);
 	if (len > 0) {
 	    *utf8_out = malloc (len + 1);
@@ -495,7 +495,7 @@ _cairo_sub_font_add_glyph (cairo_sub_font_t	   *sub_font,
 			   unsigned long	    scaled_font_glyph_index,
 			   cairo_bool_t		    is_latin,
 			   int			    latin_character,
-			   uint32_t 		    unicode,
+			   xuint32_t 		    unicode,
 			   char 		   *utf8,
 			   int 			    utf8_len,
 			   cairo_sub_font_glyph_t **sub_font_glyph_out)
@@ -512,7 +512,7 @@ _cairo_sub_font_add_glyph (cairo_sub_font_t	   *sub_font,
 					 scaled_font_glyph_index,
 					 CAIRO_SCALED_GLYPH_INFO_METRICS,
 					 &scaled_glyph);
-    assert (status != CAIRO_INT_STATUS_UNSUPPORTED);
+    XASSERT (status != CAIRO_INT_STATUS_UNSUPPORTED);
     if (unlikely (status)) {
 	_cairo_scaled_font_thaw_cache (sub_font->scaled_font);
 	return status;
@@ -598,7 +598,7 @@ _cairo_sub_font_map_glyph (cairo_sub_font_t	*sub_font,
     sub_font_glyph = _cairo_hash_table_lookup (sub_font->sub_font_glyphs,
 					       &key.base);
     if (sub_font_glyph == NULL) {
-	uint32_t font_unicode;
+	xuint32_t font_unicode;
 	char *font_utf8;
 	int font_utf8_len;
 	cairo_bool_t is_latin;
@@ -615,7 +615,7 @@ _cairo_sub_font_map_glyph (cairo_sub_font_t	*sub_font,
 	/* If the supplied utf8 is a valid single character, use it
 	 * instead of the font lookup */
 	if (text_utf8 != NULL && text_utf8_len > 0) {
-	    uint32_t  *ucs4;
+	    xuint32_t  *ucs4;
 	    int	ucs4_len;
 
 	    status = _cairo_utf8_to_ucs4 (text_utf8, text_utf8_len,
@@ -721,7 +721,7 @@ _cairo_sub_font_collect (void *entry, void *closure)
 	    continue;
 
         /* Ensure the resulting array has no uninitialized holes */
-	assert (collection->num_glyphs == collection->max_glyph + 1);
+	XASSERT (collection->num_glyphs == collection->max_glyph + 1);
 
 	subset.scaled_font = sub_font->scaled_font;
 	subset.is_composite = sub_font->is_composite;
@@ -1160,7 +1160,7 @@ _cairo_scaled_font_subset_create_glyph_names (cairo_scaled_font_subset_t *subset
     cairo_string_entry_t key, *entry;
     char buf[30];
     char *utf8;
-    uint16_t *utf16;
+    xuint16_t *utf16;
     int utf16_len;
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 

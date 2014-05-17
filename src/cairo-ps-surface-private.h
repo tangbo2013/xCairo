@@ -59,7 +59,7 @@ typedef struct cairo_ps_surface {
      * before the contents of the temporary stream are copied). */
     cairo_output_stream_t *final_stream;
 
-    FILE *tmpfile;
+    xfile_t *tmpfile;
     cairo_output_stream_t *stream;
 
     cairo_bool_t eps;

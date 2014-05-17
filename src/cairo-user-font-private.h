@@ -37,7 +37,7 @@
 #ifndef CAIRO_USER_FONT_PRIVATE_H
 #define CAIRO_USER_FONT_PRIVATE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 #include "cairo-compiler-private.h"
 
 cairo_private cairo_bool_t

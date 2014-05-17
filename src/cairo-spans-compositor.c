@@ -93,7 +93,7 @@ get_clip_surface (const cairo_spans_compositor_t *compositor,
     cairo_fill_rule_t fill_rule;
     cairo_int_status_t status;
 
-    assert (clip->path);
+    XASSERT (NULL !=  clip->path);
 
     surface = _cairo_surface_create_similar_solid (dst,
 						   CAIRO_CONTENT_ALPHA,
@@ -339,7 +339,7 @@ fixup_unbounded_boxes (const cairo_spans_compositor_t *compositor,
     cairo_box_t box;
     cairo_int_status_t status;
 
-    assert (boxes->is_pixel_aligned);
+    XASSERT (boxes->is_pixel_aligned);
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
     if (extents->bounded.width  == extents->unbounded.width &&
@@ -360,7 +360,7 @@ fixup_unbounded_boxes (const cairo_spans_compositor_t *compositor,
 	_cairo_boxes_init (&tmp);
 
 	status = _cairo_boxes_add (&tmp, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	tmp.chunks.next = &boxes->chunks;
 	tmp.num_boxes += boxes->num_boxes;
@@ -376,7 +376,7 @@ fixup_unbounded_boxes (const cairo_spans_compositor_t *compositor,
 	box.p2.x = _cairo_fixed_from_int (extents->unbounded.x + extents->unbounded.width);
 
 	status = _cairo_boxes_add (&clear, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     /* If we have a clip polygon, we need to intersect with that as well */

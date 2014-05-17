@@ -261,8 +261,8 @@ typedef int grid_scaled_y_t;
 #define UNROLL3(x) x x x
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 /* Header for a chunk of memory in a memory pool. */
@@ -404,8 +404,8 @@ struct polygon {
 struct cell {
     struct cell		*next;
     int			 x;
-    int16_t		 uncovered_area;
-    int16_t		 covered_height;
+    xint16_t		 uncovered_area;
+    xint16_t		 covered_height;
 };
 
 /* A cell list represents the scan line sparsely as cells ordered by
@@ -680,7 +680,7 @@ cell_list_alloc (struct cell_list *cells,
     cell->next = tail->next;
     tail->next = cell;
     cell->x = x;
-    *(uint32_t *)&cell->uncovered_area = 0;
+    *(xuint32_t *)&cell->uncovered_area = 0;
 
     return cell;
 }
@@ -1080,7 +1080,7 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next, *prev;
-    int32_t x;
+    xint32_t x;
 
     prev = head_a->prev;
     next = &head;
@@ -1541,7 +1541,7 @@ blit_a8 (struct cell_list *cells,
 {
     struct cell *cell = cells->head.next;
     int prev_x = xmin, last_x = -1;
-    int16_t cover = 0, last_cover = 0;
+    xint16_t cover = 0, last_cover = 0;
     unsigned num_spans;
 
     if (cell == &cells->tail)
@@ -1610,8 +1610,8 @@ blit_a1 (struct cell_list *cells,
 {
     struct cell *cell = cells->head.next;
     int prev_x = xmin, last_x = -1;
-    int16_t cover = 0;
-    uint8_t coverage, last_cover = 0;
+    xint16_t cover = 0;
+    xuint8_t coverage, last_cover = 0;
     unsigned num_spans;
 
     if (cell == &cells->tail)
@@ -1788,7 +1788,7 @@ _cairo_tor_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    FILE *file = fopen ("polygon.txt", "w");
+    xfile_t *file = fopen ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
     fclose (file);
 #endif

@@ -43,7 +43,7 @@ typedef struct _lzw_buf {
     unsigned char *data;
     int data_size;
     int num_data;
-    uint32_t pending;
+    xuint32_t pending;
     unsigned int pending_bits;
 } lzw_buf_t;
 
@@ -123,11 +123,11 @@ _lzw_buf_grow (lzw_buf_t *buf)
  * Sets buf->status to either %CAIRO_STATUS_SUCCESS or %CAIRO_STATUS_NO_MEMORY.
  */
 static void
-_lzw_buf_store_bits (lzw_buf_t *buf, uint16_t value, int num_bits)
+_lzw_buf_store_bits (lzw_buf_t *buf, xuint16_t value, int num_bits)
 {
     cairo_status_t status;
 
-    assert (value <= (1 << num_bits) - 1);
+    XASSERT (value <= (1 << num_bits) - 1);
 
     if (buf->status)
 	return;
@@ -164,7 +164,7 @@ _lzw_buf_store_pending  (lzw_buf_t *buf)
     if (buf->pending_bits == 0)
 	return;
 
-    assert (buf->pending_bits < 8);
+    XASSERT (buf->pending_bits < 8);
 
     if (buf->num_data >= buf->data_size) {
 	status = _lzw_buf_grow (buf);
@@ -187,7 +187,7 @@ _lzw_buf_store_pending  (lzw_buf_t *buf)
  * 12 bits (19 down to  8):	PREV: previous code value in chain
  *  8 bits ( 7 down to  0):	NEXT: next byte value in chain
  */
-typedef uint32_t lzw_symbol_t;
+typedef xuint32_t lzw_symbol_t;
 
 #define LZW_SYMBOL_SET(sym, prev, next)			((sym) = ((prev) << 8)|(next))
 #define LZW_SYMBOL_SET_CODE(sym, code, prev, next)	((sym) = ((code << 20)|(prev) << 8)|(next))
@@ -397,7 +397,7 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
 	return NULL;
     }
 
-    assert (buf.status == CAIRO_STATUS_SUCCESS);
+    XASSERT (buf.status == CAIRO_STATUS_SUCCESS);
 
     *size_in_out = buf.num_data;
     return buf.data;

@@ -257,7 +257,7 @@ buddy_malloc (cairo_mempool_t *pool, int bits)
 	    break;
 	}
     }
-    assert (block != NULL);
+    XASSERT (block != NULL);
 
     cairo_list_del (&block->link);
 
@@ -296,8 +296,8 @@ _cairo_mempool_init (cairo_mempool_t *pool,
 	bytes -= tmp;
     }
 
-    assert ((((unsigned long) base) & ((1 << min_bits) - 1)) == 0);
-    assert (num_sizes < ARRAY_LENGTH (pool->free));
+    XASSERT ((((unsigned long) base) & ((1 << min_bits) - 1)) == 0);
+    XASSERT (num_sizes < ARRAY_LENGTH (pool->free));
 
     pool->base = base;
     pool->free_bytes = 0;

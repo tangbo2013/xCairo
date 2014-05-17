@@ -39,7 +39,7 @@
 #ifndef CAIRO_TYPES_PRIVATE_H
 #define CAIRO_TYPES_PRIVATE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 #include "cairo-fixed-type-private.h"
 #include "cairo-list-private.h"
 #include "cairo-reference-count-private.h"
@@ -232,10 +232,10 @@ struct _cairo_color_stop {
     double alpha;
 
     /* unpremultipled, for convenience */
-    uint16_t red_short;
-    uint16_t green_short;
-    uint16_t blue_short;
-    uint16_t alpha_short;
+    xuint16_t red_short;
+    xuint16_t green_short;
+    xuint16_t blue_short;
+    xuint16_t alpha_short;
 };
 
 typedef enum _cairo_paginated_mode {

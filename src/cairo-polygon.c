@@ -53,21 +53,21 @@ assert_last_edge_is_valid(cairo_polygon_t *polygon,
 
     edge = &polygon->edges[polygon->num_edges-1];
 
-    assert (edge->bottom > edge->top);
-    assert (edge->top >= limit->p1.y);
-    assert (edge->bottom <= limit->p2.y);
+    XASSERT (edge->bottom > edge->top);
+    XASSERT (edge->top >= limit->p1.y);
+    XASSERT (edge->bottom <= limit->p2.y);
 
     x = _cairo_edge_compute_intersection_x_for_y (&edge->line.p1,
 						  &edge->line.p2,
 						  edge->top);
-    assert (x >= limit->p1.x);
-    assert (x <= limit->p2.x);
+    XASSERT (x >= limit->p1.x);
+    XASSERT (x <= limit->p2.x);
 
     x = _cairo_edge_compute_intersection_x_for_y (&edge->line.p1,
 						  &edge->line.p2,
 						  edge->bottom);
-    assert (x >= limit->p1.x);
-    assert (x <= limit->p2.x);
+    XASSERT (x >= limit->p1.x);
+    XASSERT (x <= limit->p2.x);
 }
 #else
 #define assert_last_edge_is_valid(p, l)
@@ -293,7 +293,7 @@ _add_edge (cairo_polygon_t *polygon,
 {
     cairo_edge_t *edge;
 
-    assert (top < bottom);
+    XASSERT (top < bottom);
 
     if (unlikely (polygon->num_edges == polygon->edges_size)) {
 	if (! _cairo_polygon_grow (polygon))

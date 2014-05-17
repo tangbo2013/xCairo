@@ -85,7 +85,7 @@ _cairo_boxes_get_extents (const cairo_box_t *boxes,
 			  int num_boxes,
 			  cairo_box_t *extents)
 {
-    assert (num_boxes > 0);
+    XASSERT (num_boxes > 0);
     *extents = *boxes;
     while (--num_boxes)
 	_cairo_box_add_box (extents, ++boxes);
@@ -284,7 +284,7 @@ _cairo_box_add_curve_to (cairo_box_t *extents,
 
 	status = _cairo_spline_bound (_cairo_box_add_spline_point,
 				      extents, a, b, c, d);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
     }
 }
 

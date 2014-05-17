@@ -36,7 +36,7 @@
 #ifndef CAIRO_VG_H
 #define CAIRO_VG_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if CAIRO_HAS_COGL_SURFACE
 

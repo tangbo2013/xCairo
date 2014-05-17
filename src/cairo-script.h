@@ -36,7 +36,7 @@
 #ifndef CAIRO_SCRIPT_H
 #define CAIRO_SCRIPT_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if CAIRO_HAS_SCRIPT_SURFACE
 

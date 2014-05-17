@@ -274,7 +274,7 @@ _cairo_user_scaled_glyph_init (void			 *abstract_font,
 
 static unsigned long
 _cairo_user_ucs4_to_index (void	    *abstract_font,
-			   uint32_t  ucs4)
+			   xuint32_t  ucs4)
 {
     cairo_user_scaled_font_t *scaled_font = abstract_font;
     cairo_user_font_face_t *face =

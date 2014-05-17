@@ -161,8 +161,8 @@ charstring_encode_command (cairo_array_t *data, int command)
     orig_size = _cairo_array_size (data);
     status = _cairo_array_append_multiple (data, buf, p - buf);
 
-    assert (status == CAIRO_STATUS_SUCCESS);
-    assert (_cairo_array_size (data) == orig_size);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (_cairo_array_size (data) == orig_size);
 }
 
 /* Before calling this function, the caller must allocate sufficient
@@ -210,8 +210,8 @@ charstring_encode_integer (cairo_array_t *data,
     orig_size = _cairo_array_size (data);
     status = _cairo_array_append_multiple (data, buf, p - buf);
 
-    assert (status == CAIRO_STATUS_SUCCESS);
-    assert (_cairo_array_size (data) == orig_size);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (_cairo_array_size (data) == orig_size);
 }
 
 typedef struct _ps_path_info {
@@ -323,7 +323,7 @@ static void
 charstring_encrypt (cairo_array_t *data)
 {
     unsigned char *d, *end;
-    uint16_t c, p, r;
+    xuint16_t c, p, r;
 
     r = CAIRO_TYPE1_CHARSTRING_KEY;
     d = (unsigned char *) _cairo_array_index (data, 0);
@@ -550,7 +550,7 @@ cairo_type1_write_stream_encrypted (void                *closure,
                                     unsigned int         length)
 {
     const unsigned char *in, *end;
-    uint16_t c, p;
+    xuint16_t c, p;
     static const char hex_digits[16] = "0123456789abcdef";
     char digits[3];
     cairo_type1_font_t *font = closure;

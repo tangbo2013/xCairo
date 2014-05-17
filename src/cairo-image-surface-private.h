@@ -40,7 +40,7 @@
 
 #include "cairo-surface-private.h"
 
-#include <pixman.h>
+#include <xPixman/pixman.h>
 
 CAIRO_BEGIN_DECLS
 

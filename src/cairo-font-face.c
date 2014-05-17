@@ -145,7 +145,7 @@ cairo_font_face_destroy (cairo_font_face_t *font_face)
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&font_face->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&font_face->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&font_face->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&font_face->ref_count))
 	return;
@@ -294,7 +294,7 @@ _cairo_unscaled_font_reference (cairo_unscaled_font_t *unscaled_font)
     if (unscaled_font == NULL)
 	return NULL;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&unscaled_font->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&unscaled_font->ref_count));
 
     _cairo_reference_count_inc (&unscaled_font->ref_count);
 
@@ -307,7 +307,7 @@ _cairo_unscaled_font_destroy (cairo_unscaled_font_t *unscaled_font)
     if (unscaled_font == NULL)
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&unscaled_font->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&unscaled_font->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&unscaled_font->ref_count))
 	return;

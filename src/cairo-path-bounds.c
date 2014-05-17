@@ -112,7 +112,7 @@ _cairo_path_bounder_extents (const cairo_path_fixed_t *path,
 					  _cairo_path_bounder_curve_to,
 					  _cairo_path_bounder_close_path,
 					  &bounder);
-    assert (!status);
+    XASSERT (!status);
 
     if (bounder.has_extents)
 	*extents = bounder.extents;

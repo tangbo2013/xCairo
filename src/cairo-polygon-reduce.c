@@ -47,7 +47,7 @@
 typedef cairo_point_t cairo_bo_point32_t;
 
 typedef struct _cairo_bo_intersect_ordinate {
-    int32_t ordinate;
+    xint32_t ordinate;
     enum { EXACT, INEXACT } exactness;
 } cairo_bo_intersect_ordinate_t;
 
@@ -60,7 +60,7 @@ typedef struct _cairo_bo_edge cairo_bo_edge_t;
 
 typedef struct _cairo_bo_deferred {
     cairo_bo_edge_t *right;
-    int32_t top;
+    xint32_t top;
 } cairo_bo_deferred_t;
 
 struct _cairo_bo_edge {
@@ -116,7 +116,7 @@ typedef struct _cairo_bo_event_queue {
 
 typedef struct _cairo_bo_sweep_line {
     cairo_bo_edge_t *head;
-    int32_t current_y;
+    xint32_t current_y;
     cairo_bo_edge_t *current_edge;
 } cairo_bo_sweep_line_t;
 
@@ -198,8 +198,8 @@ _slope_compare (const cairo_bo_edge_t *a,
      * should prevent that before the tessellation algorithm
      * begins.
      */
-    int32_t adx = a->edge.line.p2.x - a->edge.line.p1.x;
-    int32_t bdx = b->edge.line.p2.x - b->edge.line.p1.x;
+    xint32_t adx = a->edge.line.p2.x - a->edge.line.p1.x;
+    xint32_t bdx = b->edge.line.p2.x - b->edge.line.p1.x;
 
     /* Since the dy's are all positive by construction we can fast
      * path several common cases.
@@ -217,8 +217,8 @@ _slope_compare (const cairo_bo_edge_t *a,
 
     /* Finally we actually need to do the general comparison. */
     {
-	int32_t ady = a->edge.line.p2.y - a->edge.line.p1.y;
-	int32_t bdy = b->edge.line.p2.y - b->edge.line.p1.y;
+	xint32_t ady = a->edge.line.p2.y - a->edge.line.p1.y;
+	xint32_t bdy = b->edge.line.p2.y - b->edge.line.p1.y;
 	cairo_int64_t adx_bdy = _cairo_int32x32_64_mul (adx, bdy);
 	cairo_int64_t bdx_ady = _cairo_int32x32_64_mul (bdx, ady);
 
@@ -255,16 +255,16 @@ _slope_compare (const cairo_bo_edge_t *a,
 static int
 edges_compare_x_for_y_general (const cairo_bo_edge_t *a,
 			       const cairo_bo_edge_t *b,
-			       int32_t y)
+			       xint32_t y)
 {
     /* XXX: We're assuming here that dx and dy will still fit in 32
      * bits. That's not true in general as there could be overflow. We
      * should prevent that before the tessellation algorithm
      * begins.
      */
-    int32_t dx;
-    int32_t adx, ady;
-    int32_t bdx, bdy;
+    xint32_t dx;
+    xint32_t adx, ady;
+    xint32_t bdx, bdy;
     enum {
        HAVE_NONE    = 0x0,
        HAVE_DX      = 0x1,
@@ -279,8 +279,8 @@ edges_compare_x_for_y_general (const cairo_bo_edge_t *a,
     /* don't bother solving for abscissa if the edges' bounding boxes
      * can be used to order them. */
     {
-           int32_t amin, amax;
-           int32_t bmin, bmax;
+           xint32_t amin, amax;
+           xint32_t bmin, bmax;
            if (a->edge.line.p1.x < a->edge.line.p2.x) {
                    amin = a->edge.line.p1.x;
                    amax = a->edge.line.p2.x;
@@ -400,11 +400,11 @@ edges_compare_x_for_y_general (const cairo_bo_edge_t *a,
  */
 static int
 edge_compare_for_y_against_x (const cairo_bo_edge_t *a,
-			      int32_t y,
-			      int32_t x)
+			      xint32_t y,
+			      xint32_t x)
 {
-    int32_t adx, ady;
-    int32_t dx, dy;
+    xint32_t adx, ady;
+    xint32_t dx, dy;
     cairo_int64_t L, R;
 
     if (x < a->edge.line.p1.x && x < a->edge.line.p2.x)
@@ -432,7 +432,7 @@ edge_compare_for_y_against_x (const cairo_bo_edge_t *a,
 static int
 edges_compare_x_for_y (const cairo_bo_edge_t *a,
 		       const cairo_bo_edge_t *b,
-		       int32_t y)
+		       xint32_t y)
 {
     /* If the sweep-line is currently on an end-point of a line,
      * then we know its precise x value (and considering that we often need to
@@ -445,7 +445,7 @@ edges_compare_x_for_y (const cairo_bo_edge_t *a,
        HAVE_BX      = 0x2,
        HAVE_BOTH    = HAVE_AX | HAVE_BX
     } have_ax_bx = HAVE_BOTH;
-    int32_t ax, bx;
+    xint32_t ax, bx;
 
     if (y == a->edge.line.p1.y)
 	ax = a->edge.line.p1.x;
@@ -509,8 +509,8 @@ _cairo_bo_sweep_line_compare_edges (cairo_bo_sweep_line_t	*sweep_line,
 }
 
 static inline cairo_int64_t
-det32_64 (int32_t a, int32_t b,
-	  int32_t c, int32_t d)
+det32_64 (xint32_t a, xint32_t b,
+	  xint32_t c, xint32_t d)
 {
     /* det = a * d - b * c */
     return _cairo_int64_sub (_cairo_int32x32_64_mul (a, d),
@@ -518,8 +518,8 @@ det32_64 (int32_t a, int32_t b,
 }
 
 static inline cairo_int128_t
-det64x32_128 (cairo_int64_t a, int32_t       b,
-	      cairo_int64_t c, int32_t       d)
+det64x32_128 (cairo_int64_t a, xint32_t       b,
+	      cairo_int64_t c, xint32_t       d)
 {
     /* det = a * d - b * c */
     return _cairo_int128_sub (_cairo_int64x32_128_mul (a, d),
@@ -545,11 +545,11 @@ intersect_lines (cairo_bo_edge_t		*a,
      * What we're doing to mitigate this is to perform clamping in
      * cairo_bo_tessellate_polygon().
      */
-    int32_t dx1 = a->edge.line.p1.x - a->edge.line.p2.x;
-    int32_t dy1 = a->edge.line.p1.y - a->edge.line.p2.y;
+    xint32_t dx1 = a->edge.line.p1.x - a->edge.line.p2.x;
+    xint32_t dy1 = a->edge.line.p1.y - a->edge.line.p2.y;
 
-    int32_t dx2 = b->edge.line.p1.x - b->edge.line.p2.x;
-    int32_t dy2 = b->edge.line.p1.y - b->edge.line.p2.y;
+    xint32_t dx2 = b->edge.line.p1.x - b->edge.line.p2.x;
+    xint32_t dy2 = b->edge.line.p1.y - b->edge.line.p2.y;
 
     cairo_int64_t den_det;
     cairo_int64_t R;
@@ -656,7 +656,7 @@ intersect_lines (cairo_bo_edge_t		*a,
 
 static int
 _cairo_bo_intersect_ordinate_32_compare (cairo_bo_intersect_ordinate_t	a,
-					 int32_t			b)
+					 xint32_t			b)
 {
     /* First compare the quotient */
     if (a.ordinate > b)
@@ -1154,7 +1154,7 @@ edges_colinear (const cairo_bo_edge_t *a, const cairo_bo_edge_t *b)
 
 static void
 _cairo_bo_edge_end (cairo_bo_edge_t	*left,
-		    int32_t		 bot,
+		    xint32_t		 bot,
 		    cairo_polygon_t	*polygon)
 {
     cairo_bo_deferred_t *d = &left->deferred;
@@ -1202,7 +1202,7 @@ _cairo_bo_edge_start_or_continue (cairo_bo_edge_t	*left,
 
 static inline void
 _active_edges_to_polygon (cairo_bo_edge_t		*left,
-			  int32_t			 top,
+			  xint32_t			 top,
 			  cairo_fill_rule_t		 fill_rule,
 			  cairo_polygon_t	        *polygon)
 {
@@ -1383,7 +1383,7 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
 	return CAIRO_STATUS_SUCCESS;
 
     if (DEBUG_POLYGON) {
-	FILE *file = fopen ("reduce_in.txt", "w");
+    xfile_t *file = fopen ("reduce_in.txt", "w");
 	_cairo_debug_print_polygon (file, polygon);
 	fclose (file);
     }
@@ -1429,7 +1429,7 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
 	free (events);
 
     if (DEBUG_POLYGON) {
-	FILE *file = fopen ("reduce_out.txt", "w");
+    xfile_t *file = fopen ("reduce_out.txt", "w");
 	_cairo_debug_print_polygon (file, polygon);
 	fclose (file);
     }

@@ -36,7 +36,7 @@
 
 #include "cairoint.h"
 #include "cairo-error-private.h"
-#include <float.h>
+#include <xC/xfloat.h>
 
 #define PIXMAN_MAX_INT ((pixman_fixed_1 >> 1) - pixman_fixed_e) /* need to ensure deltas also fit */
 
@@ -1169,7 +1169,7 @@ _cairo_matrix_to_pixman_matrix_offset (const cairo_matrix_t	*matrix,
 		    double x, y, den, new_norm;
 
 		    den = (m.xx + i) * (m.yy + j) - m.xy * m.yx;
-		    if (fabs (den) < DBL_EPSILON)
+            if (fabs (den) < XDBL_EPSILON)
 			continue;
 
 		    x = m.y0 * m.xy - m.x0 * (m.yy + j);

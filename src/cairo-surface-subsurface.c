@@ -465,7 +465,7 @@ cairo_surface_create_for_rectangle (cairo_surface_t *target,
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
-    assert (_cairo_matrix_is_translation (&target->device_transform));
+    XASSERT (_cairo_matrix_is_translation (&target->device_transform));
     x += target->device_transform.x0;
     y += target->device_transform.y0;
 
@@ -509,13 +509,13 @@ _cairo_surface_create_for_rectangle_int (cairo_surface_t *target,
     if (unlikely (target->finished))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
 
-    assert (target->backend->type != CAIRO_SURFACE_TYPE_SUBSURFACE);
+    XASSERT (target->backend->type != CAIRO_SURFACE_TYPE_SUBSURFACE);
 
     surface = malloc (sizeof (cairo_surface_subsurface_t));
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
-    assert (_cairo_matrix_is_translation (&target->device_transform));
+    XASSERT (_cairo_matrix_is_translation (&target->device_transform));
 
     _cairo_surface_init (&surface->base,
 			 &_cairo_surface_subsurface_backend,

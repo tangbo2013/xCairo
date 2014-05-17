@@ -146,7 +146,7 @@ _cairo_paginated_surface_get_target (cairo_surface_t *surface)
 {
     cairo_paginated_surface_t *paginated_surface;
 
-    assert (_cairo_surface_is_paginated (surface));
+    XASSERT (_cairo_surface_is_paginated (surface));
 
     paginated_surface = (cairo_paginated_surface_t *) surface;
     return paginated_surface->target;
@@ -157,7 +157,7 @@ _cairo_paginated_surface_get_recording (cairo_surface_t *surface)
 {
     cairo_paginated_surface_t *paginated_surface;
 
-    assert (_cairo_surface_is_paginated (surface));
+    XASSERT (_cairo_surface_is_paginated (surface));
 
     paginated_surface = (cairo_paginated_surface_t *) surface;
     return paginated_surface->recording_surface;
@@ -172,7 +172,7 @@ _cairo_paginated_surface_set_size (cairo_surface_t	*surface,
     cairo_status_t status;
     cairo_rectangle_t recording_extents;
 
-    assert (_cairo_surface_is_paginated (surface));
+    XASSERT (_cairo_surface_is_paginated (surface));
 
     paginated_surface = (cairo_paginated_surface_t *) surface;
 
@@ -358,7 +358,7 @@ _paint_page (cairo_paginated_surface_t *surface)
     if (status)
 	goto FAIL;
 
-    assert (analysis->status == CAIRO_STATUS_SUCCESS);
+    XASSERT (analysis->status == CAIRO_STATUS_SUCCESS);
 
      if (surface->backend->set_bounding_box) {
 	 cairo_box_t bbox;
@@ -407,7 +407,7 @@ _paint_page (cairo_paginated_surface_t *surface)
 							 NULL,
 							 surface->target,
 							 CAIRO_RECORDING_REGION_NATIVE);
-	assert (status != CAIRO_INT_STATUS_UNSUPPORTED);
+	XASSERT (status != CAIRO_INT_STATUS_UNSUPPORTED);
 	if (unlikely (status))
 	    goto FAIL;
     }

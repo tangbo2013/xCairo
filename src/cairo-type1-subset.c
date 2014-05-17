@@ -317,7 +317,7 @@ cairo_type1_font_subset_get_matrix (cairo_type1_font_subset_t *font,
     decimal_point = locale_data->decimal_point;
     decimal_point_len = strlen (decimal_point);
 
-    assert (decimal_point_len != 0);
+    XASSERT (decimal_point_len != 0);
 
     segment_end = font->header_segment + font->header_segment_size;
     start = find_token (font->header_segment, segment_end, name);

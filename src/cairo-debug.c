@@ -104,7 +104,7 @@ void
 _cairo_debug_check_image_surface_is_defined (const cairo_surface_t *surface)
 {
     const cairo_image_surface_t *image = (cairo_image_surface_t *) surface;
-    const uint8_t *bits;
+    const xuint8_t *bits;
     int row, width;
 
     if (surface == NULL)
@@ -157,7 +157,7 @@ _cairo_image_surface_write_to_ppm (cairo_image_surface_t *isurf, const char *fn)
     else
         return;
 
-    FILE *fp = fopen(fn, "wb");
+    xfile_t *fp = fopen(fn, "wb");
     if (!fp)
         return;
 
@@ -190,7 +190,7 @@ static cairo_status_t
 _print_move_to (void *closure,
 		const cairo_point_t *point)
 {
-    fprintf (closure,
+    XDBGPRINTF (
 	     " %f %f m",
 	     _cairo_fixed_to_double (point->x),
 	     _cairo_fixed_to_double (point->y));
@@ -202,7 +202,7 @@ static cairo_status_t
 _print_line_to (void *closure,
 		const cairo_point_t *point)
 {
-    fprintf (closure,
+    XDBGPRINTF (
 	     " %f %f l",
 	     _cairo_fixed_to_double (point->x),
 	     _cairo_fixed_to_double (point->y));
@@ -216,7 +216,7 @@ _print_curve_to (void *closure,
 		 const cairo_point_t *p2,
 		 const cairo_point_t *p3)
 {
-    fprintf (closure,
+    XDBGPRINTF (
 	     " %f %f %f %f %f %f c",
 	     _cairo_fixed_to_double (p1->x),
 	     _cairo_fixed_to_double (p1->y),
@@ -231,18 +231,18 @@ _print_curve_to (void *closure,
 static cairo_status_t
 _print_close (void *closure)
 {
-    fprintf (closure, " h");
+    XDBGPRINTF (" h");
 
     return CAIRO_STATUS_SUCCESS;
 }
 
 void
-_cairo_debug_print_path (FILE *stream, cairo_path_fixed_t *path)
+_cairo_debug_print_path (xfile_t *stream, cairo_path_fixed_t *path)
 {
     cairo_status_t status;
     cairo_box_t box;
 
-    fprintf (stream,
+    XDBGPRINTF (
 	     "path: extents=(%f, %f), (%f, %f)\n",
 	    _cairo_fixed_to_double (path->extents.p1.x),
 	    _cairo_fixed_to_double (path->extents.p1.y),
@@ -255,29 +255,29 @@ _cairo_debug_print_path (FILE *stream, cairo_path_fixed_t *path)
 					  _print_curve_to,
 					  _print_close,
 					  stream);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     if (_cairo_path_fixed_is_box (path, &box)) {
-	fprintf (stream, "[box (%d, %d), (%d, %d)]",
+    XDBGPRINTF ("[box (%d, %d), (%d, %d)]",
 		 box.p1.x, box.p1.y, box.p2.x, box.p2.y);
     }
 
-    printf ("\n");
+    XDBGPRINTF ("\n");
 }
 
 void
-_cairo_debug_print_polygon (FILE *stream, cairo_polygon_t *polygon)
+_cairo_debug_print_polygon (xfile_t *stream, cairo_polygon_t *polygon)
 {
     int n;
 
-    fprintf (stream,
+    XDBGPRINTF (
 	     "polygon: extents=(%f, %f), (%f, %f)\n",
 	    _cairo_fixed_to_double (polygon->extents.p1.x),
 	    _cairo_fixed_to_double (polygon->extents.p1.y),
 	    _cairo_fixed_to_double (polygon->extents.p2.x),
 	    _cairo_fixed_to_double (polygon->extents.p2.y));
     if (polygon->num_limits) {
-	fprintf (stream,
+    XDBGPRINTF (
 		 "       : limit=(%f, %f), (%f, %f) x %d\n",
 		 _cairo_fixed_to_double (polygon->limit.p1.x),
 		 _cairo_fixed_to_double (polygon->limit.p1.y),
@@ -289,7 +289,7 @@ _cairo_debug_print_polygon (FILE *stream, cairo_polygon_t *polygon)
     for (n = 0; n < polygon->num_edges; n++) {
 	cairo_edge_t *edge = &polygon->edges[n];
 
-	fprintf (stream,
+    XDBGPRINTF (
 		 "  [%d] = [(%f, %f), (%f, %f)], top=%f, bottom=%f, dir=%d\n",
 		 n,
 		 _cairo_fixed_to_double (edge->line.p1.x),

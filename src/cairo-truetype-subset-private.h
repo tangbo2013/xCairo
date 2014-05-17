@@ -70,107 +70,107 @@
 
 /* All tt_* structs are big-endian */
 typedef struct _tt_cmap_index {
-    uint16_t platform;
-    uint16_t encoding;
-    uint32_t offset;
+    xuint16_t platform;
+    xuint16_t encoding;
+    xuint32_t offset;
 } tt_cmap_index_t;
 
 typedef struct _tt_cmap {
-    uint16_t        version;
-    uint16_t        num_tables;
+    xuint16_t        version;
+    xuint16_t        num_tables;
     tt_cmap_index_t index[1];
 } tt_cmap_t;
 
 typedef struct _segment_map {
-    uint16_t format;
-    uint16_t length;
-    uint16_t version;
-    uint16_t segCountX2;
-    uint16_t searchRange;
-    uint16_t entrySelector;
-    uint16_t rangeShift;
-    uint16_t endCount[1];
+    xuint16_t format;
+    xuint16_t length;
+    xuint16_t version;
+    xuint16_t segCountX2;
+    xuint16_t searchRange;
+    xuint16_t entrySelector;
+    xuint16_t rangeShift;
+    xuint16_t endCount[1];
 } tt_segment_map_t;
 
 typedef struct _tt_head {
-    int16_t     version_1;
-    int16_t     version_2;
-    int16_t     revision_1;
-    int16_t     revision_2;
-    uint16_t    checksum_1;
-    uint16_t    checksum_2;
-    uint16_t    magic_1;
-    uint16_t    magic_2;
-    uint16_t    flags;
-    uint16_t    units_per_em;
-    int16_t     created_1;
-    int16_t     created_2;
-    int16_t     created_3;
-    int16_t     created_4;
-    int16_t     modified_1;
-    int16_t     modified_2;
-    int16_t     modified_3;
-    int16_t     modified_4;
-    int16_t     x_min;                  /* FWORD */
-    int16_t     y_min;                  /* FWORD */
-    int16_t     x_max;                  /* FWORD */
-    int16_t     y_max;                  /* FWORD */
-    uint16_t    mac_style;
-    uint16_t    lowest_rec_pppem;
-    int16_t     font_direction_hint;
-    int16_t     index_to_loc_format;
-    int16_t     glyph_data_format;
+    xint16_t     version_1;
+    xint16_t     version_2;
+    xint16_t     revision_1;
+    xint16_t     revision_2;
+    xuint16_t    checksum_1;
+    xuint16_t    checksum_2;
+    xuint16_t    magic_1;
+    xuint16_t    magic_2;
+    xuint16_t    flags;
+    xuint16_t    units_per_em;
+    xint16_t     created_1;
+    xint16_t     created_2;
+    xint16_t     created_3;
+    xint16_t     created_4;
+    xint16_t     modified_1;
+    xint16_t     modified_2;
+    xint16_t     modified_3;
+    xint16_t     modified_4;
+    xint16_t     x_min;                  /* FWORD */
+    xint16_t     y_min;                  /* FWORD */
+    xint16_t     x_max;                  /* FWORD */
+    xint16_t     y_max;                  /* FWORD */
+    xuint16_t    mac_style;
+    xuint16_t    lowest_rec_pppem;
+    xint16_t     font_direction_hint;
+    xint16_t     index_to_loc_format;
+    xint16_t     glyph_data_format;
 } tt_head_t;
 
 typedef struct _tt_hhea {
-    int16_t     version_1;
-    int16_t     version_2;
-    int16_t     ascender;               /* FWORD */
-    int16_t     descender;              /* FWORD */
-    int16_t     line_gap;               /* FWORD */
-    uint16_t    advance_max_width;      /* UFWORD */
-    int16_t     min_left_side_bearing;  /* FWORD */
-    int16_t     min_right_side_bearing; /* FWORD */
-    int16_t     x_max_extent;           /* FWORD */
-    int16_t     caret_slope_rise;
-    int16_t     caret_slope_run;
-    int16_t     reserved[5];
-    int16_t     metric_data_format;
-    uint16_t    num_hmetrics;
+    xint16_t     version_1;
+    xint16_t     version_2;
+    xint16_t     ascender;               /* FWORD */
+    xint16_t     descender;              /* FWORD */
+    xint16_t     line_gap;               /* FWORD */
+    xuint16_t    advance_max_width;      /* UFWORD */
+    xint16_t     min_left_side_bearing;  /* FWORD */
+    xint16_t     min_right_side_bearing; /* FWORD */
+    xint16_t     x_max_extent;           /* FWORD */
+    xint16_t     caret_slope_rise;
+    xint16_t     caret_slope_run;
+    xint16_t     reserved[5];
+    xint16_t     metric_data_format;
+    xuint16_t    num_hmetrics;
 } tt_hhea_t;
 
 typedef struct _tt_maxp {
-    int16_t     version_1;
-    int16_t     version_2;
-    uint16_t    num_glyphs;
-    uint16_t    max_points;
-    uint16_t    max_contours;
-    uint16_t    max_composite_points;
-    uint16_t    max_composite_contours;
-    uint16_t    max_zones;
-    uint16_t    max_twilight_points;
-    uint16_t    max_storage;
-    uint16_t    max_function_defs;
-    uint16_t    max_instruction_defs;
-    uint16_t    max_stack_elements;
-    uint16_t    max_size_of_instructions;
-    uint16_t    max_component_elements;
-    uint16_t    max_component_depth;
+    xint16_t     version_1;
+    xint16_t     version_2;
+    xuint16_t    num_glyphs;
+    xuint16_t    max_points;
+    xuint16_t    max_contours;
+    xuint16_t    max_composite_points;
+    xuint16_t    max_composite_contours;
+    xuint16_t    max_zones;
+    xuint16_t    max_twilight_points;
+    xuint16_t    max_storage;
+    xuint16_t    max_function_defs;
+    xuint16_t    max_instruction_defs;
+    xuint16_t    max_stack_elements;
+    xuint16_t    max_size_of_instructions;
+    xuint16_t    max_component_elements;
+    xuint16_t    max_component_depth;
 } tt_maxp_t;
 
 typedef struct _tt_name_record {
-    uint16_t platform;
-    uint16_t encoding;
-    uint16_t language;
-    uint16_t name;
-    uint16_t length;
-    uint16_t offset;
+    xuint16_t platform;
+    xuint16_t encoding;
+    xuint16_t language;
+    xuint16_t name;
+    xuint16_t length;
+    xuint16_t offset;
 } tt_name_record_t;
 
 typedef struct _tt_name {
-    uint16_t   format;
-    uint16_t   num_records;
-    uint16_t   strings_offset;
+    xuint16_t   format;
+    xuint16_t   num_records;
+    xuint16_t   strings_offset;
     tt_name_record_t records[1];
 } tt_name_t;
 
@@ -181,11 +181,11 @@ typedef struct _tt_name {
 
 /* _unused fields are defined in TT spec but not used by cairo */
 typedef struct _tt_os2 {
-    uint16_t   _unused1[2];
-    uint16_t   usWeightClass;
-    uint16_t   _unused2[28];
-    uint16_t   fsSelection;
-    uint16_t   _unused3[11];
+    xuint16_t   _unused1[2];
+    xuint16_t   usWeightClass;
+    xuint16_t   _unused2[28];
+    xuint16_t   fsSelection;
+    xuint16_t   _unused3[11];
 } tt_os2_t;
 
 /* composite_glyph_t flags */
@@ -196,14 +196,14 @@ typedef struct _tt_os2 {
 #define TT_WE_HAVE_A_TWO_BY_TWO      0x0080
 
 typedef struct _tt_composite_glyph {
-    uint16_t flags;
-    uint16_t index;
-    uint16_t args[6]; /* 1 to 6 arguments depending on value of flags */
+    xuint16_t flags;
+    xuint16_t index;
+    xuint16_t args[6]; /* 1 to 6 arguments depending on value of flags */
 } tt_composite_glyph_t;
 
 typedef struct _tt_glyph_data {
-    int16_t           num_contours;
-    int8_t            data[8];
+    xint16_t           num_contours;
+    xint8_t            data[8];
     tt_composite_glyph_t glyph;
 } tt_glyph_data_t;
 

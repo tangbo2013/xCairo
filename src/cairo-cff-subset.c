@@ -106,10 +106,10 @@
 
 
 typedef struct _cff_header {
-    uint8_t major;
-    uint8_t minor;
-    uint8_t header_size;
-    uint8_t offset_size;
+    xuint8_t major;
+    xuint8_t minor;
+    xuint8_t header_size;
+    xuint8_t offset_size;
 } cff_header_t;
 
 typedef struct _cff_index_element {
@@ -309,8 +309,8 @@ decode_real (unsigned char *p, double *real)
     decimal_point = locale_data->decimal_point;
     decimal_point_len = strlen (decimal_point);
 
-    assert (decimal_point_len != 0);
-    assert (sizeof(buffer) + decimal_point_len < sizeof(buffer2));
+    XASSERT (decimal_point_len != 0);
+    XASSERT (sizeof(buffer) + decimal_point_len < sizeof(buffer2));
 
     p++;
     while (buf + 2 < buf_end) {
@@ -435,7 +435,7 @@ cff_index_read (cairo_array_t *index, unsigned char **ptr, unsigned char *end_pt
     p = *ptr;
     if (p + 2 > end_ptr)
         return CAIRO_INT_STATUS_UNSUPPORTED;
-    count = be16_to_cpu( *((uint16_t *)p) );
+    count = be16_to_cpu( *((xuint16_t *)p) );
     p += 2;
     if (count > 0) {
         offset_size = *p++;
@@ -472,12 +472,12 @@ cff_index_write (cairo_array_t *index, cairo_array_t *output)
     int num_elem;
     int i;
     cff_index_element_t *element;
-    uint16_t count;
+    xuint16_t count;
     unsigned char buf[5];
     cairo_status_t status;
 
     num_elem = _cairo_array_num_elements (index);
-    count = cpu_to_be16 ((uint16_t) num_elem);
+    count = cpu_to_be16 ((xuint16_t) num_elem);
     status = _cairo_array_append_multiple (output, &count, 2);
     if (unlikely (status))
         return status;
@@ -984,14 +984,14 @@ cairo_cff_font_read_fdselect (cairo_cff_font_t *font, unsigned char *p)
         for (i = 0; i < font->num_glyphs; i++)
             font->fdselect[i] = *p++;
     } else if (type == 3) {
-        num_ranges = be16_to_cpu( *((uint16_t *)p) );
+        num_ranges = be16_to_cpu( *((xuint16_t *)p) );
         p += 2;
         for  (i = 0; i < num_ranges; i++)
         {
-            first = be16_to_cpu( *((uint16_t *)p) );
+            first = be16_to_cpu( *((xuint16_t *)p) );
             p += 2;
             fd = *p++;
-            last = be16_to_cpu( *((uint16_t *)p) );
+            last = be16_to_cpu( *((xuint16_t *)p) );
             for (j = first; j < last; j++)
                 font->fdselect[j] = fd;
         }
@@ -1470,7 +1470,7 @@ type2_decode_integer (unsigned char *p, int *integer)
         p += 2;
     } else { /* *p == 255 */
 	 /* 16.16 fixed-point number. The fraction is ignored. */
-	 *integer = (int16_t)((p[1] << 8) | p[2]);
+     *integer = (xint16_t)((p[1] << 8) | p[2]);
         p += 5;
     }
     return p;
@@ -1722,7 +1722,7 @@ cairo_cff_font_get_gid_for_cid (cairo_cff_font_t  *font, unsigned long cid, unsi
 	    p = font->charset + 1;
 	    g = 1;
 	    while (g <= (unsigned)font->num_glyphs && p < font->data_end) {
-		c = be16_to_cpu( *((uint16_t *)p) );
+		c = be16_to_cpu( *((xuint16_t *)p) );
 		if (c == cid) {
 		    *gid = g;
 		    return CAIRO_STATUS_SUCCESS;
@@ -1737,7 +1737,7 @@ cairo_cff_font_get_gid_for_cid (cairo_cff_font_t  *font, unsigned long cid, unsi
 	    first_gid = 1;
 	    p = font->charset + 1;
 	    while (first_gid <= (unsigned)font->num_glyphs && p + 2 < font->data_end) {
-		first_cid = be16_to_cpu( *((uint16_t *)p) );
+		first_cid = be16_to_cpu( *((xuint16_t *)p) );
 		num_left = p[2];
 		if (cid >= first_cid && cid <= first_cid + num_left) {
 		    *gid = first_gid + cid - first_cid;
@@ -1753,8 +1753,8 @@ cairo_cff_font_get_gid_for_cid (cairo_cff_font_t  *font, unsigned long cid, unsi
 	    first_gid = 1;
 	    p = font->charset + 1;
 	    while (first_gid <= (unsigned)font->num_glyphs && p + 3 < font->data_end) {
-		first_cid = be16_to_cpu( *((uint16_t *)p) );
-		num_left = be16_to_cpu( *((uint16_t *)(p+2)) );
+		first_cid = be16_to_cpu( *((xuint16_t *)p) );
+		num_left = be16_to_cpu( *((xuint16_t *)(p+2)) );
 		if (cid >= first_cid && cid <= first_cid + num_left) {
 		    *gid = first_gid + cid - first_cid;
 		    return CAIRO_STATUS_SUCCESS;
@@ -2016,7 +2016,7 @@ cairo_cff_font_set_topdict_operator_to_cur_pos (cairo_cff_font_t  *font,
     cur_pos = _cairo_array_num_elements (&font->output);
     buf_end = encode_integer_max (buf, cur_pos);
     offset = cff_dict_get_location (font->top_dict, operator, &size);
-    assert (offset > 0);
+    XASSERT (offset > 0);
     op_ptr = _cairo_array_index (&font->output, offset);
     memcpy (op_ptr, buf, buf_end - buf);
 }
@@ -2056,7 +2056,7 @@ FAIL:
 static cairo_status_t
 cairo_cff_font_write_top_dict (cairo_cff_font_t *font)
 {
-    uint16_t count;
+    xuint16_t count;
     unsigned char buf[10];
     unsigned char *p;
     int offset_index;
@@ -2170,7 +2170,7 @@ cairo_cff_font_write_fdselect (cairo_cff_font_t  *font)
         }
     } else {
         unsigned char byte;
-        uint16_t word;
+        xuint16_t word;
 
         status = _cairo_array_grow_by (&font->output, 9);
         if (unlikely (status))
@@ -2178,23 +2178,23 @@ cairo_cff_font_write_fdselect (cairo_cff_font_t  *font)
 
         byte = 3;
         status = _cairo_array_append (&font->output, &byte);
-        assert (status == CAIRO_INT_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
         word = cpu_to_be16 (1);
         status = _cairo_array_append_multiple (&font->output, &word, 2);
-        assert (status == CAIRO_INT_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
         word = cpu_to_be16 (0);
         status = _cairo_array_append_multiple (&font->output, &word, 2);
-        assert (status == CAIRO_INT_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
         byte = 0;
         status = _cairo_array_append (&font->output, &byte);
-        assert (status == CAIRO_INT_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
         word = cpu_to_be16 (font->scaled_font_subset->num_glyphs);
         status = _cairo_array_append_multiple (&font->output, &word, 2);
-        assert (status == CAIRO_INT_STATUS_SUCCESS);
+        XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -2243,7 +2243,7 @@ cairo_cff_font_get_sid_for_winansi_char (cairo_cff_font_t  *font, int ch)
 	sid = ch - 31;
 
     } else if (ch == 128) {
-	assert (font->euro_sid >= NUM_STD_STRINGS);
+	XASSERT (font->euro_sid >= NUM_STD_STRINGS);
 	sid = font->euro_sid;
 
     } else if (ch >= 128 && ch <= 255) {
@@ -2263,7 +2263,7 @@ cairo_cff_font_write_type1_charset (cairo_cff_font_t  *font)
     unsigned int i;
     int ch, sid;
     cairo_status_t status;
-    uint16_t sid_be16;
+    xuint16_t sid_be16;
 
     cairo_cff_font_set_topdict_operator_to_cur_pos (font, CHARSET_OP);
     status = _cairo_array_append (&font->output, &format);
@@ -2289,7 +2289,7 @@ static cairo_status_t
 cairo_cff_font_write_cid_charset (cairo_cff_font_t  *font)
 {
     unsigned char byte;
-    uint16_t word;
+    xuint16_t word;
     cairo_status_t status;
 
     cairo_cff_font_set_topdict_operator_to_cur_pos (font, CHARSET_OP);
@@ -2299,15 +2299,15 @@ cairo_cff_font_write_cid_charset (cairo_cff_font_t  *font)
 
     byte = 2;
     status = _cairo_array_append (&font->output, &byte);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     word = cpu_to_be16 (1);
     status = _cairo_array_append_multiple (&font->output, &word, 2);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     word = cpu_to_be16 (font->scaled_font_subset->num_glyphs - 2);
     status = _cairo_array_append_multiple (&font->output, &word, 2);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -2326,14 +2326,14 @@ cairo_cff_font_write_cid_fontdict (cairo_cff_font_t *font)
     unsigned int i;
     cairo_int_status_t status;
     unsigned int offset_array;
-    uint32_t *offset_array_ptr;
+    xuint32_t *offset_array_ptr;
     int offset_base;
-    uint16_t count;
-    uint8_t offset_size = 4;
+    xuint16_t count;
+    xuint8_t offset_size = 4;
 
     cairo_cff_font_set_topdict_operator_to_cur_pos (font, FDARRAY_OP);
     count = cpu_to_be16 (font->num_subset_fontdicts);
-    status = _cairo_array_append_multiple (&font->output, &count, sizeof (uint16_t));
+    status = _cairo_array_append_multiple (&font->output, &count, sizeof (xuint16_t));
     if (unlikely (status))
         return status;
     status = _cairo_array_append (&font->output, &offset_size);
@@ -2348,16 +2348,16 @@ cairo_cff_font_write_cid_fontdict (cairo_cff_font_t *font)
         return status;
     offset_base = _cairo_array_num_elements (&font->output) - 1;
     *offset_array_ptr = cpu_to_be32(1);
-    offset_array += sizeof(uint32_t);
+    offset_array += sizeof(xuint32_t);
     for (i = 0; i < font->num_subset_fontdicts; i++) {
         status = cff_dict_write (font->fd_dict[font->fd_subset_map[i]],
                                  &font->output);
         if (unlikely (status))
             return status;
 
-	offset_array_ptr = (uint32_t *) _cairo_array_index (&font->output, offset_array);
+	offset_array_ptr = (xuint32_t *) _cairo_array_index (&font->output, offset_array);
         *offset_array_ptr = cpu_to_be32(_cairo_array_num_elements (&font->output) - offset_base);
-	offset_array += sizeof(uint32_t);
+	offset_array += sizeof(xuint32_t);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -2387,7 +2387,7 @@ cairo_cff_font_write_private_dict (cairo_cff_font_t   *font,
     buf_end = encode_integer_max (buf, size);
     buf_end = encode_integer_max (buf_end, font->private_dict_offset[dict_num]);
     offset = cff_dict_get_location (parent_dict, PRIVATE_OP, &size);
-    assert (offset > 0);
+    XASSERT (offset > 0);
     p = _cairo_array_index (&font->output, offset);
     memcpy (p, buf, buf_end - buf);
 
@@ -2417,7 +2417,7 @@ cairo_cff_font_write_local_sub (cairo_cff_font_t   *font,
         offset = _cairo_array_num_elements (&font->output) - font->private_dict_offset[dict_num];
         buf_end = encode_integer_max (buf, offset);
         offset = cff_dict_get_location (private_dict, LOCAL_SUB_OP, &size);
-        assert (offset > 0);
+        XASSERT (offset > 0);
         p = _cairo_array_index (&font->output, offset);
         memcpy (p, buf, buf_end - buf);
 
@@ -2621,8 +2621,8 @@ cairo_cff_font_create_set_widths (cairo_cff_font_t *font)
 
     for (i = 0; i < font->scaled_font_subset->num_glyphs; i++) {
         glyph_index = font->scaled_font_subset->glyphs[i];
-        long_entry_size = 2 * sizeof (int16_t);
-        short_entry_size = sizeof (int16_t);
+        long_entry_size = 2 * sizeof (xint16_t);
+        short_entry_size = sizeof (xint16_t);
         if (glyph_index < num_hmetrics) {
             status = font->backend->load_truetype_table (font->scaled_font_subset->scaled_font,
                                                          TT_TAG_hmtx,
@@ -2640,7 +2640,7 @@ cairo_cff_font_create_set_widths (cairo_cff_font_t *font)
             if (unlikely (status))
                 return status;
         }
-        font->widths[i] = be16_to_cpu (*((int16_t*)buf));
+        font->widths[i] = be16_to_cpu (*((xint16_t*)buf));
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -2703,13 +2703,13 @@ _cairo_cff_font_load_opentype_cff (cairo_cff_font_t  *font)
     if (unlikely (status))
         return status;
 
-    font->x_min = (int16_t) be16_to_cpu (head.x_min);
-    font->y_min = (int16_t) be16_to_cpu (head.y_min);
-    font->x_max = (int16_t) be16_to_cpu (head.x_max);
-    font->y_max = (int16_t) be16_to_cpu (head.y_max);
-    font->ascent = (int16_t) be16_to_cpu (hhea.ascender);
-    font->descent = (int16_t) be16_to_cpu (hhea.descender);
-    font->units_per_em = (int16_t) be16_to_cpu (head.units_per_em);
+    font->x_min = (xint16_t) be16_to_cpu (head.x_min);
+    font->y_min = (xint16_t) be16_to_cpu (head.y_min);
+    font->x_max = (xint16_t) be16_to_cpu (head.x_max);
+    font->y_max = (xint16_t) be16_to_cpu (head.y_max);
+    font->ascent = (xint16_t) be16_to_cpu (hhea.ascender);
+    font->descent = (xint16_t) be16_to_cpu (hhea.descender);
+    font->units_per_em = (xint16_t) be16_to_cpu (head.units_per_em);
     if (font->units_per_em == 0)
         font->units_per_em = 1000;
 

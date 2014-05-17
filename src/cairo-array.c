@@ -179,7 +179,7 @@ _cairo_array_index (cairo_array_t *array, unsigned int index)
     if (index == 0 && array->num_elements == 0)
 	return NULL;
 
-    assert (index < array->num_elements);
+    XASSERT (index < array->num_elements);
 
     return array->elements + index * array->element_size;
 }
@@ -223,7 +223,7 @@ _cairo_array_index_const (const cairo_array_t *array, unsigned int index)
     if (index == 0 && array->num_elements == 0)
 	return NULL;
 
-    assert (index < array->num_elements);
+    XASSERT (index < array->num_elements);
 
     return array->elements + index * array->element_size;
 }
@@ -318,7 +318,7 @@ _cairo_array_allocate (cairo_array_t	 *array,
     if (unlikely (status))
 	return status;
 
-    assert (array->num_elements + num_elements <= array->size);
+    XASSERT (array->num_elements + num_elements <= array->size);
 
     *elements = array->elements + array->num_elements * array->element_size;
 

@@ -38,7 +38,7 @@
 #ifndef CAIRO_SCALED_FONT_PRIVATE_H
 #define CAIRO_SCALED_FONT_PRIVATE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #include "cairo-types-private.h"
 #include "cairo-list-private.h"
@@ -134,8 +134,8 @@ struct _cairo_scaled_glyph {
     cairo_text_extents_t    metrics;		/* user-space metrics */
     cairo_text_extents_t    fs_metrics;		/* font-space metrics */
     cairo_box_t		    bbox;		/* device-space bounds */
-    int16_t                 x_advance;		/* device-space rounded X advance */
-    int16_t                 y_advance;		/* device-space rounded Y advance */
+    xint16_t                 x_advance;		/* device-space rounded X advance */
+    xint16_t                 y_advance;		/* device-space rounded Y advance */
 
     unsigned int	    has_info;
     cairo_image_surface_t   *surface;		/* device-space image */

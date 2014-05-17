@@ -75,7 +75,7 @@
  *   // Try to acquire the device
  *   status = cairo_device_acquire (device);
  *   if (status != CAIRO_STATUS_SUCCESS) {
- *     printf ("Failed to acquire the device: %s\n", cairo_status_to_string (status));
+ *     XDBGPRINTF ("Failed to acquire the device: %s\n", cairo_status_to_string (status));
  *     return;
  *   }
  *
@@ -205,7 +205,7 @@ cairo_device_reference (cairo_device_t *device)
 	return device;
     }
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
     _cairo_reference_count_inc (&device->ref_count);
 
     return device;
@@ -334,13 +334,13 @@ cairo_device_destroy (cairo_device_t *device)
 	return;
     }
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
     if (! _cairo_reference_count_dec_and_test (&device->ref_count))
 	return;
 
     cairo_device_finish (device);
 
-    assert (device->mutex_depth == 0);
+    XASSERT (device->mutex_depth == 0);
     CAIRO_MUTEX_FINI (device->mutex);
 
     user_data = device->user_data;
@@ -442,7 +442,7 @@ cairo_device_release (cairo_device_t *device)
     if (device == NULL)
 	return;
 
-    assert (device->mutex_depth > 0);
+    XASSERT (device->mutex_depth > 0);
 
     if (--device->mutex_depth == 0) {
 	if (device->backend->unlock != NULL)

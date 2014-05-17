@@ -45,7 +45,7 @@
 #include "cairo-surface-backend-private.h"
 #include "cairo-surface-fallback-private.h"
 
-#include <pixman.h>
+#include "../../xpixman/pixman.h"
 
 #include <directfb.h>
 #include <direct/types.h>

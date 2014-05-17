@@ -162,11 +162,11 @@ _pixman_white_image (void)
     return image;
 }
 
-static uint32_t
+static xuint32_t
 hars_petruska_f54_1_random (void)
 {
 #define rol(x,k) ((x << k) | (x >> (32-k)))
-    static uint32_t x;
+    static xuint32_t x;
     return x = (x ^ rol (x, 5) ^ rol (x, 24)) + 0x37798849;
 #undef rol
 }
@@ -439,8 +439,8 @@ _defer_free_cleanup (pixman_image_t *pixman_image,
     cairo_surface_destroy (closure);
 }
 
-static uint16_t
-expand_channel (uint16_t v, uint32_t bits)
+static xuint16_t
+expand_channel (xuint16_t v, xuint32_t bits)
 {
     int offset = 16 - bits;
     while (offset > 0) {
@@ -454,7 +454,7 @@ expand_channel (uint16_t v, uint32_t bits)
 static pixman_image_t *
 _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 {
-    uint32_t pixel;
+    xuint32_t pixel;
     pixman_color_t color;
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
@@ -466,11 +466,11 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 	return NULL;
 
     case CAIRO_FORMAT_A1:
-	pixel = *(uint8_t *) (image->data + y * image->stride + x/8);
+	pixel = *(xuint8_t *) (image->data + y * image->stride + x/8);
 	return pixel & (1 << (x&7)) ? _pixman_black_image () : _pixman_transparent_image ();
 
     case CAIRO_FORMAT_A8:
-	color.alpha = *(uint8_t *) (image->data + y * image->stride + x);
+	color.alpha = *(xuint8_t *) (image->data + y * image->stride + x);
 	color.alpha |= color.alpha << 8;
 	if (color.alpha == 0)
 	    return _pixman_transparent_image ();
@@ -481,7 +481,7 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 	return pixman_image_create_solid_fill (&color);
 
     case CAIRO_FORMAT_RGB16_565:
-	pixel = *(uint16_t *) (image->data + y * image->stride + 2 * x);
+	pixel = *(xuint16_t *) (image->data + y * image->stride + 2 * x);
 	if (pixel == 0)
 	    return _pixman_black_image ();
 	if (pixel == 0xffff)
@@ -494,7 +494,7 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 	return pixman_image_create_solid_fill (&color);
 
     case CAIRO_FORMAT_RGB30:
-	pixel = *(uint32_t *) (image->data + y * image->stride + 4 * x);
+	pixel = *(xuint32_t *) (image->data + y * image->stride + 4 * x);
 	pixel &= 0x3fffffff; /* ignore alpha bits */
 	if (pixel == 0)
 	    return _pixman_black_image ();
@@ -510,7 +510,7 @@ _pixel_to_solid (cairo_image_surface_t *image, int x, int y)
 
     case CAIRO_FORMAT_ARGB32:
     case CAIRO_FORMAT_RGB24:
-	pixel = *(uint32_t *) (image->data + y * image->stride + 4 * x);
+	pixel = *(xuint32_t *) (image->data + y * image->stride + 4 * x);
 	color.alpha = image->format == CAIRO_FORMAT_ARGB32 ? (pixel >> 24) | (pixel >> 16 & 0xff00) : 0xffff;
 	if (color.alpha == 0)
 	    return _pixman_transparent_image ();
@@ -723,7 +723,7 @@ _pixman_image_for_recording (cairo_image_surface_t *dst,
 
 	    matrix = pattern->base.matrix;
 	    status = cairo_matrix_invert (&matrix);
-	    assert (status == CAIRO_STATUS_SUCCESS);
+	    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	    x1 = limit.x;
 	    y1 = limit.y;
@@ -880,7 +880,7 @@ _pixman_image_for_surface (cairo_image_surface_t *dst,
 	    pixman_image = pixman_image_create_bits (source->pixman_format,
 						     source->width,
 						     source->height,
-						     (uint32_t *) source->data,
+						     (xuint32_t *) source->data,
 						     source->stride);
 	    if (unlikely (pixman_image == NULL)) {
 		cairo_surface_destroy (defer_free);
@@ -967,7 +967,7 @@ _pixman_image_for_surface (cairo_image_surface_t *dst,
 	pixman_image = pixman_image_create_bits (image->pixman_format,
 						 image->width,
 						 image->height,
-						 (uint32_t *) image->data,
+						 (xuint32_t *) image->data,
 						 image->stride);
 	if (unlikely (pixman_image == NULL)) {
 	    _cairo_surface_release_source_image (pattern->surface, image, extra);
@@ -1051,13 +1051,13 @@ _pixman_image_for_raster (cairo_image_surface_t *dst,
 	return NULL;
     }
 
-    assert (image->width == pattern->extents.width);
-    assert (image->height == pattern->extents.height);
+    XASSERT (image->width == pattern->extents.width);
+    XASSERT (image->height == pattern->extents.height);
 
     pixman_image = pixman_image_create_bits (image->pixman_format,
 					     image->width,
 					     image->height,
-					     (uint32_t *) image->data,
+					     (xuint32_t *) image->data,
 					     image->stride);
     if (unlikely (pixman_image == NULL)) {
 	_cairo_surface_release_source_image (surface, image, extra);

@@ -69,8 +69,8 @@ _cairo_analysis_surface_merge_status (cairo_int_status_t status_a,
 				      cairo_int_status_t status_b)
 {
     /* fatal errors should be checked and propagated at source */
-    assert (! _cairo_int_status_is_error (status_a));
-    assert (! _cairo_int_status_is_error (status_b));
+    XASSERT (! _cairo_int_status_is_error (status_a));
+    XASSERT (! _cairo_int_status_is_error (status_b));
 
     /* return the most important status */
     if (status_a == CAIRO_INT_STATUS_UNSUPPORTED ||
@@ -90,7 +90,7 @@ _cairo_analysis_surface_merge_status (cairo_int_status_t status_a,
 	return CAIRO_INT_STATUS_FLATTEN_TRANSPARENCY;
 
     /* at this point we have checked all the valid internal codes, so... */
-    assert (status_a == CAIRO_INT_STATUS_SUCCESS &&
+    XASSERT (status_a == CAIRO_INT_STATUS_SUCCESS &&
 	    status_b == CAIRO_INT_STATUS_SUCCESS);
 
     return CAIRO_INT_STATUS_SUCCESS;
@@ -147,9 +147,9 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
     cairo_matrix_t p2d;
     cairo_status_t status, analysis_status;
 
-    assert (pattern->type == CAIRO_PATTERN_TYPE_SURFACE);
+    XASSERT (pattern->type == CAIRO_PATTERN_TYPE_SURFACE);
     surface_pattern = (const cairo_surface_pattern_t *) pattern;
-    assert (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING);
+    XASSERT (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING);
     source = surface_pattern->surface;
 
     proxy = _cairo_surface_has_snapshot (source, &proxy_backend);
@@ -166,7 +166,7 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
 
     p2d = pattern->matrix;
     status = cairo_matrix_invert (&p2d);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     cairo_matrix_multiply (&tmp->ctm, &p2d, &surface->ctm);
     tmp->has_ctm = ! _cairo_matrix_is_identity (&tmp->ctm);

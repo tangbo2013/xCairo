@@ -97,7 +97,7 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <assert.h>
+#include <xC/xdebug.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -220,8 +220,8 @@ typedef int grid_area_t;
 #define UNROLL3(x) x x x
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 /* Header for a chunk of memory in a memory pool. */
@@ -956,7 +956,7 @@ polygon_add_edge (struct polygon *polygon,
     grid_scaled_y_t ymin = polygon->ymin;
     grid_scaled_y_t ymax = polygon->ymax;
 
-    assert (edge->bottom > edge->top);
+    XASSERT (edge->bottom > edge->top);
 
     if (unlikely (edge->top >= ymax || edge->bottom <= ymin))
 	return;
@@ -1042,7 +1042,7 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next;
-    int32_t x;
+    xint32_t x;
 
     if (head_a == NULL)
 	return head_b;
@@ -1602,7 +1602,7 @@ blit_coverages (struct cell_list *cells,
     cairo_half_open_span_t *spans;
     unsigned num_spans;
 
-    assert (cell != &cells->tail);
+    XASSERT (cell != &cells->tail);
 
     /* Count number of cells remaining. */
     {

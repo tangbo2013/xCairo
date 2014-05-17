@@ -134,7 +134,7 @@ _cairo_surface_clipper_set_clip (cairo_surface_clipper_t *clipper,
 	return CAIRO_STATUS_SUCCESS;
 
     /* all clipped out state should never propagate this far */
-    assert (!_cairo_clip_is_all_clipped (clip));
+    XASSERT (!_cairo_clip_is_all_clipped (clip));
 
     /* XXX Is this an incremental clip? */
     if (clipper->clip && clip &&

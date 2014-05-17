@@ -172,7 +172,7 @@ _cairo_region_init_rectangle (cairo_region_t *region,
 void
 _cairo_region_fini (cairo_region_t *region)
 {
-    assert (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
     pixman_region32_fini (&region->rgn);
     VG (VALGRIND_MAKE_MEM_NOACCESS (region, sizeof (cairo_region_t)));
 }
@@ -397,7 +397,7 @@ cairo_region_reference (cairo_region_t *region)
     if (region == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
 	return NULL;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
 
     _cairo_reference_count_inc (&region->ref_count);
     return region;
@@ -420,7 +420,7 @@ cairo_region_destroy (cairo_region_t *region)
     if (region == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&region->ref_count))
 	return;

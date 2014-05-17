@@ -305,7 +305,7 @@ _cairo_gstate_redirect_target (cairo_gstate_t *gstate, cairo_surface_t *child)
 {
     /* If this gstate is already redirected, this is an error; we need a
      * new gstate to be able to redirect */
-    assert (gstate->parent_target == NULL);
+    XASSERT (gstate->parent_target == NULL);
 
     /* Set up our new parent_target based on our current target;
      * gstate->parent_target will take the ref that is held by gstate->target
@@ -761,7 +761,7 @@ _cairo_gstate_set_matrix (cairo_gstate_t       *gstate,
     gstate->ctm = *matrix;
     gstate->ctm_inverse = *matrix;
     status = cairo_matrix_invert (&gstate->ctm_inverse);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
     gstate->is_identity = FALSE;
 
     return CAIRO_STATUS_SUCCESS;
@@ -1092,7 +1092,7 @@ _cairo_gstate_mask (cairo_gstate_t  *gstate,
     if (_cairo_clip_is_all_clipped (gstate->clip))
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (gstate->opacity == 1.0);
+    XASSERT (gstate->opacity == 1.0);
 
     if (_cairo_pattern_is_opaque (mask, NULL))
 	return _cairo_gstate_paint (gstate);
@@ -1169,7 +1169,7 @@ _cairo_gstate_stroke (cairo_gstate_t *gstate, cairo_path_fixed_t *path)
     if (_cairo_clip_is_all_clipped (gstate->clip))
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (gstate->opacity == 1.0);
+    XASSERT (gstate->opacity == 1.0);
 
     memcpy (&style, &gstate->stroke_style, sizeof (gstate->stroke_style));
     if (_cairo_stroke_style_dash_can_approximate (&gstate->stroke_style, &gstate->ctm, gstate->tolerance)) {
@@ -1267,7 +1267,7 @@ _cairo_gstate_fill (cairo_gstate_t *gstate, cairo_path_fixed_t *path)
     if (_cairo_clip_is_all_clipped (gstate->clip))
 	return CAIRO_STATUS_SUCCESS;
 
-    assert (gstate->opacity == 1.0);
+    XASSERT (gstate->opacity == 1.0);
 
     if (_cairo_path_fixed_fill_is_empty (path)) {
 	if (_cairo_operator_bounded_by_mask (gstate->op))

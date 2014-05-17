@@ -75,7 +75,7 @@ _cairo_clip_get_polygon (const cairo_clip_t *clip,
     }
 
     /* If there is no clip, we need an infinite polygon */
-    assert (clip && (clip->path || clip->num_boxes));
+    XASSERT (clip && (clip->path || clip->num_boxes));
 
     if (clip->path == NULL) {
 	*fill_rule = CAIRO_FILL_RULE_WINDING;

@@ -45,7 +45,7 @@ typedef struct _rectangle {
     struct _rectangle *next, *prev;
     cairo_fixed_t left, right;
     cairo_fixed_t top, bottom;
-    int32_t top_y, bottom_y;
+    xint32_t top_y, bottom_y;
     int dir;
 } rectangle_t;
 
@@ -70,8 +70,8 @@ typedef struct {
     pqueue_t stop;
     rectangle_t head, tail;
     rectangle_t *insert_cursor;
-    int32_t current_y;
-    int32_t xmin, xmax;
+    xint32_t current_y;
+    xint32_t xmin, xmax;
 
     struct coverage {
 	struct cell {
@@ -309,7 +309,7 @@ found:
 static inline void
 _active_edges_to_spans (sweep_line_t	*sweep)
 {
-    int32_t y = sweep->current_y;
+    xint32_t y = sweep->current_y;
     rectangle_t *rectangle;
     int coverage, prev_coverage;
     int prev_x;
@@ -585,7 +585,7 @@ generate (cairo_rectangular_scan_converter_t *self,
 static void generate_row(cairo_span_renderer_t *renderer,
 			 const rectangle_t *r,
 			 int y, int h,
-			 uint16_t coverage)
+			 xuint16_t coverage)
 {
     cairo_half_open_span_t spans[4];
     unsigned int num_spans = 0;

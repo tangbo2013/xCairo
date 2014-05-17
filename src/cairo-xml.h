@@ -36,7 +36,7 @@
 #ifndef CAIRO_XML_H
 #define CAIRO_XML_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if CAIRO_HAS_XML_SURFACE
 

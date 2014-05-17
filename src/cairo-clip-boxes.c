@@ -527,7 +527,7 @@ _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
 						   _reduce_close,
 						   &r,
 						   clip_path->tolerance);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	_reduce_close (&r);
     } while ((clip_path = clip_path->prev));
 

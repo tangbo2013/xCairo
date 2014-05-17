@@ -2,7 +2,7 @@
 
 #include "cairoint.h"
 
-const int8_t _cairo_twin_outlines[] = {
+const xint8_t _cairo_twin_outlines[] = {
 /* 0x0 '\0'  offset 0 */
     0, 24, 42, 0, 2, 2,
     0, 24, /* snap_x */
@@ -1051,7 +1051,7 @@ const int8_t _cairo_twin_outlines[] = {
     'e',
 };
 
-const uint16_t _cairo_twin_charmap[128] = {
+const xuint16_t _cairo_twin_charmap[128] = {
     0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,

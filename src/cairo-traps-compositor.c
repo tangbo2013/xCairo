@@ -74,13 +74,13 @@ typedef cairo_int_status_t
 		cairo_clip_t			*clip);
 
 static void do_unaligned_row(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b,
 			     int tx, int y, int h,
-			     uint16_t coverage)
+			     xuint16_t coverage)
 {
     int x1 = _cairo_fixed_integer_part (b->p1.x) - tx;
     int x2 = _cairo_fixed_integer_part (b->p2.x) - tx;
@@ -103,9 +103,9 @@ static void do_unaligned_row(void (*blt)(void *closure,
 }
 
 static void do_unaligned_box(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b, int tx, int ty)
 {
@@ -136,9 +136,9 @@ struct blt_in {
 };
 
 static void blt_in(void *closure,
-		   int16_t x, int16_t y,
-		   int16_t w, int16_t h,
-		   uint16_t coverage)
+		   xint16_t x, xint16_t y,
+		   xint16_t w, xint16_t h,
+		   xuint16_t coverage)
 {
     struct blt_in *info = closure;
     cairo_color_t color;
@@ -166,7 +166,7 @@ add_rect_with_offset (cairo_boxes_t *boxes, int x1, int y1, int x2, int y2, int 
     box.p2.y = _cairo_fixed_from_int (y2 - dy);
 
     status = _cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static cairo_int_status_t
@@ -805,7 +805,7 @@ add_rect (cairo_boxes_t *boxes, int x1, int y1, int x2, int y2)
     box.p2.y = _cairo_fixed_from_int (y2);
 
     status = _cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static cairo_status_t
@@ -826,7 +826,7 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
 	return CAIRO_STATUS_SUCCESS;
     }
 
-    assert (extents->clip->path == NULL);
+    XASSERT (extents->clip->path == NULL);
 
     /* subtract the drawn boxes from the unbounded area */
     _cairo_boxes_init (&clear);
@@ -874,10 +874,10 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
     } else if (boxes->num_boxes) {
 	_cairo_boxes_init (&tmp);
 
-	assert (boxes->is_pixel_aligned);
+	XASSERT (boxes->is_pixel_aligned);
 
 	status = _cairo_boxes_add (&tmp, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	tmp.chunks.next = &boxes->chunks;
 	tmp.num_boxes += boxes->num_boxes;
@@ -894,7 +894,7 @@ empty:
 	box.p2.x = _cairo_fixed_from_int (extents->unbounded.x + extents->unbounded.width);
 
 	status = _cairo_boxes_add (&clear, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     /* Now intersect with the clip boxes */
@@ -1530,7 +1530,7 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	_cairo_boxes_init (&boxes);
 	status = _cairo_rasterise_polygon_to_boxes (polygon, fill_rule, &boxes);
 	if (likely (status == CAIRO_INT_STATUS_SUCCESS)) {
-	    assert (boxes.is_pixel_aligned);
+	    XASSERT (boxes.is_pixel_aligned);
 	    status = clip_and_composite_boxes (compositor, extents, &boxes);
 	}
 	_cairo_boxes_fini (&boxes);
@@ -1561,7 +1561,7 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	if (status == CAIRO_INT_STATUS_SUCCESS) {
 	    status = clip_and_composite_boxes (compositor, extents, &boxes);
 	    /* XXX need to reconstruct the traps! */
-	    assert (status != CAIRO_INT_STATUS_UNSUPPORTED);
+	    XASSERT (status != CAIRO_INT_STATUS_UNSUPPORTED);
 	}
     }
     if (status == CAIRO_INT_STATUS_UNSUPPORTED) {
@@ -1594,7 +1594,7 @@ CLEANUP_TRAPS:
 
 struct composite_opacity_info {
     const cairo_traps_compositor_t *compositor;
-    uint8_t op;
+    xuint8_t op;
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
@@ -1602,9 +1602,9 @@ struct composite_opacity_info {
 };
 
 static void composite_opacity(void *closure,
-			      int16_t x, int16_t y,
-			      int16_t w, int16_t h,
-			      uint16_t coverage)
+			      xint16_t x, xint16_t y,
+			      xint16_t w, xint16_t h,
+			      xuint16_t coverage)
 {
     struct composite_opacity_info *info = closure;
     const cairo_traps_compositor_t *compositor = info->compositor;
@@ -1900,13 +1900,13 @@ struct composite_box_info {
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
-    uint8_t op;
+    xuint8_t op;
 };
 
 static void composite_box(void *closure,
-			  int16_t x, int16_t y,
-			  int16_t w, int16_t h,
-			  uint16_t coverage)
+			  xint16_t x, xint16_t y,
+			  xint16_t w, xint16_t h,
+			  xuint16_t coverage)
 {
     struct composite_box_info *info = closure;
     const cairo_traps_compositor_t *compositor = info->compositor;

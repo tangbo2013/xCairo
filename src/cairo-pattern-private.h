@@ -41,7 +41,7 @@
 #include "cairo-list-private.h"
 #include "cairo-surface-private.h"
 
-#include <stdio.h> /* FILE* */
+#include <xC/xfile.h> /* xfile_t* */
 
 CAIRO_BEGIN_DECLS
 
@@ -355,7 +355,7 @@ cairo_private void
 _cairo_raster_source_pattern_finish (cairo_pattern_t *abstract_pattern);
 
 cairo_private void
-_cairo_debug_print_pattern (FILE *file, const cairo_pattern_t *pattern);
+_cairo_debug_print_pattern (xfile_t *file, const cairo_pattern_t *pattern);
 
 CAIRO_END_DECLS
 

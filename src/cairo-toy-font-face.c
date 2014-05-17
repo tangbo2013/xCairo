@@ -209,7 +209,7 @@ _cairo_toy_font_face_fini (cairo_toy_font_face_t *font_face)
 {
     /* We assert here that we own font_face->family before casting
      * away the const qualifer. */
-    assert (font_face->owns_family);
+    XASSERT (font_face->owns_family);
     free ((char*) font_face->family);
 
     if (font_face->impl_face)
@@ -322,7 +322,7 @@ cairo_toy_font_face_create (const char          *family,
     if (unlikely (status))
 	goto UNWIND_FONT_FACE_MALLOC;
 
-    assert (font_face->base.hash_entry.hash == key.base.hash_entry.hash);
+    XASSERT (font_face->base.hash_entry.hash == key.base.hash_entry.hash);
     status = _cairo_hash_table_insert (hash_table, &font_face->base.hash_entry);
     if (unlikely (status))
 	goto UNWIND_FONT_FACE_INIT;
@@ -350,7 +350,7 @@ _cairo_toy_font_face_destroy (void *abstract_face)
 
     hash_table = _cairo_toy_font_face_hash_table_lock ();
     /* All created objects must have been mapped in the hash table. */
-    assert (hash_table != NULL);
+    XASSERT (hash_table != NULL);
 
     if (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&font_face->base.ref_count)) {
 	/* somebody recreated the font whilst we waited for the lock */
@@ -439,7 +439,7 @@ cairo_toy_font_face_get_family (cairo_font_face_t *font_face)
 	if (_cairo_font_face_set_error (font_face, CAIRO_STATUS_FONT_TYPE_MISMATCH))
 	    return CAIRO_FONT_FAMILY_DEFAULT;
     }
-    assert (toy_font_face->owns_family);
+    XASSERT (toy_font_face->owns_family);
     return toy_font_face->family;
 }
 

@@ -150,7 +150,7 @@ _cairo_freepool_alloc_from_new_pool (cairo_freepool_t *freepool)
     freepool->pools = pool;
 
     pool->rem = poolsize - freepool->nodesize;
-    pool->data = (uint8_t *) (pool + 1) + freepool->nodesize;
+    pool->data = (xuint8_t *) (pool + 1) + freepool->nodesize;
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (pool->data, pool->rem));
 
