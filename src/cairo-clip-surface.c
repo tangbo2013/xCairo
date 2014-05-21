@@ -61,7 +61,7 @@ _cairo_clip_combine_with_surface (const cairo_clip_t *clip,
 
     copy = _cairo_clip_copy_with_translation (clip, -dst_x, -dst_y);
     copy_path = copy->path;
-    copy->path = NULL;
+    copy->path = XNULL;
 
     if (copy->boxes) {
 	status = _cairo_surface_paint (dst,
@@ -70,7 +70,7 @@ _cairo_clip_combine_with_surface (const cairo_clip_t *clip,
 				       copy);
     }
 
-    clip = NULL;
+    clip = XNULL;
     if (_cairo_clip_is_region (copy))
 	clip = copy;
     clip_path = copy_path;
@@ -155,7 +155,7 @@ _cairo_clip_get_surface (const cairo_clip_t *clip,
 					  CAIRO_FILL_RULE_WINDING,
 					  1.,
 					  CAIRO_ANTIALIAS_DEFAULT,
-					  NULL);
+					  XNULL);
 	_cairo_path_fixed_fini (&path);
 	if (unlikely (status)) {
 	    cairo_surface_destroy (surface);
@@ -175,7 +175,7 @@ _cairo_clip_get_surface (const cairo_clip_t *clip,
 					      -clip->extents.x,
 					      -clip->extents.y);
     copy_path = copy->path;
-    copy->path = NULL;
+    copy->path = XNULL;
 
     region = copy;
     if (! _cairo_clip_is_region (copy))
@@ -226,7 +226,7 @@ _cairo_clip_get_image (const cairo_clip_t *clip,
 	return surface;
 
     status = _cairo_surface_paint (surface, CAIRO_OPERATOR_SOURCE,
-				   &_cairo_pattern_white.base, NULL);
+				   &_cairo_pattern_white.base, XNULL);
     if (likely (status == CAIRO_STATUS_SUCCESS))
 	status = _cairo_clip_combine_with_surface (clip, surface,
 						   extents->x, extents->y);

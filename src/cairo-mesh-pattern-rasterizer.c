@@ -892,7 +892,7 @@ _cairo_mesh_pattern_rasterize (const cairo_mesh_pattern_t *mesh,
     const cairo_color_t *c;
 
     XASSERT (mesh->base.status == CAIRO_STATUS_SUCCESS);
-    XASSERT (mesh->current_patch == NULL);
+    XASSERT (mesh->current_patch == XNULL);
 
     p2u = mesh->base.matrix;
     status = cairo_matrix_invert (&p2u);

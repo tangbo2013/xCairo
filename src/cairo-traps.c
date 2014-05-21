@@ -129,14 +129,14 @@ _cairo_traps_grow (cairo_traps_t *traps)
 
     if (traps->traps == traps->traps_embedded) {
 	new_traps = _cairo_malloc_ab (new_size, sizeof (cairo_trapezoid_t));
-	if (new_traps != NULL)
+    if (new_traps != XNULL)
         xmemory_copy (new_traps, traps->traps, sizeof (traps->traps_embedded));
     } else {
 	new_traps = _cairo_realloc_ab (traps->traps,
 	                               new_size, sizeof (cairo_trapezoid_t));
     }
 
-    if (unlikely (new_traps == NULL)) {
+    if (unlikely (new_traps == XNULL)) {
 	traps->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return FALSE;
     }
@@ -435,7 +435,7 @@ _cairo_traps_init_boxes (cairo_traps_t	    *traps,
     traps->maybe_region = boxes->is_pixel_aligned;
 
     trap = &traps->traps[0];
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	const cairo_box_t *box;
 	int i;
 
@@ -823,7 +823,7 @@ _cairo_traps_extract_region (cairo_traps_t   *traps,
     if (traps->num_traps > ARRAY_LENGTH (stack_rects)) {
 	rects = _cairo_malloc_ab (traps->num_traps, sizeof (cairo_rectangle_int_t));
 
-	if (unlikely (rects == NULL))
+    if (unlikely (rects == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 

@@ -100,33 +100,33 @@
 
 #define DEFINE_NIL_SURFACE(status, name)			\
 const cairo_surface_t name = {					\
-    NULL,				/* backend */		\
-    NULL,				/* device */		\
+    XNULL,				/* backend */		\
+    XNULL,				/* device */		\
     CAIRO_SURFACE_TYPE_IMAGE,		/* type */		\
     CAIRO_CONTENT_COLOR,		/* content */		\
     CAIRO_REFERENCE_COUNT_INVALID,	/* ref_count */		\
     status,				/* status */		\
     0,					/* unique id */		\
     0,					/* serial */		\
-    NULL,				/* damage */		\
+    XNULL,				/* damage */		\
     FALSE,				/* _finishing */	\
     FALSE,				/* finished */		\
     TRUE,				/* is_clear */		\
     FALSE,				/* has_font_options */	\
     FALSE,				/* owns_device */	\
-    { 0, 0, 0, NULL, },			/* user_data */		\
-    { 0, 0, 0, NULL, },			/* mime_data */         \
+    { 0, 0, 0, XNULL, },			/* user_data */		\
+    { 0, 0, 0, XNULL, },			/* mime_data */         \
     { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 },   /* device_transform */	\
     { 1.0, 0.0,	0.0, 1.0, 0.0, 0.0 },	/* device_transform_inverse */	\
-    { NULL, NULL },			/* device_transform_observers */ \
+    { XNULL, XNULL },			/* device_transform_observers */ \
     0.0,				/* x_resolution */	\
     0.0,				/* y_resolution */	\
     0.0,				/* x_fallback_resolution */	\
     0.0,				/* y_fallback_resolution */	\
-    NULL,				/* snapshot_of */	\
-    NULL,				/* snapshot_detach */	\
-    { NULL, NULL },			/* snapshots */		\
-    { NULL, NULL },			/* snapshot */		\
+    XNULL,				/* snapshot_of */	\
+    XNULL,				/* snapshot_detach */	\
+    { XNULL, XNULL },			/* snapshots */		\
+    { XNULL, XNULL },			/* snapshot */		\
     { CAIRO_ANTIALIAS_DEFAULT,		/* antialias */		\
       CAIRO_SUBPIXEL_ORDER_DEFAULT,	/* subpixel_order */	\
       CAIRO_LCD_FILTER_DEFAULT,		/* lcd_filter */	\
@@ -339,12 +339,12 @@ _cairo_surface_detach_snapshots (cairo_surface_t *surface)
 void
 _cairo_surface_detach_snapshot (cairo_surface_t *snapshot)
 {
-    XASSERT (snapshot->snapshot_of != NULL);
+    XASSERT (snapshot->snapshot_of != XNULL);
 
-    snapshot->snapshot_of = NULL;
+    snapshot->snapshot_of = XNULL;
     cairo_list_del (&snapshot->snapshot);
 
-    if (snapshot->snapshot_detach != NULL)
+    if (snapshot->snapshot_detach != XNULL)
 	snapshot->snapshot_detach (snapshot);
 
     cairo_surface_destroy (snapshot);
@@ -360,7 +360,7 @@ _cairo_surface_attach_snapshot (cairo_surface_t *surface,
 
     cairo_surface_reference (snapshot);
 
-    if (snapshot->snapshot_of != NULL)
+    if (snapshot->snapshot_of != XNULL)
 	_cairo_surface_detach_snapshot (snapshot);
 
     snapshot->snapshot_of = surface;
@@ -384,7 +384,7 @@ _cairo_surface_has_snapshot (cairo_surface_t *surface,
 	    return snapshot;
     }
 
-    return NULL;
+    return XNULL;
 }
 
 cairo_status_t
@@ -416,8 +416,8 @@ _cairo_surface_init (cairo_surface_t			*surface,
     surface->_finishing = FALSE;
     surface->is_clear = FALSE;
     surface->serial = 0;
-    surface->damage = NULL;
-    surface->owns_device = (device != NULL);
+    surface->damage = XNULL;
+    surface->owns_device = (device != XNULL);
 
     _cairo_user_data_array_init (&surface->user_data);
     _cairo_user_data_array_init (&surface->mime_data);
@@ -433,7 +433,7 @@ _cairo_surface_init (cairo_surface_t			*surface,
     surface->y_fallback_resolution = CAIRO_SURFACE_FALLBACK_RESOLUTION_DEFAULT;
 
     cairo_list_init (&surface->snapshots);
-    surface->snapshot_of = NULL;
+    surface->snapshot_of = XNULL;
 
     surface->has_font_options = FALSE;
 }
@@ -465,10 +465,10 @@ _cairo_surface_create_similar_scratch (cairo_surface_t *other,
     if (unlikely (other->status))
 	return _cairo_surface_create_in_error (other->status);
 
-    surface = NULL;
+    surface = XNULL;
     if (other->backend->create_similar)
 	surface = other->backend->create_similar (other, content, width, height);
-    if (surface == NULL)
+    if (surface == XNULL)
 	surface = cairo_surface_create_similar_image (other,
 						      _cairo_format_from_content (content),
 						      width, height);
@@ -581,11 +581,11 @@ cairo_surface_create_similar_image (cairo_surface_t  *other,
     if (unlikely (! CAIRO_FORMAT_VALID (format)))
 	return _cairo_surface_create_in_error (CAIRO_STATUS_INVALID_FORMAT);
 
-    image = NULL;
+    image = XNULL;
     if (other->backend->create_similar_image)
 	image = other->backend->create_similar_image (other,
 						      format, width, height);
-    if (image == NULL)
+    if (image == XNULL)
 	image = cairo_image_surface_create (format, width, height);
 
     XASSERT (image->is_clear);
@@ -628,15 +628,15 @@ cairo_image_surface_t *
 _cairo_surface_map_to_image (cairo_surface_t  *surface,
 			     const cairo_rectangle_int_t *extents)
 {
-    cairo_image_surface_t *image = NULL;
+    cairo_image_surface_t *image = XNULL;
 
-    XASSERT (extents != NULL);
+    XASSERT (extents != XNULL);
 
-    /* TODO: require map_to_image != NULL */
+    /* TODO: require map_to_image != XNULL */
     if (surface->backend->map_to_image)
 	image = surface->backend->map_to_image (surface, extents);
 
-    if (image == NULL)
+    if (image == XNULL)
 	image = _cairo_image_surface_clone_subimage (surface, extents);
 
     return image;
@@ -684,7 +684,7 @@ _cairo_surface_unmap_image (cairo_surface_t       *surface,
 	goto destroy;
     }
 
-    /* TODO: require unmap_image != NULL */
+    /* TODO: require unmap_image != XNULL */
     if (surface->backend->unmap_image &&
 	! _cairo_image_surface_is_clone (image))
     {
@@ -706,7 +706,7 @@ _cairo_surface_unmap_image (cairo_surface_t       *surface,
     extents.y = image->base.device_transform_inverse.y0;
     extents.width  = image->width;
     extents.height = image->height;
-    clip = _cairo_clip_intersect_rectangle (NULL, &extents);
+    clip = _cairo_clip_intersect_rectangle (XNULL, &extents);
 
     status = _cairo_surface_paint (surface,
 				   CAIRO_OPERATOR_SOURCE,
@@ -764,7 +764,7 @@ cairo_surface_map_to_image (cairo_surface_t  *surface,
     if (unlikely (surface->finished))
 	return _cairo_surface_create_in_error (CAIRO_STATUS_SURFACE_FINISHED);
 
-    if (extents == NULL) {
+    if (extents == XNULL) {
 	if (unlikely (! surface->backend->get_extents (surface, &rect)))
 	    return _cairo_surface_create_in_error (CAIRO_STATUS_INVALID_SIZE);
 
@@ -871,7 +871,7 @@ _cairo_surface_create_similar_solid (cairo_surface_t	 *other,
     status = _cairo_surface_paint (surface,
 				   color == CAIRO_COLOR_TRANSPARENT ?
 				   CAIRO_OPERATOR_CLEAR : CAIRO_OPERATOR_SOURCE,
-				   &pattern.base, NULL);
+                   &pattern.base, XNULL);
     if (unlikely (status)) {
 	cairo_surface_destroy (surface);
 	surface = _cairo_surface_create_in_error (status);
@@ -898,7 +898,7 @@ _cairo_surface_create_similar_solid (cairo_surface_t	 *other,
 cairo_surface_t *
 cairo_surface_reference (cairo_surface_t *surface)
 {
-    if (surface == NULL ||
+    if (surface == XNULL ||
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
 	return surface;
 
@@ -923,7 +923,7 @@ slim_hidden_def (cairo_surface_reference);
 void
 cairo_surface_destroy (cairo_surface_t *surface)
 {
-    if (surface == NULL ||
+    if (surface == XNULL ||
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
 	return;
 
@@ -932,7 +932,7 @@ cairo_surface_destroy (cairo_surface_t *surface)
     if (! _cairo_reference_count_dec_and_test (&surface->ref_count))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (! surface->finished) {
 	_cairo_surface_finish_snapshots (surface);
@@ -954,7 +954,7 @@ cairo_surface_destroy (cairo_surface_t *surface)
     if (surface->owns_device)
         cairo_device_destroy (surface->device);
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
     XASSERT (! _cairo_surface_has_snapshots (surface));
     /* paranoid check that nobody took a reference whilst finishing */
     XASSERT (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
@@ -977,7 +977,7 @@ slim_hidden_def(cairo_surface_destroy);
 unsigned int
 cairo_surface_get_reference_count (cairo_surface_t *surface)
 {
-    if (surface == NULL ||
+    if (surface == XNULL ||
 	    CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
 	return 0;
 
@@ -1009,7 +1009,7 @@ _cairo_surface_finish (cairo_surface_t *surface)
 	    _cairo_surface_set_error (surface, status);
     }
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
     XASSERT (!_cairo_surface_has_snapshots (surface));
 }
 
@@ -1037,7 +1037,7 @@ _cairo_surface_finish (cairo_surface_t *surface)
 void
 cairo_surface_finish (cairo_surface_t *surface)
 {
-    if (surface == NULL)
+    if (surface == XNULL)
 	return;
 
     if (CAIRO_REFERENCE_COUNT_IS_INVALID (&surface->ref_count))
@@ -1098,7 +1098,7 @@ cairo_surface_get_user_data (cairo_surface_t		 *surface,
 {
     /* Prevent reads of the array during teardown */
     if (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count))
-	return NULL;
+    return XNULL;
 
     return _cairo_user_data_array_get_data (&surface->user_data, key);
 }
@@ -1159,7 +1159,7 @@ cairo_surface_get_mime_data (cairo_surface_t		*surface,
     cairo_user_data_slot_t *slots;
     int i, num_slots;
 
-    *data = NULL;
+    *data = XNULL;
     *length = 0;
 
     /* Prevent reads of the array during teardown */
@@ -1174,7 +1174,7 @@ cairo_surface_get_mime_data (cairo_surface_t		*surface,
     num_slots = surface->mime_data.num_elements;
     slots = _cairo_array_index (&surface->mime_data, 0);
     for (i = 0; i < num_slots; i++) {
-	if (slots[i].key != NULL && strcmp ((char *) slots[i].key, mime_type) == 0) {
+    if (slots[i].key != XNULL && strcmp ((char *) slots[i].key, mime_type) == 0) {
 	    cairo_mime_data_t *mime_data = slots[i].user_data;
 
 	    *data = mime_data->data;
@@ -1300,9 +1300,9 @@ cairo_surface_set_mime_data (cairo_surface_t		*surface,
     if (unlikely (status))
 	return _cairo_surface_set_error (surface, status);
 
-    if (data != NULL) {
+    if (data != XNULL) {
     mime_data = xmemory_alloc (sizeof (cairo_mime_data_t));
-	if (unlikely (mime_data == NULL))
+    if (unlikely (mime_data == XNULL))
 	    return _cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
 	CAIRO_REFERENCE_COUNT_INIT (&mime_data->ref_count, 1);
@@ -1312,7 +1312,7 @@ cairo_surface_set_mime_data (cairo_surface_t		*surface,
 	mime_data->destroy = destroy;
 	mime_data->closure = closure;
     } else
-	mime_data = NULL;
+    mime_data = XNULL;
 
     status = _cairo_user_data_array_set_data (&surface->mime_data,
 					      (cairo_user_data_key_t *) mime_type,
@@ -1396,7 +1396,7 @@ _cairo_surface_copy_mime_data (cairo_surface_t *dst,
     /* now increment the reference counters for the copies */
     _cairo_user_data_array_foreach (&dst->mime_data,
 				    _cairo_mime_data_reference,
-				    NULL);
+                    XNULL);
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -1423,7 +1423,7 @@ _cairo_surface_set_font_options (cairo_surface_t       *surface,
     if (surface->status)
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (surface->finished) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1483,7 +1483,7 @@ _cairo_surface_flush (cairo_surface_t *surface, unsigned flags)
 {
     /* update the current snapshots *before* the user updates the surface */
     _cairo_surface_detach_snapshots (surface);
-    if (surface->snapshot_of != NULL)
+    if (surface->snapshot_of != XNULL)
 	_cairo_surface_detach_snapshot (surface);
     _cairo_surface_detach_mime_data (surface);
 
@@ -1579,7 +1579,7 @@ cairo_surface_mark_dirty_rectangle (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1606,7 +1606,7 @@ cairo_surface_mark_dirty_rectangle (cairo_surface_t *surface,
 	surface->damage = _cairo_damage_add_box (surface->damage, &box);
     }
 
-    if (surface->backend->mark_dirty_rectangle != NULL) {
+    if (surface->backend->mark_dirty_rectangle != XNULL) {
 	/* XXX: FRAGILE: We're ignoring the scaling component of
 	 * device_transform here. I don't know what the right thing to
 	 * do would actually be if there were some scaling here, but
@@ -1650,7 +1650,7 @@ _cairo_surface_set_device_scale (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1706,7 +1706,7 @@ cairo_surface_set_device_offset (cairo_surface_t *surface,
     if (unlikely (surface->status))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1797,7 +1797,7 @@ cairo_surface_set_fallback_resolution (cairo_surface_t	*surface,
     if (unlikely (surface->status))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
@@ -1881,7 +1881,7 @@ _cairo_surface_acquire_source_image (cairo_surface_t         *surface,
 
     XASSERT (!surface->finished);
 
-    if (surface->backend->acquire_source_image == NULL)
+    if (surface->backend->acquire_source_image == XNULL)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     status = surface->backend->acquire_source_image (surface,
@@ -1906,7 +1906,7 @@ _cairo_surface_default_acquire_source_image (void                    *_surface,
 	return _cairo_error (CAIRO_STATUS_INVALID_SIZE);
 
     *image_out = _cairo_surface_map_to_image (surface, &extents);
-    *image_extra = NULL;
+    *image_extra = XNULL;
     return (*image_out)->base.status;
 }
 
@@ -1944,7 +1944,7 @@ cairo_surface_t *
 _cairo_surface_get_source (cairo_surface_t *surface,
 			   cairo_rectangle_int_t *extents)
 {
-    XASSERT (NULL != surface->backend->source);
+    XASSERT (XNULL != surface->backend->source);
     return surface->backend->source (surface, extents);
 }
 
@@ -2030,7 +2030,7 @@ _cairo_surface_paint (cairo_surface_t		*surface,
 
     status = surface->backend->paint (surface, op, source, clip);
     if (status != CAIRO_INT_STATUS_NOTHING_TO_DO) {
-	surface->is_clear = op == CAIRO_OPERATOR_CLEAR && clip == NULL;
+    surface->is_clear = op == CAIRO_OPERATOR_CLEAR && clip == XNULL;
 	surface->serial++;
     }
 
@@ -2284,7 +2284,7 @@ cairo_surface_copy_page (cairo_surface_t *surface)
     if (unlikely (surface->status))
 	return;
 
-    XASSERT (surface->snapshot_of == NULL);
+    XASSERT (surface->snapshot_of == XNULL);
 
     if (unlikely (surface->finished)) {
 	_cairo_surface_set_error (surface, CAIRO_STATUS_SURFACE_FINISHED);
@@ -2292,7 +2292,7 @@ cairo_surface_copy_page (cairo_surface_t *surface)
     }
 
     /* It's fine if some backends don't implement copy_page */
-    if (surface->backend->copy_page == NULL)
+    if (surface->backend->copy_page == XNULL)
 	return;
 
     _cairo_surface_set_error (surface, surface->backend->copy_page (surface));
@@ -2331,7 +2331,7 @@ cairo_surface_show_page (cairo_surface_t *surface)
     }
 
     /* It's fine if some backends don't implement show_page */
-    if (surface->backend->show_page == NULL)
+    if (surface->backend->show_page == XNULL)
 	return;
 
     _cairo_surface_set_error (surface, surface->backend->show_page (surface));
@@ -2376,7 +2376,7 @@ _cairo_surface_get_extents (cairo_surface_t         *surface,
     }
 
     bounded = FALSE;
-    if (surface->backend->get_extents != NULL)
+    if (surface->backend->get_extents != XNULL)
 	bounded = surface->backend->get_extents (surface, extents);
 
     if (! bounded)
@@ -2425,7 +2425,7 @@ cairo_surface_has_show_text_glyphs (cairo_surface_t	    *surface)
     if (surface->backend->has_show_text_glyphs)
 	return surface->backend->has_show_text_glyphs (surface);
     else
-	return surface->backend->show_text_glyphs != NULL;
+    return surface->backend->show_text_glyphs != XNULL;
 }
 slim_hidden_def (cairo_surface_has_show_text_glyphs);
 
@@ -2485,7 +2485,7 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
 	return status;
 
     if (_cairo_surface_has_device_transform (surface) &&
-	! _cairo_matrix_is_integer_translation (&surface->device_transform, NULL, NULL))
+    ! _cairo_matrix_is_integer_translation (&surface->device_transform, XNULL, XNULL))
     {
 	cairo_font_options_t font_options;
 	cairo_matrix_t dev_ctm, font_matrix;
@@ -2510,7 +2510,7 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
     if (clusters) {
 	/* A real show_text_glyphs call.  Try show_text_glyphs backend
 	 * method first */
-	if (surface->backend->show_text_glyphs != NULL) {
+    if (surface->backend->show_text_glyphs != XNULL) {
 	    status = surface->backend->show_text_glyphs (surface, op,
 							 source,
 							 utf8, utf8_len,
@@ -2530,19 +2530,19 @@ _cairo_surface_show_text_glyphs (cairo_surface_t	    *surface,
 	}
     } else {
 	/* A mere show_glyphs call.  Try show_glyphs backend method first */
-	if (surface->backend->show_glyphs != NULL) {
+    if (surface->backend->show_glyphs != XNULL) {
 	    status = surface->backend->show_glyphs (surface, op,
 						    source,
 						    glyphs, num_glyphs,
 						    dev_scaled_font,
 						    clip);
-	} else if (surface->backend->show_text_glyphs != NULL) {
+    } else if (surface->backend->show_text_glyphs != XNULL) {
 	    /* Intentionally only try show_text_glyphs method for show_glyphs
 	     * calls if backend does not have show_glyphs.  If backend has
 	     * both methods implemented, we don't fallback from show_glyphs to
 	     * show_text_glyphs, and hence the backend can assume in its
-	     * show_text_glyphs call that clusters is not NULL (which also
-	     * implies that UTF-8 is not NULL, unless the text is
+         * show_text_glyphs call that clusters is not XNULL (which also
+         * implies that UTF-8 is not XNULL, unless the text is
 	     * zero-length).
 	     */
 	    status = surface->backend->show_text_glyphs (surface, op,

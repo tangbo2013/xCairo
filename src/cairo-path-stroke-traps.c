@@ -94,7 +94,7 @@ stroker_init (struct stroker		*stroker,
 
     stroker->style = style;
     stroker->ctm = ctm;
-    stroker->ctm_inverse = NULL;
+    stroker->ctm_inverse = XNULL;
     if (! _cairo_matrix_is_identity (ctm_inverse))
 	stroker->ctm_inverse = ctm_inverse;
     stroker->line_join = style->line_join;
@@ -1021,11 +1021,11 @@ curve_to_dashed (void *closure,
     if (stroker->has_bounds &&
 	! _cairo_spline_intersects (&stroker->current_face.point, b, c, b,
 				    &stroker->line_bounds))
-	return func (closure, d, NULL);
+    return func (closure, d, XNULL);
 
     if (! _cairo_spline_init (&spline, func, stroker,
 			      &stroker->current_face.point, b, c, d))
-	return func (closure, d, NULL);
+    return func (closure, d, XNULL);
 
     /* Temporarily modify the stroker to use round joins to guarantee
      * smooth stroked curves. */

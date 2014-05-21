@@ -164,7 +164,7 @@ _cairo_stroker_init (cairo_stroker_t		*stroker,
 
     _cairo_stroker_dash_init (&stroker->dash, stroke_style);
 
-    stroker->add_external_edge = NULL;
+    stroker->add_external_edge = XNULL;
 
     stroker->has_bounds = FALSE;
     if (num_limits)
@@ -281,7 +281,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
 	    num_points += 2;
 	    if (num_points > ARRAY_LENGTH(stack_points)) {
 		points = _cairo_malloc_ab (num_points, sizeof (cairo_point_t));
-		if (unlikely (points == NULL))
+		if (unlikely (points == XNULL))
 		    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    }
 
@@ -329,7 +329,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
 	    num_points += 2;
 	    if (num_points > ARRAY_LENGTH(stack_points)) {
 		points = _cairo_malloc_ab (num_points, sizeof (cairo_point_t));
-		if (unlikely (points == NULL))
+		if (unlikely (points == XNULL))
 		    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    }
 
@@ -359,7 +359,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
 
 BEVEL:
     /* Ensure a leak free connection... */
-    if (stroker->add_external_edge != NULL) {
+    if (stroker->add_external_edge != XNULL) {
 	if (clockwise)
 	    return stroker->add_external_edge (stroker->closure, inpt, outpt);
 	else
@@ -389,7 +389,7 @@ _cairo_stroker_join (cairo_stroker_t *stroker,
     }
 
     if (clockwise) {
-	if (stroker->add_external_edge != NULL) {
+	if (stroker->add_external_edge != XNULL) {
 	    status = stroker->add_external_edge (stroker->closure,
 						 &out->cw, &in->point);
 	    if (unlikely (status))
@@ -404,7 +404,7 @@ _cairo_stroker_join (cairo_stroker_t *stroker,
 	inpt = &in->ccw;
 	outpt = &out->ccw;
     } else {
-	if (stroker->add_external_edge != NULL) {
+	if (stroker->add_external_edge != XNULL) {
 	    status = stroker->add_external_edge (stroker->closure,
 						 &in->ccw, &in->point);
 	    if (unlikely (status))
@@ -564,7 +564,7 @@ _cairo_stroker_join (cairo_stroker_t *stroker,
 	    if (_cairo_slope_compare_sgn (fdx1, fdy1, mdx, mdy) !=
 		_cairo_slope_compare_sgn (fdx2, fdy2, mdx, mdy))
 	    {
-		if (stroker->add_external_edge != NULL) {
+		if (stroker->add_external_edge != XNULL) {
 		    points[0].x = _cairo_fixed_from_double (mx);
 		    points[0].y = _cairo_fixed_from_double (my);
 
@@ -607,7 +607,7 @@ _cairo_stroker_join (cairo_stroker_t *stroker,
     /* fall through ... */
 
     case CAIRO_LINE_JOIN_BEVEL:
-	if (stroker->add_external_edge != NULL) {
+	if (stroker->add_external_edge != XNULL) {
 	    if (clockwise) {
 		return stroker->add_external_edge (stroker->closure,
 						   inpt, outpt);
@@ -664,7 +664,7 @@ _cairo_stroker_add_cap (cairo_stroker_t *stroker,
 	quad[2].y = f->cw.y + fvector.dy;
 	quad[3] = f->cw;
 
-	if (stroker->add_external_edge != NULL) {
+	if (stroker->add_external_edge != XNULL) {
 	    cairo_status_t status;
 
 	    status = stroker->add_external_edge (stroker->closure,
@@ -690,7 +690,7 @@ _cairo_stroker_add_cap (cairo_stroker_t *stroker,
 
     case CAIRO_LINE_CAP_BUTT:
     default:
-	if (stroker->add_external_edge != NULL) {
+	if (stroker->add_external_edge != XNULL) {
 	    return stroker->add_external_edge (stroker->closure,
 					       &f->ccw, &f->cw);
 	} else {
@@ -841,7 +841,7 @@ _cairo_stroker_add_caps (cairo_stroker_t *stroker)
 	cairo_stroke_face_t face;
 
 	_compute_normalized_device_slope (&dx, &dy,
-					  stroker->ctm_inverse, NULL);
+					  stroker->ctm_inverse, XNULL);
 
 	/* arbitrarily choose first_point
 	 * first_point and current_point should be the same */
@@ -894,7 +894,7 @@ _cairo_stroker_add_sub_edge (cairo_stroker_t *stroker,
     end->cw.x += p2->x - p1->x;
     end->cw.y += p2->y - p1->y;
 
-    if (stroker->add_external_edge != NULL) {
+    if (stroker->add_external_edge != XNULL) {
 	cairo_status_t status;
 
 	status = stroker->add_external_edge (stroker->closure,
@@ -965,7 +965,7 @@ _cairo_stroker_line_to (void *closure,
     slope_dx = _cairo_fixed_to_double (point->x - p1->x);
     slope_dy = _cairo_fixed_to_double (point->y - p1->y);
     _compute_normalized_device_slope (&slope_dx, &slope_dy,
-				      stroker->ctm_inverse, NULL);
+				      stroker->ctm_inverse, XNULL);
 
     status = _cairo_stroker_add_sub_edge (stroker,
 					  p1, point,
@@ -1016,7 +1016,7 @@ _cairo_stroker_spline_to (void *closure,
     slope_dy = _cairo_fixed_to_double (tangent->dy);
 
     if (! _compute_normalized_device_slope (&slope_dx, &slope_dy,
-					    stroker->ctm_inverse, NULL))
+					    stroker->ctm_inverse, XNULL))
 	return CAIRO_STATUS_SUCCESS;
 
     _compute_face (point, tangent,
@@ -1269,7 +1269,7 @@ _cairo_stroker_curve_to (void *closure,
 	slope_dx = _cairo_fixed_to_double (spline.initial_slope.dx);
 	slope_dy = _cairo_fixed_to_double (spline.initial_slope.dy);
 	if (_compute_normalized_device_slope (&slope_dx, &slope_dy,
-					      stroker->ctm_inverse, NULL))
+					      stroker->ctm_inverse, XNULL))
 	{
 	    _compute_face (&stroker->current_point,
 			   &spline.initial_slope,
@@ -1304,7 +1304,7 @@ _cairo_stroker_curve_to (void *closure,
 	slope_dx = _cairo_fixed_to_double (spline.final_slope.dx);
 	slope_dy = _cairo_fixed_to_double (spline.final_slope.dy);
 	if (_compute_normalized_device_slope (&slope_dx, &slope_dy,
-					      stroker->ctm_inverse, NULL))
+					      stroker->ctm_inverse, XNULL))
 	{
 	    _compute_face (&stroker->current_point,
 			   &spline.final_slope,
@@ -1379,7 +1379,7 @@ _cairo_path_fixed_stroke_to_shaper (cairo_path_fixed_t	*path,
 
     status = _cairo_stroker_init (&stroker, path, stroke_style,
 			          ctm, ctm_inverse, tolerance,
-				  NULL, 0);
+				  XNULL, 0);
     if (unlikely (status))
 	return status;
 

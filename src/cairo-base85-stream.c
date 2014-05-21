@@ -99,7 +99,7 @@ _cairo_base85_stream_close (cairo_output_stream_t *base)
 
     if (stream->pending) {
     xmemory_set (stream->four_tuple + stream->pending, 0, 4 - stream->pending);
-	_expand_four_tuple_to_five (stream->four_tuple, five_tuple, NULL);
+    _expand_four_tuple_to_five (stream->four_tuple, five_tuple, XNULL);
 	_cairo_output_stream_write (stream->output, five_tuple, stream->pending + 1);
     }
 
@@ -115,14 +115,14 @@ _cairo_base85_stream_create (cairo_output_stream_t *output)
 	return _cairo_output_stream_create_in_error (output->status);
 
     stream = xmemory_alloc (sizeof (cairo_base85_stream_t));
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
     _cairo_output_stream_init (&stream->base,
 			       _cairo_base85_stream_write,
-			       NULL,
+                   XNULL,
 			       _cairo_base85_stream_close);
     stream->output = output;
     stream->pending = 0;

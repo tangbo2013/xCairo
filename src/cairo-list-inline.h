@@ -93,7 +93,7 @@ cairo_list_is_empty (const cairo_list_t *head);
 static inline void
 cairo_list_validate_is_empty (const cairo_list_t *head)
 {
-    XASSERT (head->next == NULL || (cairo_list_is_empty (head) && head->next == head->prev));
+    XASSERT (head->next == XNULL || (cairo_list_is_empty (head) && head->next == head->prev));
 }
 #else
 #define _cairo_list_validate(link)

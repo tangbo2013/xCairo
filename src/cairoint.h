@@ -505,8 +505,8 @@ struct _cairo_scaled_font_backend {
      * @tag: 4 byte table name specifying the table to read.
      * @offset: offset into the table
      * @buffer: buffer to write data into. Caller must ensure there is sufficient space.
-     *          If NULL, return the size of the table in @length.
-     * @length: If @buffer is NULL, the size of the table will be returned in @length.
+     *          If XNULL, return the size of the table in @length.
+     * @length: If @buffer is XNULL, the size of the table will be returned in @length.
      *          If @buffer is not null, @length specifies the number of bytes to read.
      *
      * If less than @length bytes are available to read this function
@@ -558,8 +558,8 @@ struct _cairo_scaled_font_backend {
      * @scaled_font: font
      * @offset: offset into the table
      * @buffer: buffer to write data into. Caller must ensure there is sufficient space.
-     *          If NULL, return the size of the table in @length.
-     * @length: If @buffer is NULL, the size of the table will be returned in @length.
+     *          If XNULL, return the size of the table in @length.
+     * @length: If @buffer is XNULL, the size of the table will be returned in @length.
      *          If @buffer is not null, @length specifies the number of bytes to read.
      *
      * If less than @length bytes are available to read this function

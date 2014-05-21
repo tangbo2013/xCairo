@@ -148,7 +148,7 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 
     if (num_ops) {
 	buf = _cairo_path_buf_create (num_ops, num_points);
-	if (unlikely (buf == NULL)) {
+    if (unlikely (buf == XNULL)) {
 	    _cairo_path_fixed_fini (path);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
@@ -328,7 +328,7 @@ _cairo_path_fixed_create (void)
     path = xmemory_alloc (sizeof (cairo_path_fixed_t));
     if (!path) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return NULL;
+    return XNULL;
     }
 
     _cairo_path_fixed_init (path);
@@ -672,7 +672,7 @@ _cairo_path_fixed_close_path (cairo_path_fixed_t *path)
 
     path->needs_move_to = TRUE; /* After close_path, add an implicit move_to */
 
-    return _cairo_path_fixed_add (path, CAIRO_PATH_OP_CLOSE_PATH, NULL, 0);
+    return _cairo_path_fixed_add (path, CAIRO_PATH_OP_CLOSE_PATH, XNULL, 0);
 }
 
 cairo_bool_t
@@ -701,7 +701,7 @@ _cairo_path_fixed_add (cairo_path_fixed_t   *path,
 	buf->num_points + num_points > buf->size_points)
     {
 	buf = _cairo_path_buf_create (buf->num_ops * 2, buf->num_points * 2);
-	if (unlikely (buf == NULL))
+    if (unlikely (buf == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	_cairo_path_fixed_add_buf (path, buf);
@@ -1177,7 +1177,7 @@ _cairo_path_fixed_interpret_flat (const cairo_path_fixed_t		*path,
 	return _cairo_path_fixed_interpret (path,
 					    move_to,
 					    line_to,
-					    NULL,
+                        XNULL,
 					    close_path,
 					    closure);
     }
@@ -1471,7 +1471,7 @@ _cairo_path_fixed_iter_next_op (cairo_path_fixed_iter_t *iter)
     if (++iter->n_op >= iter->buf->num_ops) {
 	iter->buf = cairo_path_buf_next (iter->buf);
 	if (iter->buf == iter->first) {
-	    iter->buf = NULL;
+        iter->buf = XNULL;
 	    return FALSE;
 	}
 
@@ -1489,7 +1489,7 @@ _cairo_path_fixed_iter_is_fill_box (cairo_path_fixed_iter_t *_iter,
     cairo_point_t points[5];
     cairo_path_fixed_iter_t iter;
 
-    if (_iter->buf == NULL)
+    if (_iter->buf == XNULL)
 	return FALSE;
 
     iter = *_iter;
@@ -1579,7 +1579,7 @@ _cairo_path_fixed_iter_is_fill_box (cairo_path_fixed_iter_t *_iter,
 cairo_bool_t
 _cairo_path_fixed_iter_at_end (const cairo_path_fixed_iter_t *iter)
 {
-    if (iter->buf == NULL)
+    if (iter->buf == XNULL)
 	return TRUE;
 
     return iter->n_op == iter->buf->num_ops;

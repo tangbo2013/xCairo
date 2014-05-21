@@ -824,7 +824,7 @@ _pqueue_grow (pqueue_t *pq)
     if (pq->elements == pq->elements_embedded) {
 	new_elements = _cairo_malloc_ab (pq->max_size,
 					 sizeof (cairo_bo_event_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     xmemory_copy (new_elements, pq->elements_embedded,
@@ -833,7 +833,7 @@ _pqueue_grow (pqueue_t *pq)
 	new_elements = _cairo_realloc_ab (pq->elements,
 					  pq->max_size,
 					  sizeof (cairo_bo_event_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -880,7 +880,7 @@ _pqueue_pop (pqueue_t *pq)
 
     tail = elements[pq->size--];
     if (pq->size == 0) {
-	elements[PQ_FIRST_ENTRY] = NULL;
+    elements[PQ_FIRST_ENTRY] = XNULL;
 	return;
     }
 
@@ -913,7 +913,7 @@ _cairo_bo_event_queue_insert (cairo_bo_event_queue_t	*queue,
     cairo_bo_queue_event_t *event;
 
     event = _cairo_freepool_alloc (&queue->pool);
-    if (unlikely (event == NULL))
+    if (unlikely (event == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     event->type = type;
@@ -938,8 +938,8 @@ _cairo_bo_event_dequeue (cairo_bo_event_queue_t *event_queue)
 
     event = event_queue->pqueue.elements[PQ_FIRST_ENTRY];
     cmp = *event_queue->start_events;
-    if (event == NULL ||
-	(cmp != NULL && cairo_bo_event_compare (cmp, event) < 0))
+    if (event == XNULL ||
+    (cmp != XNULL && cairo_bo_event_compare (cmp, event) < 0))
     {
 	event = cmp;
 	event_queue->start_events++;
@@ -962,14 +962,14 @@ _cairo_bo_event_queue_init (cairo_bo_event_queue_t	 *event_queue,
 			    int				  num_events)
 {
     _cairo_bo_event_queue_sort (start_events, num_events);
-    start_events[num_events] = NULL;
+    start_events[num_events] = XNULL;
 
     event_queue->start_events = start_events;
 
     _cairo_freepool_init (&event_queue->pool,
 			  sizeof (cairo_bo_queue_event_t));
     _pqueue_init (&event_queue->pqueue);
-    event_queue->pqueue.elements[PQ_FIRST_ENTRY] = NULL;
+    event_queue->pqueue.elements[PQ_FIRST_ENTRY] = XNULL;
 }
 
 static cairo_status_t
@@ -983,7 +983,7 @@ _cairo_bo_event_queue_insert_stop (cairo_bo_event_queue_t	*event_queue,
 						  point.y);
     return _cairo_bo_event_queue_insert (event_queue,
 					 CAIRO_BO_EVENT_TYPE_STOP,
-					 edge, NULL,
+                     edge, XNULL,
 					 &point);
 }
 
@@ -1024,16 +1024,16 @@ _cairo_bo_event_queue_insert_if_intersect_below_current_y (cairo_bo_event_queue_
 static void
 _cairo_bo_sweep_line_init (cairo_bo_sweep_line_t *sweep_line)
 {
-    sweep_line->head = NULL;
+    sweep_line->head = XNULL;
     sweep_line->current_y = INT32_MIN;
-    sweep_line->current_edge = NULL;
+    sweep_line->current_edge = XNULL;
 }
 
 static cairo_status_t
 _cairo_bo_sweep_line_insert (cairo_bo_sweep_line_t	*sweep_line,
 			     cairo_bo_edge_t		*edge)
 {
-    if (sweep_line->current_edge != NULL) {
+    if (sweep_line->current_edge != XNULL) {
 	cairo_bo_edge_t *prev, *next;
 	int cmp;
 
@@ -1043,7 +1043,7 @@ _cairo_bo_sweep_line_insert (cairo_bo_sweep_line_t	*sweep_line,
 	if (cmp < 0) {
 	    prev = sweep_line->current_edge;
 	    next = prev->next;
-	    while (next != NULL &&
+        while (next != XNULL &&
 		   _cairo_bo_sweep_line_compare_edges (sweep_line,
 						       next, edge) < 0)
 	    {
@@ -1053,12 +1053,12 @@ _cairo_bo_sweep_line_insert (cairo_bo_sweep_line_t	*sweep_line,
 	    prev->next = edge;
 	    edge->prev = prev;
 	    edge->next = next;
-	    if (next != NULL)
+        if (next != XNULL)
 		next->prev = edge;
 	} else if (cmp > 0) {
 	    next = sweep_line->current_edge;
 	    prev = next->prev;
-	    while (prev != NULL &&
+        while (prev != XNULL &&
 		   _cairo_bo_sweep_line_compare_edges (sweep_line,
 						       prev, edge) > 0)
 	    {
@@ -1068,7 +1068,7 @@ _cairo_bo_sweep_line_insert (cairo_bo_sweep_line_t	*sweep_line,
 	    next->prev = edge;
 	    edge->next = next;
 	    edge->prev = prev;
-	    if (prev != NULL)
+        if (prev != XNULL)
 		prev->next = edge;
 	    else
 		sweep_line->head = edge;
@@ -1076,7 +1076,7 @@ _cairo_bo_sweep_line_insert (cairo_bo_sweep_line_t	*sweep_line,
 	    prev = sweep_line->current_edge;
 	    edge->prev = prev;
 	    edge->next = prev->next;
-	    if (prev->next != NULL)
+        if (prev->next != XNULL)
 		prev->next->prev = edge;
 	    prev->next = edge;
 	}
@@ -1093,12 +1093,12 @@ static void
 _cairo_bo_sweep_line_delete (cairo_bo_sweep_line_t	*sweep_line,
 			     cairo_bo_edge_t	*edge)
 {
-    if (edge->prev != NULL)
+    if (edge->prev != XNULL)
 	edge->prev->next = edge->next;
     else
 	sweep_line->head = edge->next;
 
-    if (edge->next != NULL)
+    if (edge->next != XNULL)
 	edge->next->prev = edge->prev;
 
     if (sweep_line->current_edge == edge)
@@ -1110,12 +1110,12 @@ _cairo_bo_sweep_line_swap (cairo_bo_sweep_line_t	*sweep_line,
 			   cairo_bo_edge_t		*left,
 			   cairo_bo_edge_t		*right)
 {
-    if (left->prev != NULL)
+    if (left->prev != XNULL)
 	left->prev->next = right;
     else
 	sweep_line->head = right;
 
-    if (right->next != NULL)
+    if (right->next != XNULL)
 	right->next->prev = left;
 
     left->next = right->next;
@@ -1170,7 +1170,7 @@ _cairo_bo_edge_end (cairo_bo_edge_t	*left,
 				 -1);
     }
 
-    d->right = NULL;
+    d->right = XNULL;
 }
 
 
@@ -1183,8 +1183,8 @@ _cairo_bo_edge_start_or_continue (cairo_bo_edge_t	*left,
     if (left->deferred.right == right)
 	return;
 
-    if (left->deferred.right != NULL) {
-	if (right != NULL && edges_colinear (left->deferred.right, right))
+    if (left->deferred.right != XNULL) {
+    if (right != XNULL && edges_colinear (left->deferred.right, right))
 	{
 	    /* continuation on right, so just swap edges */
 	    left->deferred.right = right;
@@ -1194,7 +1194,7 @@ _cairo_bo_edge_start_or_continue (cairo_bo_edge_t	*left,
 	_cairo_bo_edge_end (left, top, polygon);
     }
 
-    if (right != NULL && ! edges_colinear (left, right)) {
+    if (right != XNULL && ! edges_colinear (left, right)) {
 	left->deferred.top = top;
 	left->deferred.right = right;
     }
@@ -1214,30 +1214,30 @@ _active_edges_to_polygon (cairo_bo_edge_t		*left,
     else
 	mask = 1;
 
-    while (left != NULL) {
+    while (left != XNULL) {
 	int in_out = left->edge.dir;
 
 	right = left->next;
-	if (left->deferred.right == NULL) {
-	    while (right != NULL && right->deferred.right == NULL)
+    if (left->deferred.right == XNULL) {
+        while (right != XNULL && right->deferred.right == XNULL)
 		right = right->next;
 
-	    if (right != NULL && edges_colinear (left, right)) {
+        if (right != XNULL && edges_colinear (left, right)) {
 		/* continuation on left */
 		left->deferred = right->deferred;
-		right->deferred.right = NULL;
+        right->deferred.right = XNULL;
 	    }
 	}
 
 	right = left->next;
-	while (right != NULL) {
-	    if (right->deferred.right != NULL)
+    while (right != XNULL) {
+        if (right->deferred.right != XNULL)
 		_cairo_bo_edge_end (right, top, polygon);
 
 	    in_out += right->edge.dir;
 	    if ((in_out & mask) == 0) {
 		/* skip co-linear edges */
-		if (right->next == NULL || !edges_colinear (right, right->next))
+        if (right->next == XNULL || !edges_colinear (right, right->next))
 		    break;
 	    }
 
@@ -1247,7 +1247,7 @@ _active_edges_to_polygon (cairo_bo_edge_t		*left,
 	_cairo_bo_edge_start_or_continue (left, right, top, polygon);
 
 	left = right;
-	if (left != NULL)
+    if (left != XNULL)
 	    left = left->next;
     }
 }
@@ -1293,13 +1293,13 @@ _cairo_bentley_ottmann_tessellate_bo_edges (cairo_bo_event_t   **start_events,
 	    left = e1->prev;
 	    right = e1->next;
 
-	    if (left != NULL) {
+        if (left != XNULL) {
 		status = _cairo_bo_event_queue_insert_if_intersect_below_current_y (&event_queue, left, e1);
 		if (unlikely (status))
 		    goto unwind;
 	    }
 
-	    if (right != NULL) {
+        if (right != XNULL) {
 		status = _cairo_bo_event_queue_insert_if_intersect_below_current_y (&event_queue, e1, right);
 		if (unlikely (status))
 		    goto unwind;
@@ -1316,10 +1316,10 @@ _cairo_bentley_ottmann_tessellate_bo_edges (cairo_bo_event_t   **start_events,
 
 	    _cairo_bo_sweep_line_delete (&sweep_line, e1);
 
-	    if (e1->deferred.right != NULL)
+        if (e1->deferred.right != XNULL)
 		_cairo_bo_edge_end (e1, e1->edge.bottom, polygon);
 
-	    if (left != NULL && right != NULL) {
+        if (left != XNULL && right != XNULL) {
 		status = _cairo_bo_event_queue_insert_if_intersect_below_current_y (&event_queue, left, right);
 		if (unlikely (status))
 		    goto unwind;
@@ -1343,13 +1343,13 @@ _cairo_bentley_ottmann_tessellate_bo_edges (cairo_bo_event_t   **start_events,
 
 	    /* after the swap e2 is left of e1 */
 
-	    if (left != NULL) {
+        if (left != XNULL) {
 		status = _cairo_bo_event_queue_insert_if_intersect_below_current_y (&event_queue, left, e2);
 		if (unlikely (status))
 		    goto unwind;
 	    }
 
-	    if (right != NULL) {
+        if (right != XNULL) {
 		status = _cairo_bo_event_queue_insert_if_intersect_below_current_y (&event_queue, e1, right);
 		if (unlikely (status))
 		    goto unwind;
@@ -1395,7 +1395,7 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
 					  sizeof (cairo_bo_start_event_t) +
 					  sizeof (cairo_bo_event_t *),
 					  sizeof (cairo_bo_event_t *));
-	if (unlikely (events == NULL))
+    if (unlikely (events == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	event_ptrs = (cairo_bo_event_t **) (events + num_events);
@@ -1411,9 +1411,9 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
 						events[i].point.y);
 
 	events[i].edge.edge = polygon->edges[i];
-	events[i].edge.deferred.right = NULL;
-	events[i].edge.prev = NULL;
-	events[i].edge.next = NULL;
+    events[i].edge.deferred.right = XNULL;
+    events[i].edge.prev = XNULL;
+    events[i].edge.next = XNULL;
     }
 
     num_limits = polygon->num_limits; polygon->num_limits = 0;

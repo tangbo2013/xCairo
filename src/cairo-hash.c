@@ -56,7 +56,7 @@
 
 #define DEAD_ENTRY ((cairo_hash_entry_t *) 0x1)
 
-#define ENTRY_IS_FREE(entry) ((entry) == NULL)
+#define ENTRY_IS_FREE(entry) ((entry) == XNULL)
 #define ENTRY_IS_DEAD(entry) ((entry) == DEAD_ENTRY)
 #define ENTRY_IS_LIVE(entry) ((entry) >  DEAD_ENTRY)
 
@@ -166,12 +166,12 @@ _cairo_hash_table_create (cairo_hash_keys_equal_func_t keys_equal)
     cairo_hash_table_t *hash_table;
 
     hash_table = xmemory_alloc (sizeof (cairo_hash_table_t));
-    if (unlikely (hash_table == NULL)) {
+    if (unlikely (hash_table == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return NULL;
+    return XNULL;
     }
 
-    if (keys_equal == NULL)
+    if (keys_equal == XNULL)
 	hash_table->keys_equal = _cairo_hash_table_uid_keys_equal;
     else
 	hash_table->keys_equal = keys_equal;
@@ -181,10 +181,10 @@ _cairo_hash_table_create (cairo_hash_keys_equal_func_t keys_equal)
 
     hash_table->entries = xmemory_calloc (*hash_table->table_size,
 				  sizeof (cairo_hash_entry_t *));
-    if (unlikely (hash_table->entries == NULL)) {
+    if (unlikely (hash_table->entries == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	xmemory_free (hash_table);
-	return NULL;
+    return XNULL;
     }
 
     hash_table->live_entries = 0;
@@ -250,7 +250,7 @@ _cairo_hash_table_lookup_unique_key (cairo_hash_table_t *hash_table,
     } while (++i < table_size);
 
     ASSERT_NOT_REACHED;
-    return NULL;
+    return XNULL;
 }
 
 /**
@@ -306,7 +306,7 @@ _cairo_hash_table_manage (cairo_hash_table_t *hash_table)
 
     new_size = *tmp.table_size;
     tmp.entries = xmemory_calloc (new_size, sizeof (cairo_hash_entry_t*));
-    if (unlikely (tmp.entries == NULL))
+    if (unlikely (tmp.entries == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     for (i = 0; i < *hash_table->table_size; ++i) {
@@ -355,7 +355,7 @@ _cairo_hash_table_lookup (cairo_hash_table_t *hash_table,
 	if (entry->hash == hash && hash_table->keys_equal (key, entry))
 		goto insert_cache;
     } else if (ENTRY_IS_FREE (entry))
-	return NULL;
+    return XNULL;
 
     i = 1;
     step = 1 + hash % (table_size - 2);
@@ -369,11 +369,11 @@ _cairo_hash_table_lookup (cairo_hash_table_t *hash_table,
 	    if (entry->hash == hash && hash_table->keys_equal (key, entry))
 		    goto insert_cache;
 	} else if (ENTRY_IS_FREE (entry))
-	    return NULL;
+        return XNULL;
     } while (++i < table_size);
 
     ASSERT_NOT_REACHED;
-    return NULL;
+    return XNULL;
 
 insert_cache:
     hash_table->cache[hash & 31] = entry;
@@ -407,7 +407,7 @@ _cairo_hash_table_random_entry (cairo_hash_table_t	   *hash_table,
     unsigned long hash;
     unsigned long table_size, i, idx, step;
 
-    XASSERT (predicate != NULL);
+    XASSERT (predicate != XNULL);
 
     table_size = *hash_table->table_size;
     hash = xrand_rand ();
@@ -429,7 +429,7 @@ _cairo_hash_table_random_entry (cairo_hash_table_t	   *hash_table,
 	    return entry;
     } while (++i < table_size);
 
-    return NULL;
+    return XNULL;
 }
 
 /**
@@ -505,7 +505,7 @@ _cairo_hash_table_lookup_exact_key (cairo_hash_table_t *hash_table,
     } while (++i < table_size);
 
     ASSERT_NOT_REACHED;
-    return NULL;
+    return XNULL;
 }
 /**
  * _cairo_hash_table_remove:
@@ -523,7 +523,7 @@ _cairo_hash_table_remove (cairo_hash_table_t *hash_table,
 {
     *_cairo_hash_table_lookup_exact_key (hash_table, key) = DEAD_ENTRY;
     hash_table->live_entries--;
-    hash_table->cache[key->hash & 31] = NULL;
+    hash_table->cache[key->hash & 31] = XNULL;
 
     /* Check for table resize. Don't do this when iterating as this will
      * reorder elements of the table and cause the iteration to potentially

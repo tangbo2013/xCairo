@@ -74,7 +74,7 @@ _lzw_buf_init (lzw_buf_t *buf, int size)
     buf->pending_bits = 0;
 
     buf->data = xmemory_alloc (size);
-    if (unlikely (buf->data == NULL)) {
+    if (unlikely (buf->data == XNULL)) {
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return;
@@ -94,12 +94,12 @@ _lzw_buf_grow (lzw_buf_t *buf)
     if (buf->status)
 	return buf->status;
 
-    new_data = NULL;
+    new_data = XNULL;
     /* check for integer overflow */
     if (new_size / 2 == buf->data_size)
     new_data = xmemory_realloc (buf->data, new_size);
 
-    if (unlikely (new_data == NULL)) {
+    if (unlikely (new_data == XNULL)) {
 	xmemory_free (buf->data);
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -271,7 +271,7 @@ _lzw_symbol_table_lookup (lzw_symbol_table_t	 *table,
     idx = hash % LZW_SYMBOL_MOD1;
     step = 0;
 
-    *slot_ret = NULL;
+    *slot_ret = XNULL;
     for (i = 0; i < LZW_SYMBOL_TABLE_SIZE; i++)
     {
 	candidate = table->table[idx];
@@ -328,13 +328,13 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
     int bytes_remaining = *size_in_out;
     lzw_buf_t buf;
     lzw_symbol_table_t table;
-    lzw_symbol_t symbol, *slot = NULL; /* just to squelch a warning */
+    lzw_symbol_t symbol, *slot = XNULL; /* just to squelch a warning */
     int code_next = LZW_CODE_FIRST;
     int code_bits = LZW_BITS_MIN;
     int prev, next = 0; /* just to squelch a warning */
 
     if (*size_in_out == 0)
-	return NULL;
+    return XNULL;
 
     _lzw_buf_init (&buf, *size_in_out);
 
@@ -394,7 +394,7 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
     /* See if we ever ran out of memory while writing to buf. */
     if (buf.status == CAIRO_STATUS_NO_MEMORY) {
 	*size_in_out = 0;
-	return NULL;
+    return XNULL;
     }
 
     XASSERT (buf.status == CAIRO_STATUS_SUCCESS);

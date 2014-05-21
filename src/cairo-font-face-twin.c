@@ -289,8 +289,8 @@ twin_font_face_create_properties (cairo_font_face_t *twin_face)
     twin_face_properties_t *props;
 
     props = xmemory_alloc (sizeof (twin_face_properties_t));
-    if (unlikely (props == NULL))
-	return NULL;
+    if (unlikely (props == XNULL))
+	return XNULL;
 
     props->stretch  = TWIN_STRETCH_NORMAL;
     props->slant = CAIRO_FONT_SLANT_NORMAL;
@@ -302,7 +302,7 @@ twin_font_face_create_properties (cairo_font_face_t *twin_face)
 					    &twin_properties_key,
                         props, xmemory_free))) {
     xmemory_free (props);
-	return NULL;
+	return XNULL;
     }
 
     return props;
@@ -315,7 +315,7 @@ twin_font_face_set_properties_from_toy (cairo_font_face_t *twin_face,
     twin_face_properties_t *props;
 
     props = twin_font_face_create_properties (twin_face);
-    if (unlikely (props == NULL))
+    if (unlikely (props == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     props->slant = toy_face->slant;
@@ -413,7 +413,7 @@ twin_scaled_font_compute_properties (cairo_scaled_font_t *scaled_font,
     twin_scaled_properties_t *props;
 
     props = xmemory_alloc (sizeof (twin_scaled_properties_t));
-    if (unlikely (props == NULL))
+    if (unlikely (props == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 

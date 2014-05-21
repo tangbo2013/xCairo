@@ -166,17 +166,17 @@ _cairo_polygon_init_boxes (cairo_polygon_t *polygon,
 	polygon->edges_size = 2 * boxes->num_boxes;
 	polygon->edges = _cairo_malloc_ab (polygon->edges_size,
 					   2*sizeof(cairo_edge_t));
-	if (unlikely (polygon->edges == NULL))
+	if (unlikely (polygon->edges == XNULL))
 	    return polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
     polygon->extents.p1.x = polygon->extents.p1.y = INT32_MAX;
     polygon->extents.p2.x = polygon->extents.p2.y = INT32_MIN;
 
-    polygon->limits = NULL;
+    polygon->limits = XNULL;
     polygon->num_limits = 0;
 
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++) {
 	    cairo_point_t p1, p2;
 
@@ -214,14 +214,14 @@ _cairo_polygon_init_box_array (cairo_polygon_t *polygon,
 	polygon->edges_size = 2 * num_boxes;
 	polygon->edges = _cairo_malloc_ab (polygon->edges_size,
 					   2*sizeof(cairo_edge_t));
-	if (unlikely (polygon->edges == NULL))
+	if (unlikely (polygon->edges == XNULL))
 	    return polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
     polygon->extents.p1.x = polygon->extents.p1.y = INT32_MAX;
     polygon->extents.p2.x = polygon->extents.p2.y = INT32_MIN;
 
-    polygon->limits = NULL;
+    polygon->limits = XNULL;
     polygon->num_limits = 0;
 
     for (i = 0; i < num_boxes; i++) {
@@ -266,14 +266,14 @@ _cairo_polygon_grow (cairo_polygon_t *polygon)
 
     if (polygon->edges == polygon->edges_embedded) {
 	new_edges = _cairo_malloc_ab (new_size, sizeof (cairo_edge_t));
-	if (new_edges != NULL)
+	if (new_edges != XNULL)
 	    xmemory_copy (new_edges, polygon->edges, old_size * sizeof (cairo_edge_t));
     } else {
 	new_edges = _cairo_realloc_ab (polygon->edges,
 		                       new_size, sizeof (cairo_edge_t));
     }
 
-    if (unlikely (new_edges == NULL)) {
+    if (unlikely (new_edges == XNULL)) {
 	polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return FALSE;
     }
@@ -563,7 +563,7 @@ _cairo_polygon_add_contour (cairo_polygon_t *polygon,
 			    const cairo_contour_t *contour)
 {
     const struct _cairo_contour_chain *chain;
-    const cairo_point_t *prev = NULL;
+    const cairo_point_t *prev = XNULL;
     int i;
 
     if (contour->chain.num_points <= 1)

@@ -58,7 +58,7 @@ typedef struct _cairo_gl_dispatch_entry {
                        XOFFSETOF(cairo_gl_dispatch_t, name) }
 #define DISPATCH_ENTRY_CUSTOM(name, name2) { { "gl"#name, "gl"#name2, "gl"#name }, \
                                  XOFFSETOF(cairo_gl_dispatch_t, name)}
-#define DISPATCH_ENTRY_LAST { { NULL, NULL, NULL }, 0 }
+#define DISPATCH_ENTRY_LAST { { XNULL, XNULL, XNULL }, 0 }
 
 cairo_private cairo_gl_dispatch_entry_t dispatch_buffers_entries[] = {
     DISPATCH_ENTRY_ARB     (GenBuffers),

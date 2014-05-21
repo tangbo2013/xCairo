@@ -187,7 +187,7 @@ cairo_glyph_t *
 cairo_glyph_allocate (int num_glyphs)
 {
     if (num_glyphs <= 0)
-	return NULL;
+    return XNULL;
 
     return _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
 }
@@ -237,7 +237,7 @@ cairo_text_cluster_t *
 cairo_text_cluster_allocate (int num_clusters)
 {
     if (num_clusters <= 0)
-	return NULL;
+    return XNULL;
 
     return _cairo_malloc_ab (num_clusters, sizeof (cairo_text_cluster_t));
 }
@@ -320,7 +320,7 @@ _cairo_validate_text_clusters (const char		   *utf8,
 	    goto BAD;
 
 	/* Make sure we've got valid UTF-8 for the cluster */
-	status = _cairo_utf8_to_ucs4 (utf8+n_bytes, cluster_bytes, NULL, NULL);
+    status = _cairo_utf8_to_ucs4 (utf8+n_bytes, cluster_bytes, XNULL, XNULL);
 	if (unlikely (status))
 	    return _cairo_error (CAIRO_STATUS_INVALID_CLUSTERS);
 
@@ -791,33 +791,33 @@ _cairo_win32_tmpfile (void)
 
     path_len = GetTempPathW (MAX_PATH, path_name);
     if (path_len <= 0 || path_len >= MAX_PATH)
-	return NULL;
+    return XNULL;
 
     if (GetTempFileNameW (path_name, L"ps_", 0, file_name) == 0)
-	return NULL;
+    return XNULL;
 
     handle = CreateFileW (file_name,
 			 GENERIC_READ | GENERIC_WRITE,
 			 0,
-			 NULL,
+             XNULL,
 			 CREATE_ALWAYS,
              xfile_t_ATTRIBUTE_NORMAL | xfile_t_FLAG_DELETE_ON_CLOSE,
-			 NULL);
+             XNULL);
     if (handle == INVALID_HANDLE_VALUE) {
 	DeleteFileW (file_name);
-	return NULL;
+    return XNULL;
     }
 
     fd = _open_osfhandle((intptr_t) handle, 0);
     if (fd < 0) {
 	CloseHandle (handle);
-	return NULL;
+    return XNULL;
     }
 
     fp = fdopen(fd, "w+b");
-    if (fp == NULL) {
+    if (fp == XNULL) {
 	_close(fd);
-	return NULL;
+    return XNULL;
     }
 
     return fp;
@@ -875,9 +875,9 @@ _cairo_intern_string (const char **str_inout, int len)
     tmpl.string = (char *) str;
 
     CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht == NULL) {
+    if (_cairo_intern_string_ht == XNULL) {
 	_cairo_intern_string_ht = _cairo_hash_table_create (_intern_string_equal);
-	if (unlikely (_cairo_intern_string_ht == NULL)) {
+    if (unlikely (_cairo_intern_string_ht == XNULL)) {
 	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    goto BAIL;
 	}
@@ -885,9 +885,9 @@ _cairo_intern_string (const char **str_inout, int len)
 
     istring = _cairo_hash_table_lookup (_cairo_intern_string_ht,
 					&tmpl.hash_entry);
-    if (istring == NULL) {
+    if (istring == XNULL) {
     istring = xmemory_alloc (sizeof (cairo_intern_string_t) + len + 1);
-	if (likely (istring != NULL)) {
+    if (likely (istring != XNULL)) {
 	    istring->hash_entry.hash = tmpl.hash_entry.hash;
 	    istring->len = tmpl.len;
 	    istring->string = (char *) (istring + 1);
@@ -924,12 +924,12 @@ void
 _cairo_intern_string_reset_static_data (void)
 {
     CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht != NULL) {
+    if (_cairo_intern_string_ht != XNULL) {
 	_cairo_hash_table_foreach (_cairo_intern_string_ht,
 				   _intern_string_pluck,
 				   _cairo_intern_string_ht);
 	_cairo_hash_table_destroy(_cairo_intern_string_ht);
-	_cairo_intern_string_ht = NULL;
+    _cairo_intern_string_ht = XNULL;
     }
     CAIRO_MUTEX_UNLOCK (_cairo_intern_string_mutex);
 }

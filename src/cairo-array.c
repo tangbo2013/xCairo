@@ -60,7 +60,7 @@ _cairo_array_init (cairo_array_t *array, unsigned int element_size)
     array->size = 0;
     array->num_elements = 0;
     array->element_size = element_size;
-    array->elements = NULL;
+    array->elements = XNULL;
 }
 
 /**
@@ -115,7 +115,7 @@ _cairo_array_grow_by (cairo_array_t *array, unsigned int additional)
     new_elements = _cairo_realloc_ab (array->elements,
 			              array->size, array->element_size);
 
-    if (unlikely (new_elements == NULL)) {
+    if (unlikely (new_elements == XNULL)) {
 	array->size = old_size;
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
@@ -173,11 +173,11 @@ _cairo_array_index (cairo_array_t *array, unsigned int index)
      *        ... use elements[i] here ...
      *    }
      *
-     * which in the num_elements==0 case gets the NULL pointer here,
+     * which in the num_elements==0 case gets the XNULL pointer here,
      * but never dereferences it.
      */
     if (index == 0 && array->num_elements == 0)
-	return NULL;
+    return XNULL;
 
     XASSERT (index < array->num_elements);
 
@@ -217,11 +217,11 @@ _cairo_array_index_const (const cairo_array_t *array, unsigned int index)
      *        ... read elements[i] here ...
      *    }
      *
-     * which in the num_elements==0 case gets the NULL pointer here,
+     * which in the num_elements==0 case gets the XNULL pointer here,
      * but never dereferences it.
      */
     if (index == 0 && array->num_elements == 0)
-	return NULL;
+    return XNULL;
 
     XASSERT (index < array->num_elements);
 
@@ -388,7 +388,7 @@ _cairo_user_data_array_fini (cairo_user_data_array_t *array)
 	slots = _cairo_array_index (array, 0);
 	while (num_slots--) {
 	    cairo_user_data_slot_t *s = &slots[num_slots];
-	    if (s->user_data != NULL && s->destroy != NULL)
+        if (s->user_data != XNULL && s->destroy != XNULL)
 		s->destroy (s->user_data);
 	}
     }
@@ -416,8 +416,8 @@ _cairo_user_data_array_get_data (cairo_user_data_array_t     *array,
     cairo_user_data_slot_t *slots;
 
     /* We allow this to support degenerate objects such as cairo_surface_nil. */
-    if (array == NULL)
-	return NULL;
+    if (array == XNULL)
+    return XNULL;
 
     num_slots = array->num_elements;
     slots = _cairo_array_index (array, 0);
@@ -426,7 +426,7 @@ _cairo_user_data_array_get_data (cairo_user_data_array_t     *array,
 	    return slots[i].user_data;
     }
 
-    return NULL;
+    return XNULL;
 }
 
 /**
@@ -460,12 +460,12 @@ _cairo_user_data_array_set_data (cairo_user_data_array_t     *array,
 	new_slot.user_data = user_data;
 	new_slot.destroy = destroy;
     } else {
-	new_slot.key = NULL;
-	new_slot.user_data = NULL;
-	new_slot.destroy = NULL;
+    new_slot.key = XNULL;
+    new_slot.user_data = XNULL;
+    new_slot.destroy = XNULL;
     }
 
-    slot = NULL;
+    slot = XNULL;
     num_slots = array->num_elements;
     slots = _cairo_array_index (array, 0);
     for (i = 0; i < num_slots; i++) {
@@ -475,7 +475,7 @@ _cairo_user_data_array_set_data (cairo_user_data_array_t     *array,
 		slot->destroy (slot->user_data);
 	    break;
 	}
-	if (user_data && slots[i].user_data == NULL) {
+    if (user_data && slots[i].user_data == XNULL) {
 	    slot = &slots[i];	/* Have to keep searching for an exact match */
 	}
     }
@@ -520,7 +520,7 @@ _cairo_user_data_array_foreach (cairo_user_data_array_t     *array,
     num_slots = array->num_elements;
     slots = _cairo_array_index (array, 0);
     for (i = 0; i < num_slots; i++) {
-	if (slots[i].user_data != NULL)
+    if (slots[i].user_data != XNULL)
 	    func (slots[i].key, slots[i].user_data, closure);
     }
 }

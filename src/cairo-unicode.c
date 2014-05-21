@@ -256,7 +256,7 @@ _cairo_utf8_to_ucs4 (const char *str,
 		     xuint32_t  **result,
 		     int	*items_written)
 {
-    xuint32_t *str32 = NULL;
+    xuint32_t *str32 = XNULL;
     int n_chars, i;
     const unsigned char *in;
     const unsigned char * const ustr = (const unsigned char *) str;
@@ -370,7 +370,7 @@ _cairo_utf8_to_utf16 (const char *str,
 		      xuint16_t **result,
 		      int	*items_written)
 {
-    xuint16_t *str16 = NULL;
+    xuint16_t *str16 = XNULL;
     int n16, i;
     const unsigned char *in;
     const unsigned char * const ustr = (const unsigned char *) str;

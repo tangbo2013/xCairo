@@ -87,10 +87,10 @@ struct _cairo_scaled_font {
     cairo_reference_count_t ref_count;
     cairo_user_data_array_t user_data;
 
-    cairo_font_face_t *original_font_face; /* may be NULL */
+    cairo_font_face_t *original_font_face; /* may be XNULL */
 
     /* hash key members */
-    cairo_font_face_t *font_face; /* may be NULL */
+    cairo_font_face_t *font_face; /* may be XNULL */
     cairo_matrix_t font_matrix;	  /* font space => user space */
     cairo_matrix_t ctm;	          /* user space => device space */
     cairo_font_options_t options;

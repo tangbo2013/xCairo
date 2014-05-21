@@ -69,7 +69,7 @@ static inline void
 _cairo_clip_steal_boxes (cairo_clip_t *clip, cairo_boxes_t *boxes)
 {
     _cairo_boxes_init_for_array (boxes, clip->boxes, clip->num_boxes);
-    clip->boxes = NULL;
+    clip->boxes = XNULL;
     clip->num_boxes = 0;
 }
 

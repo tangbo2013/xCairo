@@ -86,7 +86,7 @@ _create_recording_surface_for_target (cairo_surface_t *target,
 
 	return cairo_recording_surface_create (content, &recording_extents);
     } else {
-	return cairo_recording_surface_create (content, NULL);
+	return cairo_recording_surface_create (content, XNULL);
     }
 }
 
@@ -99,14 +99,14 @@ _cairo_paginated_surface_create (cairo_surface_t				*target,
     cairo_status_t status;
 
     surface = xmemory_alloc (sizeof (cairo_paginated_surface_t));
-    if (unlikely (surface == NULL)) {
+    if (unlikely (surface == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto FAIL;
     }
 
     _cairo_surface_init (&surface->base,
 			 &cairo_paginated_surface_backend,
-			 NULL, /* device */
+			 XNULL, /* device */
 			 content);
 
     /* Override surface->base.type with target's type so we don't leak
@@ -276,7 +276,7 @@ _cairo_paginated_surface_acquire_source_image (void	       *abstract_surface,
     }
 
     *image_out = (cairo_image_surface_t*) image;
-    *image_extra = NULL;
+    *image_extra = XNULL;
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -324,7 +324,7 @@ _paint_fallback_image (cairo_paginated_surface_t *surface,
      * filtering (if possible) to avoid introducing potential artifacts. */
     pattern.base.filter = CAIRO_FILTER_NEAREST;
 
-    clip = _cairo_clip_intersect_rectangle (NULL, rect);
+    clip = _cairo_clip_intersect_rectangle (XNULL, rect);
     status = _cairo_surface_paint (surface->target,
 				   CAIRO_OPERATOR_SOURCE,
 				   &pattern.base, clip);
@@ -380,7 +380,7 @@ _paint_page (cairo_paginated_surface_t *surface)
 
     /* Finer grained fallbacks are currently only supported for some
      * surface types */
-    if (surface->backend->supports_fine_grained_fallbacks != NULL &&
+    if (surface->backend->supports_fine_grained_fallbacks != XNULL &&
 	surface->backend->supports_fine_grained_fallbacks (surface->target))
     {
 	has_supported = _cairo_analysis_surface_has_supported (analysis);
@@ -404,7 +404,7 @@ _paint_page (cairo_paginated_surface_t *surface)
 		                              CAIRO_PAGINATED_MODE_RENDER);
 
 	status = _cairo_recording_surface_replay_region (surface->recording_surface,
-							 NULL,
+							 XNULL,
 							 surface->target,
 							 CAIRO_RECORDING_REGION_NATIVE);
 	XASSERT (status != CAIRO_INT_STATUS_UNSUPPORTED);
@@ -656,7 +656,7 @@ _cairo_paginated_surface_get_supported_mime_types (void *abstract_surface)
     if (surface->target->backend->get_supported_mime_types)
 	return surface->target->backend->get_supported_mime_types (surface->target);
 
-    return NULL;
+    return XNULL;
 }
 
 static cairo_surface_t *
@@ -686,9 +686,9 @@ static const cairo_surface_backend_t cairo_paginated_surface_backend = {
     _cairo_paginated_context_create,
 
     _cairo_paginated_surface_create_similar,
-    NULL, /* create simlar image */
-    NULL, /* map to image */
-    NULL, /* unmap image */
+    XNULL, /* create simlar image */
+    XNULL, /* map to image */
+    XNULL, /* unmap image */
 
     _cairo_paginated_surface_source,
     _cairo_paginated_surface_acquire_source_image,
@@ -701,15 +701,15 @@ static const cairo_surface_backend_t cairo_paginated_surface_backend = {
     _cairo_paginated_surface_get_extents,
     _cairo_paginated_surface_get_font_options,
 
-    NULL, /* flush */
-    NULL, /* mark_dirty_rectangle */
+    XNULL, /* flush */
+    XNULL, /* mark_dirty_rectangle */
 
     _cairo_paginated_surface_paint,
     _cairo_paginated_surface_mask,
     _cairo_paginated_surface_stroke,
     _cairo_paginated_surface_fill,
-    NULL, /* fill_stroke */
-    NULL, /* show_glyphs */
+    XNULL, /* fill_stroke */
+    XNULL, /* show_glyphs */
     _cairo_paginated_surface_has_show_text_glyphs,
     _cairo_paginated_surface_show_text_glyphs,
     _cairo_paginated_surface_get_supported_mime_types,

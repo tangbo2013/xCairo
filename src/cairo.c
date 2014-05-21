@@ -111,8 +111,8 @@
     {									\
 	CAIRO_REFERENCE_COUNT_INVALID,	/* ref_count */			\
 	status,				/* status */			\
-	{ 0, 0, 0, NULL },		/* user_data */			\
-	NULL								\
+    { 0, 0, 0, XNULL },		/* user_data */			\
+    XNULL								\
     }
 
 static const cairo_t _cairo_nil[] = {
@@ -224,12 +224,12 @@ _cairo_create_in_error (cairo_status_t status)
 cairo_t *
 cairo_create (cairo_surface_t *target)
 {
-    if (unlikely (target == NULL))
+    if (unlikely (target == XNULL))
 	return _cairo_create_in_error (_cairo_error (CAIRO_STATUS_NULL_POINTER));
     if (unlikely (target->status))
 	return _cairo_create_in_error (target->status);
 
-    if (target->backend->create_context == NULL)
+    if (target->backend->create_context == XNULL)
 	return _cairo_create_in_error (_cairo_error (CAIRO_STATUS_WRITE_ERROR));
 
     return target->backend->create_context (target);
@@ -266,7 +266,7 @@ _cairo_init (cairo_t *cr,
 cairo_t *
 cairo_reference (cairo_t *cr)
 {
-    if (cr == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
+    if (cr == XNULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
 	return cr;
 
     XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
@@ -295,7 +295,7 @@ _cairo_fini (cairo_t *cr)
 void
 cairo_destroy (cairo_t *cr)
 {
-    if (cr == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
+    if (cr == XNULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
 	return;
 
     XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&cr->ref_count));
@@ -373,7 +373,7 @@ cairo_set_user_data (cairo_t			 *cr,
 unsigned int
 cairo_get_reference_count (cairo_t *cr)
 {
-    if (cr == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
+    if (cr == XNULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&cr->ref_count))
 	return 0;
 
     return CAIRO_REFERENCE_COUNT_GET_VALUE (&cr->ref_count);
@@ -754,7 +754,7 @@ cairo_set_source_surface (cairo_t	  *cr,
     if (unlikely (cr->status))
 	return;
 
-    if (unlikely (surface == NULL)) {
+    if (unlikely (surface == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -794,7 +794,7 @@ cairo_set_source (cairo_t *cr, cairo_pattern_t *source)
     if (unlikely (cr->status))
 	return;
 
-    if (unlikely (source == NULL)) {
+    if (unlikely (source == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -1099,7 +1099,7 @@ cairo_get_dash_count (cairo_t *cr)
     if (unlikely (cr->status))
 	return 0;
 
-    cr->backend->get_dash (cr, NULL, &num_dashes, NULL);
+    cr->backend->get_dash (cr, XNULL, &num_dashes, XNULL);
 
     return num_dashes;
 }
@@ -1124,7 +1124,7 @@ cairo_get_dash (cairo_t *cr,
     if (unlikely (cr->status))
 	return;
 
-    cr->backend->get_dash (cr, dashes, NULL, offset);
+    cr->backend->get_dash (cr, dashes, XNULL, offset);
 }
 
 /**
@@ -2049,7 +2049,7 @@ cairo_mask (cairo_t         *cr,
     if (unlikely (cr->status))
 	return;
 
-    if (unlikely (pattern == NULL)) {
+    if (unlikely (pattern == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -2988,7 +2988,7 @@ cairo_set_scaled_font (cairo_t                   *cr,
     if (unlikely (cr->status))
 	return;
 
-    if ((scaled_font == NULL)) {
+    if ((scaled_font == XNULL)) {
 	_cairo_set_error (cr, _cairo_error (CAIRO_STATUS_NULL_POINTER));
 	return;
     }
@@ -3063,7 +3063,7 @@ cairo_text_extents (cairo_t              *cr,
 {
     cairo_status_t status;
     cairo_scaled_font_t *scaled_font;
-    cairo_glyph_t *glyphs = NULL;
+    cairo_glyph_t *glyphs = XNULL;
     int num_glyphs = 0;
     double x, y;
 
@@ -3077,7 +3077,7 @@ cairo_text_extents (cairo_t              *cr,
     if (unlikely (cr->status))
 	return;
 
-    if (utf8 == NULL)
+    if (utf8 == XNULL)
 	return;
 
     scaled_font = cairo_get_scaled_font (cr);
@@ -3091,7 +3091,7 @@ cairo_text_extents (cairo_t              *cr,
 					       x, y,
 					       utf8, -1,
 					       &glyphs, &num_glyphs,
-					       NULL, NULL, NULL);
+                           XNULL, XNULL, XNULL);
 
     if (likely (status == CAIRO_STATUS_SUCCESS)) {
 	status = cr->backend->glyph_extents (cr,
@@ -3150,7 +3150,7 @@ cairo_glyph_extents (cairo_t                *cr,
 	return;
     }
 
-    if (unlikely (glyphs == NULL)) {
+    if (unlikely (glyphs == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -3208,7 +3208,7 @@ cairo_show_text (cairo_t *cr, const char *utf8)
     if (unlikely (cr->status))
 	return;
 
-    if (utf8 == NULL)
+    if (utf8 == XNULL)
 	return;
 
     scaled_font = cairo_get_scaled_font (cr);
@@ -3229,7 +3229,7 @@ cairo_show_text (cairo_t *cr, const char *utf8)
 	clusters = stack_clusters;
 	num_clusters = ARRAY_LENGTH (stack_clusters);
     } else {
-	clusters = NULL;
+    clusters = XNULL;
 	num_clusters = 0;
     }
 
@@ -3238,7 +3238,7 @@ cairo_show_text (cairo_t *cr, const char *utf8)
 					       x, y,
 					       utf8, utf8_len,
 					       &glyphs, &num_glyphs,
-					       has_show_text_glyphs ? &clusters : NULL, &num_clusters,
+                           has_show_text_glyphs ? &clusters : XNULL, &num_clusters,
 					       &cluster_flags);
     if (unlikely (status))
 	goto BAIL;
@@ -3246,7 +3246,7 @@ cairo_show_text (cairo_t *cr, const char *utf8)
     if (num_glyphs == 0)
 	return;
 
-    i = NULL;
+    i = XNULL;
     if (has_show_text_glyphs) {
 	info.utf8 = utf8;
 	info.utf8_len = utf8_len;
@@ -3307,12 +3307,12 @@ cairo_show_glyphs (cairo_t *cr, const cairo_glyph_t *glyphs, int num_glyphs)
 	return;
     }
 
-    if (glyphs == NULL) {
+    if (glyphs == XNULL) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
 
-    status = cr->backend->glyphs (cr, glyphs, num_glyphs, NULL);
+    status = cr->backend->glyphs (cr, glyphs, num_glyphs, XNULL);
     if (unlikely (status))
 	_cairo_set_error (cr, status);
 }
@@ -3368,14 +3368,14 @@ cairo_show_text_glyphs (cairo_t			   *cr,
 
     /* A slew of sanity checks */
 
-    /* Special case for NULL and -1 */
-    if (utf8 == NULL && utf8_len == -1)
+    /* Special case for XNULL and -1 */
+    if (utf8 == XNULL && utf8_len == -1)
 	utf8_len = 0;
 
-    /* No NULLs for non-zeros */
-    if ((num_glyphs   && glyphs   == NULL) ||
-	(utf8_len     && utf8     == NULL) ||
-	(num_clusters && clusters == NULL)) {
+    /* No XNULLs for non-zeros */
+    if ((num_glyphs   && glyphs   == XNULL) ||
+    (utf8_len     && utf8     == XNULL) ||
+    (num_clusters && clusters == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -3405,7 +3405,7 @@ cairo_show_text_glyphs (cairo_t			   *cr,
 
 	    cairo_status_t status2;
 
-	    status2 = _cairo_utf8_to_ucs4 (utf8, utf8_len, NULL, NULL);
+        status2 = _cairo_utf8_to_ucs4 (utf8, utf8_len, XNULL, XNULL);
 	    if (status2)
 		status = status2;
 	} else {
@@ -3420,7 +3420,7 @@ cairo_show_text_glyphs (cairo_t			   *cr,
 	    status = cr->backend->glyphs (cr, glyphs, num_glyphs, &info);
 	}
     } else {
-	status = cr->backend->glyphs (cr, glyphs, num_glyphs, NULL);
+    status = cr->backend->glyphs (cr, glyphs, num_glyphs, XNULL);
     }
     if (unlikely (status))
 	_cairo_set_error (cr, status);
@@ -3466,7 +3466,7 @@ cairo_text_path (cairo_t *cr, const char *utf8)
     if (unlikely (cr->status))
 	return;
 
-    if (utf8 == NULL)
+    if (utf8 == XNULL)
 	return;
 
 
@@ -3484,7 +3484,7 @@ cairo_text_path (cairo_t *cr, const char *utf8)
 					       x, y,
 					       utf8, -1,
 					       &glyphs, &num_glyphs,
-					       NULL, NULL, NULL);
+                           XNULL, XNULL, XNULL);
 
     if (num_glyphs == 0)
 	return;
@@ -3540,7 +3540,7 @@ cairo_glyph_path (cairo_t *cr, const cairo_glyph_t *glyphs, int num_glyphs)
 	return;
     }
 
-    if (unlikely (glyphs == NULL)) {
+    if (unlikely (glyphs == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -3982,7 +3982,7 @@ cairo_append_path (cairo_t		*cr,
     if (unlikely (cr->status))
 	return;
 
-    if (unlikely (path == NULL)) {
+    if (unlikely (path == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }
@@ -3999,7 +3999,7 @@ cairo_append_path (cairo_t		*cr,
     if (path->num_data == 0)
 	return;
 
-    if (unlikely (path->data == NULL)) {
+    if (unlikely (path->data == XNULL)) {
 	_cairo_set_error (cr, CAIRO_STATUS_NULL_POINTER);
 	return;
     }

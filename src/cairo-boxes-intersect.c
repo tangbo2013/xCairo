@@ -98,11 +98,11 @@ dump_traps (cairo_traps_t *traps, const char *filename)
     xfile_t *file;
     int n;
 
-    if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
+    if (getenv ("CAIRO_DEBUG_TRAPS") == XNULL)
 	return;
 
     file = xfile_open (filename, "a");
-    if (file != NULL) {
+    if (file != XNULL) {
 	for (n = 0; n < traps->num_traps; n++) {
 	    fprintf (file, "%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
 		     traps->traps[n].top,
@@ -145,7 +145,7 @@ pqueue_init (pqueue_t *pq)
     pq->size = 0;
 
     pq->elements = pq->elements_embedded;
-    pq->elements[PQ_FIRST_ENTRY] = NULL;
+    pq->elements[PQ_FIRST_ENTRY] = XNULL;
 }
 
 static inline void
@@ -164,7 +164,7 @@ pqueue_grow (pqueue_t *pq)
     if (pq->elements == pq->elements_embedded) {
 	new_elements = _cairo_malloc_ab (pq->max_size,
 					 sizeof (rectangle_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return FALSE;
 
     xmemory_copy (new_elements, pq->elements_embedded,
@@ -173,7 +173,7 @@ pqueue_grow (pqueue_t *pq)
 	new_elements = _cairo_realloc_ab (pq->elements,
 					  pq->max_size,
 					  sizeof (rectangle_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return FALSE;
     }
 
@@ -216,7 +216,7 @@ pqueue_pop (pqueue_t *pq)
 
     tail = elements[pq->size--];
     if (pq->size == 0) {
-	elements[PQ_FIRST_ENTRY] = NULL;
+    elements[PQ_FIRST_ENTRY] = XNULL;
 	return;
     }
 
@@ -261,15 +261,15 @@ sweep_line_init (sweep_line_t	 *sweep_line,
 		 int		  num_rectangles)
 {
     _rectangle_sort (rectangles, num_rectangles);
-    rectangles[num_rectangles] = NULL;
+    rectangles[num_rectangles] = XNULL;
     sweep_line->rectangles = rectangles;
 
     sweep_line->head.x = INT32_MIN;
-    sweep_line->head.right = NULL;
+    sweep_line->head.right = XNULL;
     sweep_line->head.dir = 0;
     sweep_line->head.next = &sweep_line->tail;
     sweep_line->tail.x = INT32_MAX;
-    sweep_line->tail.right = NULL;
+    sweep_line->tail.right = XNULL;
     sweep_line->tail.dir = 0;
     sweep_line->tail.prev = &sweep_line->head;
 
@@ -305,7 +305,7 @@ end_box (sweep_line_t *sweep_line, edge_t *left, xint32_t bot, cairo_boxes_t *ou
         xlongjmp_jump (sweep_line->unwind, status);
     }
 
-    left->right = NULL;
+    left->right = XNULL;
 }
 
 /* Start a new trapezoid at the given top y coordinate, whose edges
@@ -323,8 +323,8 @@ start_or_continue_box (sweep_line_t *sweep_line,
     if (left->right == right)
 	return;
 
-    if (left->right != NULL) {
-	if (right != NULL && left->right->x == right->x) {
+    if (left->right != XNULL) {
+    if (right != XNULL && left->right->x == right->x) {
 	    /* continuation on right, so just swap edges */
 	    left->right = right;
 	    return;
@@ -333,7 +333,7 @@ start_or_continue_box (sweep_line_t *sweep_line,
 	end_box (sweep_line, left, top, out);
     }
 
-    if (right != NULL && left->x != right->x) {
+    if (right != XNULL && left->x != right->x) {
 	left->top = top;
 	left->right = right;
     }
@@ -369,7 +369,7 @@ active_edges (sweep_line_t *sweep, cairo_boxes_t *out)
 	    if (left->next == &sweep->tail)
 		goto out;
 
-	    if (unlikely (left->right != NULL))
+        if (unlikely (left->right != XNULL))
 		end_box (sweep, left, top, out);
 
 	    left = left->next;
@@ -377,7 +377,7 @@ active_edges (sweep_line_t *sweep, cairo_boxes_t *out)
 
 	right = left->next;
 	do {
-	    if (unlikely (right->right != NULL))
+        if (unlikely (right->right != XNULL))
 		end_box (sweep, right, top, out);
 
 	    winding[right->a_or_b] += right->dir;
@@ -402,7 +402,7 @@ out:
 static inline void
 sweep_line_delete_edge (sweep_line_t *sweep_line, edge_t *edge, cairo_boxes_t *out)
 {
-    if (edge->right != NULL) {
+    if (edge->right != XNULL) {
 	edge_t *next = edge->next;
 	if (next->x == edge->x) {
 	    next->top = edge->top;
@@ -498,7 +498,7 @@ intersect (rectangle_t **rectangles, int num_rectangles, cairo_boxes_t *out)
 	    rectangle_t *stop;
 
 	    stop = rectangle_peek_stop (&sweep_line);
-	    while (stop != NULL && stop->bottom < rectangle->top) {
+        while (stop != XNULL && stop->bottom < rectangle->top) {
 		if (stop->bottom != sweep_line.current_y) {
 		    active_edges (&sweep_line, out);
 		    sweep_line.current_y = stop->bottom;
@@ -514,9 +514,9 @@ intersect (rectangle_t **rectangles, int num_rectangles, cairo_boxes_t *out)
 	}
 
 	sweep_line_insert (&sweep_line, rectangle);
-    } while ((rectangle = rectangle_pop_start (&sweep_line)) != NULL);
+    } while ((rectangle = rectangle_pop_start (&sweep_line)) != XNULL);
 
-    while ((rectangle = rectangle_peek_stop (&sweep_line)) != NULL) {
+    while ((rectangle = rectangle_peek_stop (&sweep_line)) != XNULL) {
 	if (rectangle->bottom != sweep_line.current_y) {
 	    active_edges (&sweep_line, out);
 	    sweep_line.current_y = rectangle->bottom;
@@ -542,7 +542,7 @@ _cairo_boxes_intersect_with_box (const cairo_boxes_t *boxes,
 	struct _cairo_boxes_chunk *chunk;
 
 	out->num_boxes = 0;
-	for (chunk = &out->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &out->chunks; chunk != XNULL; chunk = chunk->next) {
 	    for (i = j = 0; i < chunk->count; i++) {
 		cairo_box_t *b = &chunk->base[i];
 
@@ -565,7 +565,7 @@ _cairo_boxes_intersect_with_box (const cairo_boxes_t *boxes,
 
 	_cairo_boxes_clear (out);
 	_cairo_boxes_limit (out, box, 1);
-	for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	    for (i = 0; i < chunk->count; i++) {
 		status = _cairo_boxes_add (out,
 					   CAIRO_ANTIALIAS_DEFAULT,
@@ -614,14 +614,14 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
 					      sizeof (rectangle_t) +
 					      sizeof (rectangle_t *),
 					      sizeof (rectangle_t *));
-	if (unlikely (rectangles == NULL))
+    if (unlikely (rectangles == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	rectangles_ptrs = (rectangle_t **) (rectangles + count);
     }
 
     j = 0;
-    for (chunk = &a->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &a->chunks; chunk != XNULL; chunk = chunk->next) {
 	const cairo_box_t *box = chunk->base;
 	for (i = 0; i < chunk->count; i++) {
 	    if (box[i].p1.x < box[i].p2.x) {
@@ -639,9 +639,9 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
 	    }
 
 	    rectangles[j].left.a_or_b = 0;
-	    rectangles[j].left.right = NULL;
+        rectangles[j].left.right = XNULL;
 	    rectangles[j].right.a_or_b = 0;
-	    rectangles[j].right.right = NULL;
+        rectangles[j].right.right = XNULL;
 
 	    rectangles[j].top = box[i].p1.y;
 	    rectangles[j].bottom = box[i].p2.y;
@@ -650,7 +650,7 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
 	    j++;
 	}
     }
-    for (chunk = &b->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &b->chunks; chunk != XNULL; chunk = chunk->next) {
 	const cairo_box_t *box = chunk->base;
 	for (i = 0; i < chunk->count; i++) {
 	    if (box[i].p1.x < box[i].p2.x) {
@@ -668,9 +668,9 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
 	    }
 
 	    rectangles[j].left.a_or_b = 1;
-	    rectangles[j].left.right = NULL;
+        rectangles[j].left.right = XNULL;
 	    rectangles[j].right.a_or_b = 1;
-	    rectangles[j].right.right = NULL;
+        rectangles[j].right.right = XNULL;
 
 	    rectangles[j].top = box[i].p1.y;
 	    rectangles[j].bottom = box[i].p2.y;

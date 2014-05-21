@@ -52,19 +52,19 @@ _cairo_damage_create (void)
     cairo_damage_t *damage;
 
     damage = xmemory_alloc (sizeof (*damage));
-    if (unlikely (damage == NULL)) {
+    if (unlikely (damage == XNULL)) {
 	_cairo_error_throw(CAIRO_STATUS_NO_MEMORY);
 	return (cairo_damage_t *) &__cairo_damage__nil;
     }
 
     damage->status = CAIRO_STATUS_SUCCESS;
-    damage->region = NULL;
+    damage->region = XNULL;
     damage->dirty = 0;
     damage->tail = &damage->chunks;
     damage->chunks.base = damage->boxes;
     damage->chunks.size = ARRAY_LENGTH(damage->boxes);
     damage->chunks.count = 0;
-    damage->chunks.next = NULL;
+    damage->chunks.next = XNULL;
 
     damage->remain = damage->chunks.size;
 
@@ -79,7 +79,7 @@ _cairo_damage_destroy (cairo_damage_t *damage)
     if (damage == (cairo_damage_t *) &__cairo_damage__nil)
 	return;
 
-    for (chunk = damage->chunks.next; chunk != NULL; chunk = next) {
+    for (chunk = damage->chunks.next; chunk != XNULL; chunk = next) {
 	next = chunk->next;
     xmemory_free (chunk);
     }
@@ -97,7 +97,7 @@ _cairo_damage_add_boxes(cairo_damage_t *damage,
 
     TRACE ((stderr, "%s x%d\n", __FUNCTION__, count));
 
-    if (damage == NULL)
+    if (damage == XNULL)
 	damage = _cairo_damage_create ();
     if (damage->status)
 	return damage;
@@ -123,12 +123,12 @@ _cairo_damage_add_boxes(cairo_damage_t *damage,
 	size = (count + 64) & ~63;
 
     chunk = xmemory_alloc (sizeof (*chunk) + sizeof (cairo_box_t) * size);
-    if (unlikely (chunk == NULL)) {
+    if (unlikely (chunk == XNULL)) {
 	_cairo_damage_destroy (damage);
 	return (cairo_damage_t *) &__cairo_damage__nil;
     }
 
-    chunk->next = NULL;
+    chunk->next = XNULL;
     chunk->base = (cairo_box_t *) (chunk + 1);
     chunk->size = size;
     chunk->count = count;
@@ -186,20 +186,20 @@ _cairo_damage_add_region (cairo_damage_t *damage,
 cairo_damage_t *
 _cairo_damage_reduce (cairo_damage_t *damage)
 {
-    cairo_box_t *free_boxes = NULL;
+    cairo_box_t *free_boxes = XNULL;
     cairo_box_t *boxes, *b;
     struct _cairo_damage_chunk *chunk, *last;
 
     TRACE ((stderr, "%s: dirty=%d\n", __FUNCTION__,
 	    damage ? damage->dirty : -1));
-    if (damage == NULL || damage->status || !damage->dirty)
+    if (damage == XNULL || damage->status || !damage->dirty)
 	return damage;
 
     if (damage->region) {
 	cairo_region_t *region;
 
 	region = damage->region;
-	damage->region = NULL;
+    damage->region = XNULL;
 
 	damage = _cairo_damage_add_region (damage, region);
 	cairo_region_destroy (region);
@@ -211,13 +211,13 @@ _cairo_damage_reduce (cairo_damage_t *damage)
     boxes = damage->tail->base;
     if (damage->dirty > damage->tail->size) {
     boxes = free_boxes = xmemory_alloc (damage->dirty * sizeof (cairo_box_t));
-	if (unlikely (boxes == NULL)) {
+    if (unlikely (boxes == XNULL)) {
 	    _cairo_damage_destroy (damage);
 	    return (cairo_damage_t *) &__cairo_damage__nil;
 	}
 
 	b = boxes;
-	last = NULL;
+    last = XNULL;
     } else {
 	b = boxes + damage->tail->count;
 	last = damage->tail;

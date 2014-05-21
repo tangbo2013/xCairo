@@ -505,7 +505,7 @@ _pool_chunk_create(struct pool *pool, size_t size)
     struct _pool_chunk *p;
 
     p = xmemory_alloc(size + sizeof(struct _pool_chunk));
-    if (unlikely (NULL == p))
+    if (unlikely (XNULL == p))
     xlongjmp_jump (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     return _pool_chunk_init(p, pool->current, size);
@@ -519,9 +519,9 @@ pool_init(struct pool *pool,
 {
     pool->jmp = jmp;
     pool->current = pool->sentinel;
-    pool->first_free = NULL;
+    pool->first_free = XNULL;
     pool->default_capacity = default_capacity;
-    _pool_chunk_init(pool->sentinel, NULL, embedded_capacity);
+    _pool_chunk_init(pool->sentinel, XNULL, embedded_capacity);
 }
 
 static void
@@ -529,15 +529,15 @@ pool_fini(struct pool *pool)
 {
     struct _pool_chunk *p = pool->current;
     do {
-	while (NULL != p) {
+    while (XNULL != p) {
 	    struct _pool_chunk *prev = p->prev_chunk;
 	    if (p != pool->sentinel)
         xmemory_free(p);
 	    p = prev;
 	}
 	p = pool->first_free;
-	pool->first_free = NULL;
-    } while (NULL != p);
+    pool->first_free = XNULL;
+    } while (XNULL != p);
 }
 
 /* Satisfy an allocation by first allocating a new large enough chunk
@@ -557,7 +557,7 @@ _pool_alloc_from_new_chunk(
      * try getting a chunk off the free list.  Force alloc of a new
      * chunk for large requests. */
     capacity = size;
-    chunk = NULL;
+    chunk = XNULL;
     if (size < pool->default_capacity) {
 	capacity = pool->default_capacity;
 	chunk = pool->first_free;
@@ -567,7 +567,7 @@ _pool_alloc_from_new_chunk(
 	}
     }
 
-    if (NULL == chunk)
+    if (XNULL == chunk)
 	chunk = _pool_chunk_create (pool, capacity);
     pool->current = chunk;
 
@@ -644,7 +644,7 @@ cell_list_init(struct cell_list *cells, xjmp_buf_t *jmp)
     pool_init(cells->cell_pool.base, jmp,
 	      256*sizeof(struct cell),
 	      sizeof(cells->cell_pool.embedded));
-    cells->tail.next = NULL;
+    cells->tail.next = XNULL;
     cells->tail.x = XINT32_MAX;
     cells->head.x = XINT32_MIN;
     cells->head.next = &cells->tail;
@@ -853,7 +853,7 @@ polygon_reset (struct polygon *polygon,
     if (num_buckets > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
 	polygon->y_buckets = _cairo_malloc_ab (num_buckets,
 					       sizeof (struct edge *));
-	if (unlikely (NULL == polygon->y_buckets))
+    if (unlikely (XNULL == polygon->y_buckets))
 	    goto bail_no_mem;
     }
     xmemory_set (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
@@ -934,10 +934,10 @@ active_list_reset (struct active_list *active)
     active->head.vertical = 1;
     active->head.height_left = XINT32_MAX;
     active->head.x.quo = XINT32_MIN;
-    active->head.prev = NULL;
+    active->head.prev = XNULL;
     active->head.next = &active->tail;
     active->tail.prev = &active->head;
-    active->tail.next = NULL;
+    active->tail.next = XNULL;
     active->tail.x.quo = XINT32_MAX;
     active->tail.height_left = XINT32_MAX;
     active->tail.vertical = 1;
@@ -955,7 +955,7 @@ active_list_init(struct active_list *active)
  * Merge two sorted edge lists.
  * Input:
  *  - head_a: The head of the first list.
- *  - head_b: The head of the second list; head_b cannot be NULL.
+ *  - head_b: The head of the second list; head_b cannot be XNULL.
  * Output:
  * Returns the head of the merged list.
  *
@@ -987,7 +987,7 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
     do {
 	x = head_b->x.quo;
-	while (head_a != NULL && head_a->x.quo <= x) {
+    while (head_a != XNULL && head_a->x.quo <= x) {
 	    prev = head_a;
 	    next = &head_a->next;
 	    head_a = head_a->next;
@@ -995,12 +995,12 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
 	head_b->prev = prev;
 	*next = head_b;
-	if (head_a == NULL)
+    if (head_a == XNULL)
 	    return head;
 
 start_with_b:
 	x = head_a->x.quo;
-	while (head_b != NULL && head_b->x.quo <= x) {
+    while (head_b != XNULL && head_b->x.quo <= x) {
 	    prev = head_b;
 	    next = &head_b->next;
 	    head_b = head_b->next;
@@ -1008,7 +1008,7 @@ start_with_b:
 
 	head_a->prev = prev;
 	*next = head_a;
-	if (head_b == NULL)
+    if (head_b == XNULL)
 	    return head;
     } while (1);
 }
@@ -1016,13 +1016,13 @@ start_with_b:
 /*
  * Sort (part of) a list.
  * Input:
- *  - list: The list to be sorted; list cannot be NULL.
+ *  - list: The list to be sorted; list cannot be XNULL.
  *  - limit: Recursion limit.
  * Output:
  *  - head_out: The head of the sorted list containing the first 2^(level+1) elements of the
  *              input list; if the input list has fewer elements, head_out be a sorted list
  *              containing all the elements of the input list.
- * Returns the head of the list of unprocessed elements (NULL if the sorted list contains
+ * Returns the head of the list of unprocessed elements (XNULL if the sorted list contains
  * all the elements of the input list).
  *
  * Implementation notes:
@@ -1040,21 +1040,21 @@ sort_edges (struct edge *list,
 
     head_other = list->next;
 
-    if (head_other == NULL) {
+    if (head_other == XNULL) {
 	*head_out = list;
-	return NULL;
+    return XNULL;
     }
 
     remaining = head_other->next;
     if (list->x.quo <= head_other->x.quo) {
 	*head_out = list;
-	head_other->next = NULL;
+    head_other->next = XNULL;
     } else {
 	*head_out = head_other;
 	head_other->prev = list->prev;
 	head_other->next = list;
 	list->prev = head_other;
-	list->next = NULL;
+    list->next = XNULL;
     }
 
     for (i = 0; i < level && remaining; i++) {
@@ -1086,7 +1086,7 @@ can_do_full_row (struct active_list *active)
 	int is_vertical = 1;
 
 	e = active->head.next;
-	while (NULL != e) {
+    while (XNULL != e) {
 	    if (e->height_left < min_height)
 		min_height = e->height_left;
 	    is_vertical &= e->vertical;
@@ -1127,7 +1127,7 @@ polygon_fill_buckets (struct active_list *active,
 	if (buckets[suby])
 	    buckets[suby]->prev = edge;
 	edge->next = buckets[suby];
-	edge->prev = NULL;
+    edge->prev = XNULL;
 	buckets[suby] = edge;
 	if (edge->height_left < min_height)
 	    min_height = edge->height_left;
@@ -1294,7 +1294,7 @@ glitter_scan_converter_reset(
     if (xmax - xmin > ARRAY_LENGTH(converter->spans_embedded)) {
 	converter->spans = _cairo_malloc_ab (xmax - xmin,
 					     sizeof (cairo_half_open_span_t));
-	if (unlikely (converter->spans == NULL))
+    if (unlikely (converter->spans == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     } else
 	converter->spans = converter->spans_embedded;
@@ -1572,7 +1572,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 
 	    if (active->is_vertical) {
 		while (j < h &&
-		       polygon->y_buckets[j] == NULL &&
+               polygon->y_buckets[j] == XNULL &&
 		       active->min_height >= 2*GRID_Y)
 		{
 		    active->min_height -= GRID_Y;
@@ -1593,7 +1593,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 	    for (sub = 0; sub < GRID_Y; sub++) {
 		if (buckets[sub]) {
 		    active_list_merge_edges_from_bucket (active, buckets[sub]);
-		    buckets[sub] = NULL;
+            buckets[sub] = XNULL;
 		}
 
 		sub_row (active, coverages, winding_mask);
@@ -1628,7 +1628,7 @@ static void
 _cairo_tor22_scan_converter_destroy (void *converter)
 {
     cairo_tor22_scan_converter_t *self = converter;
-    if (self == NULL) {
+    if (self == XNULL) {
 	return;
     }
     _glitter_scan_converter_fini (self->converter);
@@ -1683,7 +1683,7 @@ _cairo_tor22_scan_converter_create (int			xmin,
     cairo_status_t status;
 
     self = xmemory_alloc (sizeof(struct _cairo_tor22_scan_converter));
-    if (unlikely (self == NULL)) {
+    if (unlikely (self == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;
     }

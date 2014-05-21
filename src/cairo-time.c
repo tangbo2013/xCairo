@@ -173,7 +173,7 @@ _cairo_time_get (void)
     xdate_time_t t;
     cairo_time_t r;
 
-//    gettimeofday (&t, NULL);
+//    gettimeofday (&t, XNULL);
     xtime_localTime(xtime_clock(), &t);
 
     r = _cairo_double_to_int64 (_cairo_time_1s ());

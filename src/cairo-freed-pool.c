@@ -49,7 +49,7 @@ _freed_pool_get_search (freed_pool_t *pool)
 
     for (i = ARRAY_LENGTH (pool->pool); i--;) {
 	ptr = _atomic_fetch (&pool->pool[i]);
-	if (ptr != NULL) {
+	if (ptr != XNULL) {
 	    pool->top = i;
 	    return ptr;
 	}
@@ -57,7 +57,7 @@ _freed_pool_get_search (freed_pool_t *pool)
 
     /* empty */
     pool->top = 0;
-    return NULL;
+    return XNULL;
 }
 
 void
@@ -84,7 +84,7 @@ _freed_pool_reset (freed_pool_t *pool)
 
     for (i = 0; i < ARRAY_LENGTH (pool->pool); i++) {
 	xmemory_free (pool->pool[i]);
-	pool->pool[i] = NULL;
+	pool->pool[i] = XNULL;
     }
 
     pool->top = 0;

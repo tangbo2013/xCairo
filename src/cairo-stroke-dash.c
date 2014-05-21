@@ -84,7 +84,7 @@ void
 _cairo_stroker_dash_init (cairo_stroker_dash_t *dash,
 			  const cairo_stroke_style_t *style)
 {
-    dash->dashed = style->dash != NULL;
+    dash->dashed = style->dash != XNULL;
     if (! dash->dashed)
 	return;
 

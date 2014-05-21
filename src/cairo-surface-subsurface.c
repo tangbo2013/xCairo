@@ -63,8 +63,8 @@ _cairo_surface_subsurface_create_similar (void *other,
 {
     cairo_surface_subsurface_t *surface = other;
 
-    if (surface->target->backend->create_similar == NULL)
-	return NULL;
+    if (surface->target->backend->create_similar == XNULL)
+	return XNULL;
 
     return surface->target->backend->create_similar (surface->target, content, width, height);
 }
@@ -76,8 +76,8 @@ _cairo_surface_subsurface_create_similar_image (void *other,
 {
     cairo_surface_subsurface_t *surface = other;
 
-    if (surface->target->backend->create_similar_image == NULL)
-	return NULL;
+    if (surface->target->backend->create_similar_image == XNULL)
+	return XNULL;
 
     return surface->target->backend->create_similar_image (surface->target,
 							   format,
@@ -237,7 +237,7 @@ _cairo_surface_subsurface_mark_dirty (void *abstract_surface,
     cairo_status_t status;
 
     status = CAIRO_STATUS_SUCCESS;
-    if (surface->target->backend->mark_dirty_rectangle != NULL) {
+    if (surface->target->backend->mark_dirty_rectangle != XNULL) {
 	cairo_rectangle_int_t rect, extents;
 
 	rect.x = x;
@@ -280,7 +280,7 @@ _cairo_surface_subsurface_get_font_options (void *abstract_surface,
 {
     cairo_surface_subsurface_t *surface = abstract_surface;
 
-    if (surface->target->backend->get_font_options != NULL)
+    if (surface->target->backend->get_font_options != XNULL)
 	surface->target->backend->get_font_options (surface->target, options);
 }
 
@@ -321,7 +321,7 @@ _cairo_surface_subsurface_acquire_source_image (void                    *abstrac
     pattern.base.filter = CAIRO_FILTER_NEAREST;
     status = _cairo_surface_paint (image,
 				   CAIRO_OPERATOR_SOURCE,
-				   &pattern.base, NULL);
+				   &pattern.base, XNULL);
     _cairo_pattern_fini (&pattern.base);
     if (unlikely (status)) {
 	cairo_surface_destroy (image);
@@ -329,7 +329,7 @@ _cairo_surface_subsurface_acquire_source_image (void                    *abstrac
     }
 
     *image_out = (cairo_image_surface_t *)image;
-    *extra_out = NULL;
+    *extra_out = XNULL;
     return CAIRO_STATUS_SUCCESS;
 }
 
@@ -364,7 +364,7 @@ _cairo_surface_subsurface_snapshot (void *abstract_surface)
     pattern.base.filter = CAIRO_FILTER_NEAREST;
     status = _cairo_surface_paint (clone,
 				   CAIRO_OPERATOR_SOURCE,
-				   &pattern.base, NULL);
+				   &pattern.base, XNULL);
     _cairo_pattern_fini (&pattern.base);
 
     if (unlikely (status)) {
@@ -398,8 +398,8 @@ static const cairo_surface_backend_t _cairo_surface_subsurface_backend = {
     _cairo_surface_subsurface_release_source_image,
     _cairo_surface_subsurface_snapshot,
 
-    NULL, /* copy_page */
-    NULL, /* show_page */
+    XNULL, /* copy_page */
+    XNULL, /* show_page */
 
     _cairo_surface_subsurface_get_extents,
     _cairo_surface_subsurface_get_font_options,
@@ -411,7 +411,7 @@ static const cairo_surface_backend_t _cairo_surface_subsurface_backend = {
     _cairo_surface_subsurface_mask,
     _cairo_surface_subsurface_stroke,
     _cairo_surface_subsurface_fill,
-    NULL, /* fill/stroke */
+    XNULL, /* fill/stroke */
     _cairo_surface_subsurface_glyphs,
 };
 
@@ -462,7 +462,7 @@ cairo_surface_create_for_rectangle (cairo_surface_t *target,
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
 
     surface = xmemory_alloc (sizeof (cairo_surface_subsurface_t));
-    if (unlikely (surface == NULL))
+    if (unlikely (surface == XNULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     XASSERT (_cairo_matrix_is_translation (&target->device_transform));
@@ -471,7 +471,7 @@ cairo_surface_create_for_rectangle (cairo_surface_t *target,
 
     _cairo_surface_init (&surface->base,
 			 &_cairo_surface_subsurface_backend,
-			 NULL, /* device */
+			 XNULL, /* device */
 			 target->content);
 
     /* XXX forced integer alignment */
@@ -493,7 +493,7 @@ cairo_surface_create_for_rectangle (cairo_surface_t *target,
     surface->target = cairo_surface_reference (target);
     surface->base.type = surface->target->type;
 
-    surface->snapshot = NULL;
+    surface->snapshot = XNULL;
 
     return &surface->base;
 }
@@ -512,14 +512,14 @@ _cairo_surface_create_for_rectangle_int (cairo_surface_t *target,
     XASSERT (target->backend->type != CAIRO_SURFACE_TYPE_SUBSURFACE);
 
     surface = xmemory_alloc (sizeof (cairo_surface_subsurface_t));
-    if (unlikely (surface == NULL))
+    if (unlikely (surface == XNULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     XASSERT (_cairo_matrix_is_translation (&target->device_transform));
 
     _cairo_surface_init (&surface->base,
 			 &_cairo_surface_subsurface_backend,
-			 NULL, /* device */
+			 XNULL, /* device */
 			 target->content);
 
     surface->extents = *extents;
@@ -529,7 +529,7 @@ _cairo_surface_create_for_rectangle_int (cairo_surface_t *target,
     surface->target = cairo_surface_reference (target);
     surface->base.type = surface->target->type;
 
-    surface->snapshot = NULL;
+    surface->snapshot = XNULL;
 
     return &surface->base;
 }
@@ -543,7 +543,7 @@ _cairo_surface_subsurface_detach_snapshot (cairo_surface_t *surface)
     TRACE ((stderr, "%s: target=%d\n", __FUNCTION__, ss->target->unique_id));
 
     cairo_surface_destroy (ss->snapshot);
-    ss->snapshot = NULL;
+    ss->snapshot = XNULL;
 }
 
 void

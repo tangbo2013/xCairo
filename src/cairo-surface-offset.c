@@ -273,7 +273,7 @@ _cairo_surface_offset_glyphs (cairo_surface_t		*surface,
 	return CAIRO_STATUS_SUCCESS;
 
     dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-    if (dev_glyphs == NULL)
+    if (dev_glyphs == XNULL)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     xmemory_copy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
@@ -294,9 +294,9 @@ _cairo_surface_offset_glyphs (cairo_surface_t		*surface,
     }
 
     status = _cairo_surface_show_text_glyphs (surface, op, source,
-					      NULL, 0,
+					      XNULL, 0,
 					      dev_glyphs, num_glyphs,
-					      NULL, 0, 0,
+					      XNULL, 0, 0,
 					      scaled_font,
 					      dev_clip);
 

@@ -93,10 +93,10 @@ _cairo_cache_init (cairo_cache_t		*cache,
 		   unsigned long		 max_size)
 {
     cache->hash_table = _cairo_hash_table_create (keys_equal);
-    if (unlikely (cache->hash_table == NULL))
+    if (unlikely (cache->hash_table == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    if (predicate == NULL)
+    if (predicate == XNULL)
 	predicate = _cairo_cache_entry_is_non_zero;
     cache->predicate = predicate;
     cache->entry_destroy = entry_destroy;
@@ -217,7 +217,7 @@ _cairo_cache_remove_random (cairo_cache_t *cache)
 
     entry = _cairo_hash_table_random_entry (cache->hash_table,
 					    cache->predicate);
-    if (unlikely (entry == NULL))
+    if (unlikely (entry == XNULL))
 	return FALSE;
 
     _cairo_cache_remove (cache, entry);

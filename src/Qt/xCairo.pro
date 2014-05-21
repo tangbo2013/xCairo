@@ -23,11 +23,6 @@ SOURCES += \
     ../cairo-version.c \
     ../cairo-user-font.c \
     ../cairo-unicode.c \
-    ../cairo-type3-glyph-surface.c \
-    ../cairo-type1-subset.c \
-    ../cairo-type1-glyph-names.c \
-    ../cairo-type1-fallback.c \
-    ../cairo-truetype-subset.c \
     ../cairo-tristrip.c \
     ../cairo-traps.c \
     ../cairo-traps-compositor.c \

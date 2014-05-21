@@ -451,7 +451,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 
 	if (num_glyphs > ARRAY_LENGTH (stack_glyphs)) {
 	    dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-	    if (unlikely (dev_glyphs == NULL)) {
+	    if (unlikely (dev_glyphs == XNULL)) {
 		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		goto FINISH;
 	    }
@@ -483,7 +483,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 	 */
 	if (num_glyphs > ARRAY_LENGTH (stack_glyphs)) {
 	    dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-	    if (unlikely (dev_glyphs == NULL)) {
+	    if (unlikely (dev_glyphs == XNULL)) {
 		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		goto FINISH;
 	    }
@@ -563,7 +563,7 @@ _cairo_surface_wrapper_set_inverse_transform (cairo_surface_wrapper_t *wrapper,
 {
     cairo_status_t status;
 
-    if (transform == NULL || _cairo_matrix_is_identity (transform)) {
+    if (transform == XNULL || _cairo_matrix_is_identity (transform)) {
 	cairo_matrix_init_identity (&wrapper->transform);
 
 	wrapper->needs_transform =
@@ -598,7 +598,7 @@ _cairo_surface_wrapper_snapshot (cairo_surface_wrapper_t *wrapper)
     if (wrapper->target->backend->snapshot)
 	return wrapper->target->backend->snapshot (wrapper->target);
 
-    return NULL;
+    return XNULL;
 }
 
 cairo_bool_t
@@ -615,7 +615,7 @@ _cairo_surface_wrapper_init (cairo_surface_wrapper_t *wrapper,
     cairo_matrix_init_identity (&wrapper->transform);
     wrapper->has_extents = FALSE;
     wrapper->extents.x = wrapper->extents.y = 0;
-    wrapper->clip = NULL;
+    wrapper->clip = XNULL;
 
     wrapper->needs_transform = FALSE;
     if (target) {
@@ -660,7 +660,7 @@ _cairo_surface_wrapper_get_target_extents (cairo_surface_wrapper_t *wrapper,
 	x2 = clip.x + clip.width;
 	y2 = clip.y + clip.height;
 
-	_cairo_matrix_transform_bounding_box (&m, &x1, &y1, &x2, &y2, NULL);
+	_cairo_matrix_transform_bounding_box (&m, &x1, &y1, &x2, &y2, XNULL);
 
 	clip.x = floor (x1);
 	clip.y = floor (y1);

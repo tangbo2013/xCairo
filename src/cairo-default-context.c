@@ -74,7 +74,7 @@ _cairo_default_context_fini (cairo_default_context_t *cr)
 
     _cairo_gstate_fini (cr->gstate);
     cr->gstate_freelist = cr->gstate_freelist->next; /* skip over tail[1] */
-    while (cr->gstate_freelist != NULL) {
+    while (cr->gstate_freelist != XNULL) {
 	cairo_gstate_t *gstate = cr->gstate_freelist;
 	cr->gstate_freelist = gstate->next;
 	xmemory_free (gstate);
@@ -167,7 +167,7 @@ _cairo_default_context_push_group (void *abstract_cr, cairo_content_t content)
 
 	if (!bounded) {
 	    /* XXX: Generic solution? */
-	    group_surface = cairo_recording_surface_create (content, NULL);
+        group_surface = cairo_recording_surface_create (content, XNULL);
 	    extents.x = extents.y = 0;
 	} else {
 	    group_surface = _cairo_surface_create_similar_solid (parent_surface,
@@ -1388,8 +1388,8 @@ static const cairo_backend_t _cairo_default_context_backend = {
     _cairo_default_context_rel_line_to,
     _cairo_default_context_curve_to,
     _cairo_default_context_rel_curve_to,
-    NULL, /* arc-to */
-    NULL, /* rel-arc-to */
+    XNULL, /* arc-to */
+    XNULL, /* rel-arc-to */
     _cairo_default_context_close_path,
     _cairo_default_context_arc,
     _cairo_default_context_rectangle,
@@ -1400,7 +1400,7 @@ static const cairo_backend_t _cairo_default_context_backend = {
     _cairo_default_context_copy_path_flat,
     _cairo_default_context_append_path,
 
-    NULL, /* stroke-to-path */
+    XNULL, /* stroke-to-path */
 
     _cairo_default_context_clip,
     _cairo_default_context_clip_preserve,
@@ -1450,7 +1450,7 @@ _cairo_default_context_init (cairo_default_context_t *cr, void *target)
 
     cr->gstate = &cr->gstate_tail[0];
     cr->gstate_freelist = &cr->gstate_tail[1];
-    cr->gstate_tail[1].next = NULL;
+    cr->gstate_tail[1].next = XNULL;
 
     return _cairo_gstate_init (cr->gstate, target);
 }
@@ -1462,9 +1462,9 @@ _cairo_default_context_create (void *target)
     cairo_status_t status;
 
     cr = _freed_pool_get (&context_pool);
-    if (unlikely (cr == NULL)) {
+    if (unlikely (cr == XNULL)) {
 	cr = xmemory_alloc (sizeof (cairo_default_context_t));
-	if (unlikely (cr == NULL))
+    if (unlikely (cr == XNULL))
 	    return _cairo_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 

@@ -172,7 +172,7 @@ _cairo_rectilinear_stroker_add_segment (cairo_rectilinear_stroker_t *stroker,
 
 	if (stroker->segments == stroker->segments_embedded) {
 	    new_segments = _cairo_malloc_ab (new_size, sizeof (segment_t));
-	    if (unlikely (new_segments == NULL))
+	    if (unlikely (new_segments == XNULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	    xmemory_copy (new_segments, stroker->segments,
@@ -180,7 +180,7 @@ _cairo_rectilinear_stroker_add_segment (cairo_rectilinear_stroker_t *stroker,
 	} else {
 	    new_segments = _cairo_realloc_ab (stroker->segments,
 					      new_size, sizeof (segment_t));
-	    if (unlikely (new_segments == NULL))
+	    if (unlikely (new_segments == XNULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
 
@@ -680,7 +680,7 @@ _cairo_path_fixed_stroke_rectilinear_to_boxes (const cairo_path_fixed_t	*path,
 					  rectilinear_stroker.dash.dashed ?
 					  _cairo_rectilinear_stroker_line_to_dashed :
 					  _cairo_rectilinear_stroker_line_to,
-					  NULL,
+					  XNULL,
 					  _cairo_rectilinear_stroker_close_path,
 					  &rectilinear_stroker);
     if (unlikely (status))

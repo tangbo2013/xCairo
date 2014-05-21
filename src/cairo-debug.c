@@ -107,7 +107,7 @@ _cairo_debug_check_image_surface_is_defined (const cairo_surface_t *surface)
     const xuint8_t *bits;
     int row, width;
 
-    if (surface == NULL)
+    if (surface == XNULL)
 	return;
 
     if (! RUNNING_ON_VALGRIND)

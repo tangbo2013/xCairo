@@ -65,7 +65,7 @@ typedef struct _cairo_cogl_device {
 
     /* This is a sparsely filled set of templates because we don't support
      * the full range of operators that cairo has. All entries corresponding
-     * to unsupported operators are NULL.
+     * to unsupported operators are XNULL.
      *
      * The CAIRO_OPERATOR_ADD is the operator enum with the highest value that
      * we support so we at least cap the size of the array by that.

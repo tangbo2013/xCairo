@@ -79,7 +79,7 @@ _cairo_surface_wrapper_fini (cairo_surface_wrapper_t *wrapper);
 static inline cairo_bool_t
 _cairo_surface_wrapper_has_fill_stroke (cairo_surface_wrapper_t *wrapper)
 {
-    return wrapper->target->backend->fill_stroke != NULL;
+    return wrapper->target->backend->fill_stroke != XNULL;
 }
 
 cairo_private cairo_status_t

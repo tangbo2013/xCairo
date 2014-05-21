@@ -61,7 +61,7 @@ _atomic_fetch (void **slot)
 
     do {
         ptr = _cairo_atomic_ptr_get (slot);
-    } while (! _cairo_atomic_ptr_cmpxchg (slot, ptr, NULL));
+    } while (! _cairo_atomic_ptr_cmpxchg (slot, ptr, XNULL));
 
     return ptr;
 }
@@ -69,7 +69,7 @@ _atomic_fetch (void **slot)
 static cairo_always_inline cairo_bool_t
 _atomic_store (void **slot, void *ptr)
 {
-    return _cairo_atomic_ptr_cmpxchg (slot, NULL, ptr);
+    return _cairo_atomic_ptr_cmpxchg (slot, XNULL, ptr);
 }
 
 cairo_private void *
@@ -86,7 +86,7 @@ _freed_pool_get (freed_pool_t *pool)
 	i = 0;
 
     ptr = _atomic_fetch (&pool->pool[i]);
-    if (likely (ptr != NULL)) {
+    if (likely (ptr != XNULL)) {
 	pool->top = i;
 	return ptr;
     }
@@ -128,7 +128,7 @@ _freed_pool_reset (freed_pool_t *pool);
 
 typedef int freed_pool_t;
 
-#define _freed_pool_get(pool) NULL
+#define _freed_pool_get(pool) XNULL
 #define _freed_pool_put(pool, ptr) xmemory_free(ptr)
 #define _freed_pool_reset(ptr)
 

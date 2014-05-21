@@ -50,12 +50,12 @@ _cairo_rtree_node_create (cairo_rtree_t		 *rtree,
     cairo_rtree_node_t *node;
 
     node = _cairo_freepool_alloc (&rtree->node_freepool);
-    if (node == NULL) {
+    if (node == XNULL) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return NULL;
+	return XNULL;
     }
 
-    node->children[0] = NULL;
+    node->children[0] = XNULL;
     node->parent = parent;
     node->state  = CAIRO_RTREE_NODE_AVAILABLE;
     node->pinned = FALSE;
@@ -79,7 +79,7 @@ _cairo_rtree_node_destroy (cairo_rtree_t *rtree, cairo_rtree_node_t *node)
     if (node->state == CAIRO_RTREE_NODE_OCCUPIED) {
 	rtree->destroy (node);
     } else {
-	for (i = 0; i < 4 && node->children[i] != NULL; i++)
+	for (i = 0; i < 4 && node->children[i] != XNULL; i++)
 	    _cairo_rtree_node_destroy (rtree, node->children[i]);
     }
 
@@ -94,17 +94,17 @@ _cairo_rtree_node_collapse (cairo_rtree_t *rtree, cairo_rtree_node_t *node)
     do {
 	XASSERT (node->state == CAIRO_RTREE_NODE_DIVIDED);
 
-	for (i = 0;  i < 4 && node->children[i] != NULL; i++)
+	for (i = 0;  i < 4 && node->children[i] != XNULL; i++)
 	    if (node->children[i]->state != CAIRO_RTREE_NODE_AVAILABLE)
 		return;
 
-	for (i = 0; i < 4 && node->children[i] != NULL; i++)
+	for (i = 0; i < 4 && node->children[i] != XNULL; i++)
 	    _cairo_rtree_node_destroy (rtree, node->children[i]);
 
-	node->children[0] = NULL;
+	node->children[0] = XNULL;
 	node->state = CAIRO_RTREE_NODE_AVAILABLE;
 	cairo_list_move (&node->link, &rtree->available);
-    } while ((node = node->parent) != NULL);
+    } while ((node = node->parent) != XNULL);
 }
 
 cairo_status_t
@@ -129,7 +129,7 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 	node->children[i] = _cairo_rtree_node_create (rtree, node,
 						      node->x, node->y,
 						      width, height);
-	if (unlikely (node->children[i] == NULL))
+	if (unlikely (node->children[i] == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	i++;
 
@@ -138,7 +138,7 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 							  node->x + width,
 							  node->y,
 							  w, height);
-	    if (unlikely (node->children[i] == NULL))
+	    if (unlikely (node->children[i] == XNULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    i++;
 	}
@@ -148,7 +148,7 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 							  node->x,
 							  node->y + height,
 							  width, h);
-	    if (unlikely (node->children[i] == NULL))
+	    if (unlikely (node->children[i] == XNULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    i++;
 
@@ -157,14 +157,14 @@ _cairo_rtree_node_insert (cairo_rtree_t *rtree,
 							      node->x + width,
 							      node->y + height,
 							      w, h);
-		if (unlikely (node->children[i] == NULL))
+		if (unlikely (node->children[i] == XNULL))
 		    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		i++;
 	    }
 	}
 
 	if (i < 4)
-	    node->children[i] = NULL;
+	    node->children[i] = XNULL;
 
 	node->state = CAIRO_RTREE_NODE_DIVIDED;
 	cairo_list_move (&node->link, &rtree->evictable);
@@ -262,9 +262,9 @@ _cairo_rtree_evict_random (cairo_rtree_t	 *rtree,
 	    if (node->state == CAIRO_RTREE_NODE_OCCUPIED) {
 		rtree->destroy (node);
 	    } else {
-		for (i = 0; i < 4 && node->children[i] != NULL; i++)
+		for (i = 0; i < 4 && node->children[i] != XNULL; i++)
 		    _cairo_rtree_node_destroy (rtree, node->children[i]);
-		node->children[0] = NULL;
+		node->children[0] = XNULL;
 	    }
 
 	    node->state = CAIRO_RTREE_NODE_AVAILABLE;
@@ -330,9 +330,9 @@ _cairo_rtree_reset (cairo_rtree_t *rtree)
     if (rtree->root.state == CAIRO_RTREE_NODE_OCCUPIED) {
 	rtree->destroy (&rtree->root);
     } else {
-	for (i = 0; i < 4 && rtree->root.children[i] != NULL; i++)
+	for (i = 0; i < 4 && rtree->root.children[i] != XNULL; i++)
 	    _cairo_rtree_node_destroy (rtree, rtree->root.children[i]);
-	rtree->root.children[0] = NULL;
+	rtree->root.children[0] = XNULL;
     }
 
     cairo_list_init (&rtree->available);
@@ -351,7 +351,7 @@ _cairo_rtree_node_foreach (cairo_rtree_node_t *node,
 {
     int i;
 
-    for (i = 0; i < 4 && node->children[i] != NULL; i++)
+    for (i = 0; i < 4 && node->children[i] != XNULL; i++)
 	_cairo_rtree_node_foreach(node->children[i], func, data);
 
     func(node, data);
@@ -367,7 +367,7 @@ _cairo_rtree_foreach (cairo_rtree_t *rtree,
     if (rtree->root.state == CAIRO_RTREE_NODE_OCCUPIED) {
 	func(&rtree->root, data);
     } else {
-	for (i = 0; i < 4 && rtree->root.children[i] != NULL; i++)
+	for (i = 0; i < 4 && rtree->root.children[i] != XNULL; i++)
 	    _cairo_rtree_node_foreach (rtree->root.children[i], func, data);
     }
 }
@@ -380,7 +380,7 @@ _cairo_rtree_fini (cairo_rtree_t *rtree)
     if (rtree->root.state == CAIRO_RTREE_NODE_OCCUPIED) {
 	rtree->destroy (&rtree->root);
     } else {
-	for (i = 0; i < 4 && rtree->root.children[i] != NULL; i++)
+	for (i = 0; i < 4 && rtree->root.children[i] != XNULL; i++)
 	    _cairo_rtree_node_destroy (rtree, rtree->root.children[i]);
     }
 

@@ -117,7 +117,7 @@ pqueue_init (pqueue_t *pq)
     pq->size = 0;
 
     pq->elements = pq->elements_embedded;
-    pq->elements[PQ_FIRST_ENTRY] = NULL;
+    pq->elements[PQ_FIRST_ENTRY] = XNULL;
 }
 
 static inline void
@@ -136,7 +136,7 @@ pqueue_grow (pqueue_t *pq)
     if (pq->elements == pq->elements_embedded) {
 	new_elements = _cairo_malloc_ab (pq->max_size,
 					 sizeof (rectangle_t *));
-	if (unlikely (new_elements == NULL))
+	if (unlikely (new_elements == XNULL))
 	    return FALSE;
 
 	xmemory_copy (new_elements, pq->elements_embedded,
@@ -145,7 +145,7 @@ pqueue_grow (pqueue_t *pq)
 	new_elements = _cairo_realloc_ab (pq->elements,
 					  pq->max_size,
 					  sizeof (rectangle_t *));
-	if (unlikely (new_elements == NULL))
+	if (unlikely (new_elements == XNULL))
 	    return FALSE;
     }
 
@@ -187,7 +187,7 @@ pqueue_pop (pqueue_t *pq)
 
     tail = elements[pq->size--];
     if (pq->size == 0) {
-	elements[PQ_FIRST_ENTRY] = NULL;
+	elements[PQ_FIRST_ENTRY] = XNULL;
 	return;
     }
 
@@ -232,9 +232,9 @@ sweep_line_init (sweep_line_t *sweep)
     sweep->spans = sweep->spans_stack;
     sweep->size_spans = ARRAY_LENGTH (sweep->spans_stack);
 
-    sweep->coverage.head.prev = NULL;
+    sweep->coverage.head.prev = XNULL;
     sweep->coverage.head.x = XINT32_MIN;
-    sweep->coverage.tail.next = NULL;
+    sweep->coverage.tail.next = XNULL;
     sweep->coverage.tail.x = XINT32_MAX;
 
     pqueue_init (&sweep->stop);
@@ -283,7 +283,7 @@ add_cell (sweep_line_t *sweep, int x, int covered, int uncovered)
 	sweep->coverage.count++;
 
 	c = _cairo_freepool_alloc (&sweep->coverage.pool);
-	if (unlikely (c == NULL)) {
+	if (unlikely (c == XNULL)) {
 	    xlongjmp_jump (sweep->jmpbuf,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
@@ -368,7 +368,7 @@ _active_edges_to_spans (sweep_line_t	*sweep)
 	    xmemory_free (sweep->spans);
 
 	sweep->spans = _cairo_malloc_ab (size, sizeof (cairo_half_open_span_t));
-	if (unlikely (sweep->spans == NULL))
+	if (unlikely (sweep->spans == XNULL))
 	    xlongjmp_jump (sweep->jmpbuf, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
 	sweep->size_spans = size;
@@ -512,7 +512,7 @@ generate (cairo_rectangular_scan_converter_t *self,
 	do {
 	    sweep_line_insert (&sweep_line, start);
 	    start = *sweep_line.start++;
-	    if (start == NULL)
+	    if (start == XNULL)
 		goto end;
 	    if (start->top_y != sweep_line.current_y)
 		break;
@@ -524,13 +524,13 @@ generate (cairo_rectangular_scan_converter_t *self,
 	while (stop->bottom_y == sweep_line.current_y) {
 	    sweep_line_delete (&sweep_line, stop);
 	    stop = peek_stop (&sweep_line);
-	    if (stop == NULL)
+	    if (stop == XNULL)
 		break;
 	}
 
 	sweep_line.current_y++;
 
-	while (stop != NULL && stop->bottom_y < start->top_y) {
+	while (stop != XNULL && stop->bottom_y < start->top_y) {
 	    if (stop->bottom_y != sweep_line.current_y) {
 		render_rows (&sweep_line, renderer,
 			     stop->bottom_y - sweep_line.current_y);
@@ -542,7 +542,7 @@ generate (cairo_rectangular_scan_converter_t *self,
 	    do {
 		sweep_line_delete (&sweep_line, stop);
 		stop = peek_stop (&sweep_line);
-	    } while (stop != NULL && stop->bottom_y == sweep_line.current_y);
+	    } while (stop != XNULL && stop->bottom_y == sweep_line.current_y);
 
 	    sweep_line.current_y++;
 	}
@@ -555,7 +555,7 @@ generate (cairo_rectangular_scan_converter_t *self,
     while (stop->bottom_y == sweep_line.current_y) {
 	sweep_line_delete (&sweep_line, stop);
 	stop = peek_stop (&sweep_line);
-	if (stop == NULL)
+	if (stop == XNULL)
 	    goto out;
     }
 
@@ -571,7 +571,7 @@ generate (cairo_rectangular_scan_converter_t *self,
 	do {
 	    sweep_line_delete (&sweep_line, stop);
 	    stop = peek_stop (&sweep_line);
-	    if (stop == NULL)
+	    if (stop == XNULL)
 		goto out;
 	} while (stop->bottom_y == sweep_line.current_y);
 
@@ -666,7 +666,7 @@ _cairo_rectangular_scan_converter_generate (void			*converter,
 	return renderer->render_rows (renderer,
 				      _cairo_fixed_integer_part (self->extents.p1.y),
 				      _cairo_fixed_integer_part (self->extents.p2.y - self->extents.p1.y),
-				      NULL, 0);
+				      XNULL, 0);
     }
 
     if (self->num_rectangles == 1)
@@ -676,12 +676,12 @@ _cairo_rectangular_scan_converter_generate (void			*converter,
     if (unlikely (self->num_rectangles >= ARRAY_LENGTH (rectangles_stack))) {
 	rectangles = _cairo_malloc_ab (self->num_rectangles + 1,
 				       sizeof (rectangle_t *));
-	if (unlikely (rectangles == NULL))
+	if (unlikely (rectangles == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
     j = 0;
-    for (chunk = &self->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &self->chunks; chunk != XNULL; chunk = chunk->next) {
 	rectangle_t *rectangle;
 
 	rectangle = chunk->base;
@@ -689,7 +689,7 @@ _cairo_rectangular_scan_converter_generate (void			*converter,
 	    rectangles[j++] = &rectangle[i];
     }
     rectangle_sort (rectangles, j);
-    rectangles[j] = NULL;
+    rectangles[j] = XNULL;
 
     status = generate (self, renderer, rectangles);
 
@@ -714,11 +714,11 @@ _allocate_rectangle (cairo_rectangular_scan_converter_t *self)
 					       sizeof (rectangle_t),
 					       sizeof (struct _cairo_rectangular_scan_converter_chunk));
 
-	if (unlikely (chunk->next == NULL))
-	    return NULL;
+	if (unlikely (chunk->next == XNULL))
+	    return XNULL;
 
 	chunk = chunk->next;
-	chunk->next = NULL;
+	chunk->next = XNULL;
 	chunk->count = 0;
 	chunk->size = size;
 	chunk->base = chunk + 1;
@@ -737,7 +737,7 @@ _cairo_rectangular_scan_converter_add_box (cairo_rectangular_scan_converter_t *s
     rectangle_t *rectangle;
 
     rectangle = _allocate_rectangle (self);
-    if (unlikely (rectangle == NULL))
+    if (unlikely (rectangle == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     rectangle->dir = dir;
@@ -766,7 +766,7 @@ _cairo_rectangular_scan_converter_destroy (void *converter)
     cairo_rectangular_scan_converter_t *self = converter;
     struct _cairo_rectangular_scan_converter_chunk *chunk, *next;
 
-    for (chunk = self->chunks.next; chunk != NULL; chunk = next) {
+    for (chunk = self->chunks.next; chunk != XNULL; chunk = next) {
 	next = chunk->next;
 	xmemory_free (chunk);
     }
@@ -782,7 +782,7 @@ _cairo_rectangular_scan_converter_init (cairo_rectangular_scan_converter_t *self
     _cairo_box_from_rectangle (&self->extents, extents);
 
     self->chunks.base = self->buf;
-    self->chunks.next = NULL;
+    self->chunks.next = XNULL;
     self->chunks.count = 0;
     self->chunks.size = sizeof (self->buf) / sizeof (rectangle_t);
     self->tail = &self->chunks;

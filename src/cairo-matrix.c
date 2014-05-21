@@ -919,7 +919,7 @@ _cairo_matrix_transformed_circle_major_axis (const cairo_matrix_t *matrix,
     _cairo_matrix_get_affine (matrix,
                               &a, &b,
                               &c, &d,
-                              NULL, NULL);
+                              XNULL, XNULL);
 
     i = a*a + b*b;
     j = c*c + d*d;

@@ -46,7 +46,7 @@ _cairo_boxes_init (cairo_boxes_t *boxes)
     boxes->num_boxes = 0;
 
     boxes->tail = &boxes->chunks;
-    boxes->chunks.next = NULL;
+    boxes->chunks.next = XNULL;
     boxes->chunks.base = boxes->boxes_embedded;
     boxes->chunks.size = ARRAY_LENGTH (boxes->boxes_embedded);
     boxes->chunks.count = 0;
@@ -85,7 +85,7 @@ _cairo_boxes_init_for_array (cairo_boxes_t *boxes,
     boxes->num_boxes = num_boxes;
 
     boxes->tail = &boxes->chunks;
-    boxes->chunks.next = NULL;
+    boxes->chunks.next = XNULL;
     boxes->chunks.base = array;
     boxes->chunks.size = num_boxes;
     boxes->chunks.count = num_boxes;
@@ -149,7 +149,7 @@ _cairo_boxes_add_internal (cairo_boxes_t *boxes,
 					       sizeof (cairo_box_t),
 					       sizeof (struct _cairo_boxes_chunk));
 
-	if (unlikely (chunk->next == NULL)) {
+    if (unlikely (chunk->next == XNULL)) {
 	    boxes->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    return;
 	}
@@ -157,7 +157,7 @@ _cairo_boxes_add_internal (cairo_boxes_t *boxes,
 	chunk = chunk->next;
 	boxes->tail = chunk;
 
-	chunk->next = NULL;
+    chunk->next = XNULL;
 	chunk->count = 0;
 	chunk->size = size;
 	chunk->base = (cairo_box_t *) (chunk + 1);
@@ -280,7 +280,7 @@ _cairo_boxes_extents (const cairo_boxes_t *boxes,
     }
 
     b = boxes->chunks.base[0];
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++) {
 	    if (chunk->base[i].p1.x < b.p1.x)
 		b.p1.x = chunk->base[i].p1.x;
@@ -303,7 +303,7 @@ _cairo_boxes_clear (cairo_boxes_t *boxes)
 {
     struct _cairo_boxes_chunk *chunk, *next;
 
-    for (chunk = boxes->chunks.next; chunk != NULL; chunk = next) {
+    for (chunk = boxes->chunks.next; chunk != XNULL; chunk = next) {
 	next = chunk->next;
     xmemory_free (chunk);
     }
@@ -328,17 +328,17 @@ _cairo_boxes_to_array (const cairo_boxes_t *boxes,
     int i, j;
 
     *num_boxes = boxes->num_boxes;
-    if (boxes->chunks.next == NULL && ! force_allocation)
+    if (boxes->chunks.next == XNULL && ! force_allocation)
 	    return boxes->chunks.base;
 
     box = _cairo_malloc_ab (boxes->num_boxes, sizeof (cairo_box_t));
-    if (box == NULL) {
+    if (box == XNULL) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return NULL;
+    return XNULL;
     }
 
     j = 0;
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++)
 	    box[j++] = chunk->base[i];
     }
@@ -351,7 +351,7 @@ _cairo_boxes_fini (cairo_boxes_t *boxes)
 {
     struct _cairo_boxes_chunk *chunk, *next;
 
-    for (chunk = boxes->chunks.next; chunk != NULL; chunk = next) {
+    for (chunk = boxes->chunks.next; chunk != XNULL; chunk = next) {
 	next = chunk->next;
     xmemory_free (chunk);
     }
@@ -365,7 +365,7 @@ _cairo_boxes_for_each_box (cairo_boxes_t *boxes,
     struct _cairo_boxes_chunk *chunk;
     int i;
 
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++)
 	    if (! func (&chunk->base[i], data))
 		return FALSE;
@@ -449,7 +449,7 @@ _cairo_debug_print_boxes (xfile_t *stream, const cairo_boxes_t *boxes)
 	     _cairo_fixed_to_double (extents.p2.x),
 	     _cairo_fixed_to_double (extents.p2.y));
 
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++) {
         XDBGPRINTF ("  box[%d]: (%f, %f), (%f, %f)\n", i,
 		     _cairo_fixed_to_double (chunk->base[i].p1.x),

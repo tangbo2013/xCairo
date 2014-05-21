@@ -50,7 +50,7 @@ _cairo_contour_init (cairo_contour_t *contour,
 {
     contour->direction = direction;
     contour->chain.points = contour->embedded_points;
-    contour->chain.next = NULL;
+    contour->chain.next = XNULL;
     contour->chain.num_points = 0;
     contour->chain.size_points = ARRAY_LENGTH (contour->embedded_points);
     contour->tail = &contour->chain;
@@ -63,18 +63,18 @@ __cairo_contour_add_point (cairo_contour_t *contour,
     cairo_contour_chain_t *tail = contour->tail;
     cairo_contour_chain_t *next;
 
-    XASSERT (tail->next == NULL);
+    XASSERT (tail->next == XNULL);
 
     next = _cairo_malloc_ab_plus_c (tail->size_points*2,
 				    sizeof (cairo_point_t),
 				    sizeof (cairo_contour_chain_t));
-    if (unlikely (next == NULL))
+    if (unlikely (next == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     next->size_points = tail->size_points*2;
     next->num_points = 1;
     next->points = (cairo_point_t *)(next+1);
-    next->next = NULL;
+    next->next = XNULL;
     tail->next = next;
     contour->tail = next;
 
@@ -88,7 +88,7 @@ first_inc (cairo_contour_t *contour,
 	   cairo_contour_chain_t **chain)
 {
     if (*p == (*chain)->points + (*chain)->num_points) {
-    XASSERT (NULL != (*chain)->next);
+    XASSERT (XNULL != (*chain)->next);
 	*chain = (*chain)->next;
 	*p = &(*chain)->points[0];
     } else
@@ -164,7 +164,7 @@ iter_next (cairo_contour_iter_t *iter)
 {
     if (iter->point == &iter->chain->points[iter->chain->size_points-1]) {
 	iter->chain = iter->chain->next;
-	if (iter->chain == NULL)
+    if (iter->chain == XNULL)
 	    return FALSE;
 
 	iter->point = &iter->chain->points[0];
@@ -202,7 +202,7 @@ static const cairo_contour_chain_t *prev_const_chain(const cairo_contour_t *cont
     const cairo_contour_chain_t *prev;
 
     if (chain == &contour->chain)
-	return NULL;
+    return XNULL;
 
     for (prev = &contour->chain; prev->next != chain; prev = prev->next)
 	;
@@ -307,7 +307,7 @@ void
 _cairo_contour_simplify (cairo_contour_t *contour, double tolerance)
 {
     cairo_contour_chain_t *chain;
-    cairo_point_t *last = NULL;
+    cairo_point_t *last = XNULL;
     cairo_contour_iter_t iter, furthest;
     cairo_bool_t simplified;
     xuint64_t max = 0;
@@ -322,7 +322,7 @@ _cairo_contour_simplify (cairo_contour_t *contour, double tolerance)
     /* stage 1: vertex reduction */
     for (chain = &contour->chain; chain; chain = chain->next) {
 	for (i = 0; i < chain->num_points; i++) {
-	    if (last == NULL ||
+        if (last == XNULL ||
 		point_distance_sq (last, &chain->points[i]) > tolerance) {
 		last = &chain->points[i];
 	    } else {
@@ -387,7 +387,7 @@ _cairo_contour_simplify (cairo_contour_t *contour, double tolerance)
         xmemory_free (chain);
 	}
 
-	iter.chain->next = NULL;
+    iter.chain->next = XNULL;
 	contour->tail = iter.chain;
     }
 }
@@ -450,5 +450,5 @@ __cairo_contour_remove_last_chain (cairo_contour_t *contour)
 	;
     xmemory_free (contour->tail);
     contour->tail = chain;
-    chain->next = NULL;
+    chain->next = XNULL;
 }

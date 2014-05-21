@@ -329,8 +329,8 @@ _cairo_shape_mask_compositor_init (cairo_compositor_t *compositor,
 {
     compositor->delegate = delegate;
 
-    compositor->paint  = NULL;
-    compositor->mask   = NULL;
+    compositor->paint  = XNULL;
+    compositor->mask   = XNULL;
     compositor->fill   = _cairo_shape_mask_compositor_fill;
     compositor->stroke = _cairo_shape_mask_compositor_stroke;
     compositor->glyphs = _cairo_shape_mask_compositor_glyphs;

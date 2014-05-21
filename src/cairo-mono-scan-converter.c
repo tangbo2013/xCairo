@@ -124,7 +124,7 @@ polygon_init (struct polygon *polygon, int ymin, int ymax)
     polygon->y_buckets = polygon->y_buckets_embedded;
     if (h > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
 	polygon->y_buckets = _cairo_malloc_ab (h, sizeof (struct edge *));
-	if (unlikely (NULL == polygon->y_buckets))
+    if (unlikely (XNULL == polygon->y_buckets))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
     xmemory_set (polygon->y_buckets, 0, h * sizeof (struct edge *));
@@ -154,7 +154,7 @@ _polygon_insert_edge_into_its_y_bucket(struct polygon *polygon,
     if (*ptail)
 	(*ptail)->prev = e;
     e->next = *ptail;
-    e->prev = NULL;
+    e->prev = XNULL;
     *ptail = e;
 }
 
@@ -224,7 +224,7 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
     do {
 	x = head_b->x.quo;
-	while (head_a != NULL && head_a->x.quo <= x) {
+    while (head_a != XNULL && head_a->x.quo <= x) {
 	    prev = head_a;
 	    next = &head_a->next;
 	    head_a = head_a->next;
@@ -232,12 +232,12 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
 	head_b->prev = prev;
 	*next = head_b;
-	if (head_a == NULL)
+    if (head_a == XNULL)
 	    return head;
 
 start_with_b:
 	x = head_a->x.quo;
-	while (head_b != NULL && head_b->x.quo <= x) {
+    while (head_b != XNULL && head_b->x.quo <= x) {
 	    prev = head_b;
 	    next = &head_b->next;
 	    head_b = head_b->next;
@@ -245,7 +245,7 @@ start_with_b:
 
 	head_a->prev = prev;
 	*next = head_a;
-	if (head_b == NULL)
+    if (head_b == XNULL)
 	    return head;
     } while (1);
 }
@@ -260,21 +260,21 @@ sort_edges (struct edge *list,
 
     head_other = list->next;
 
-    if (head_other == NULL) {
+    if (head_other == XNULL) {
 	*head_out = list;
-	return NULL;
+    return XNULL;
     }
 
     remaining = head_other->next;
     if (list->x.quo <= head_other->x.quo) {
 	*head_out = list;
-	head_other->next = NULL;
+    head_other->next = XNULL;
     } else {
 	*head_out = head_other;
 	head_other->prev = list->prev;
 	head_other->next = list;
 	list->prev = head_other;
-	list->next = NULL;
+    list->next = XNULL;
     }
 
     for (i = 0; i < level && remaining; i++) {
@@ -402,7 +402,7 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
     if (max_num_spans > ARRAY_LENGTH(c->spans_embedded)) {
 	c->spans = _cairo_malloc_ab (max_num_spans,
 				     sizeof (cairo_half_open_span_t));
-	if (unlikely (c->spans == NULL)) {
+    if (unlikely (c->spans == XNULL)) {
 	    polygon_fini (c->polygon);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
@@ -417,10 +417,10 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
     c->head.vertical = 1;
     c->head.height_left = XINT32_MAX;
     c->head.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MIN));
-    c->head.prev = NULL;
+    c->head.prev = XNULL;
     c->head.next = &c->tail;
     c->tail.prev = &c->head;
-    c->tail.next = NULL;
+    c->tail.next = XNULL;
     c->tail.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MAX));
     c->tail.height_left = XINT32_MAX;
     c->tail.vertical = 1;
@@ -447,7 +447,7 @@ mono_scan_converter_allocate_edges(struct mono_scan_converter *c,
     c->polygon->edges = c->polygon->edges_embedded;
     if (num_edges > ARRAY_LENGTH (c->polygon->edges_embedded)) {
 	c->polygon->edges = _cairo_malloc_ab (num_edges, sizeof (struct edge));
-	if (unlikely (c->polygon->edges == NULL))
+    if (unlikely (c->polygon->edges == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -502,7 +502,7 @@ mono_scan_converter_render(struct mono_scan_converter *c,
 		e = e->next;
 	    }
 
-	    while (--min_height >= 1 && polygon->y_buckets[j] == NULL)
+        while (--min_height >= 1 && polygon->y_buckets[j] == XNULL)
 		j++;
 	    if (j != i + 1)
 		step_edges (c, j - (i + 1));
@@ -588,7 +588,7 @@ _cairo_mono_scan_converter_create (int			xmin,
     cairo_status_t status;
 
     self = xmemory_alloc (sizeof(struct _cairo_mono_scan_converter));
-    if (unlikely (self == NULL)) {
+    if (unlikely (self == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;
     }

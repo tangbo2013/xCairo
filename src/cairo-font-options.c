@@ -183,7 +183,7 @@ cairo_font_options_destroy (cairo_font_options_t *options)
 cairo_status_t
 cairo_font_options_status (cairo_font_options_t *options)
 {
-    if (options == NULL)
+    if (options == XNULL)
 	return CAIRO_STATUS_NULL_POINTER;
     else if (options == (cairo_font_options_t *) &_cairo_font_options_nil)
 	return CAIRO_STATUS_NO_MEMORY;

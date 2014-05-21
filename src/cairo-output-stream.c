@@ -90,18 +90,18 @@ _cairo_output_stream_fini (cairo_output_stream_t *stream)
 }
 
 const cairo_output_stream_t _cairo_output_stream_nil = {
-    NULL, /* write_func */
-    NULL, /* flush_func */
-    NULL, /* close_func */
+    XNULL, /* write_func */
+    XNULL, /* flush_func */
+    XNULL, /* close_func */
     0,    /* position */
     CAIRO_STATUS_NO_MEMORY,
     FALSE /* closed */
 };
 
 static const cairo_output_stream_t _cairo_output_stream_nil_write_error = {
-    NULL, /* write_func */
-    NULL, /* flush_func */
-    NULL, /* close_func */
+    XNULL, /* write_func */
+    XNULL, /* flush_func */
+    XNULL, /* close_func */
     0,    /* position */
     CAIRO_STATUS_WRITE_ERROR,
     FALSE /* closed */
@@ -122,7 +122,7 @@ closure_write (cairo_output_stream_t *stream,
     cairo_output_stream_with_closure_t *stream_with_closure =
 	(cairo_output_stream_with_closure_t *) stream;
 
-    if (stream_with_closure->write_func == NULL)
+    if (stream_with_closure->write_func == XNULL)
 	return CAIRO_STATUS_SUCCESS;
 
     return stream_with_closure->write_func (stream_with_closure->closure,
@@ -135,7 +135,7 @@ closure_close (cairo_output_stream_t *stream)
     cairo_output_stream_with_closure_t *stream_with_closure =
 	(cairo_output_stream_with_closure_t *) stream;
 
-    if (stream_with_closure->close_func != NULL)
+    if (stream_with_closure->close_func != XNULL)
 	return stream_with_closure->close_func (stream_with_closure->closure);
     else
 	return CAIRO_STATUS_SUCCESS;
@@ -149,13 +149,13 @@ _cairo_output_stream_create (cairo_write_func_t		write_func,
     cairo_output_stream_with_closure_t *stream;
 
     stream = xmemory_alloc (sizeof (cairo_output_stream_with_closure_t));
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
     _cairo_output_stream_init (&stream->base,
-			       closure_write, NULL, closure_close);
+                   closure_write, XNULL, closure_close);
     stream->write_func = write_func;
     stream->close_func = close_func;
     stream->closure = closure;
@@ -175,12 +175,12 @@ _cairo_output_stream_create_in_error (cairo_status_t status)
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
 
     stream = xmemory_alloc (sizeof (cairo_output_stream_t));
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
-    _cairo_output_stream_init (stream, NULL, NULL, NULL);
+    _cairo_output_stream_init (stream, XNULL, XNULL, XNULL);
     stream->status = status;
 
     return stream;
@@ -241,7 +241,7 @@ _cairo_output_stream_destroy (cairo_output_stream_t *stream)
 {
     cairo_status_t status;
 
-    XASSERT (stream != NULL);
+    XASSERT (stream != XNULL);
 
     if (stream == &_cairo_output_stream_nil ||
 	stream == &_cairo_output_stream_nil_write_error)
@@ -594,13 +594,13 @@ _cairo_output_stream_create_for_file (xfile_t *file)
 {
     stdio_stream_t *stream;
 
-    if (file == NULL) {
+    if (file == XNULL) {
 	_cairo_error_throw (CAIRO_STATUS_WRITE_ERROR);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
     }
 
     stream = xmemory_alloc (sizeof *stream);
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
@@ -618,11 +618,11 @@ _cairo_output_stream_create_for_filename (const char *filename)
     stdio_stream_t *stream;
     xfile_t *file;
 
-    if (filename == NULL)
+    if (filename == XNULL)
 	return _cairo_null_stream_create ();
 
     file = xfile_open (filename, XOFM_READWRITE);
-    if (file == NULL) {
+    if (file == XNULL) {
 //	switch (errno) {
 //	case ENOMEM:
 //	    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
@@ -634,7 +634,7 @@ _cairo_output_stream_create_for_filename (const char *filename)
     }
 
     stream = xmemory_alloc (sizeof *stream);
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
     xfile_close (file);
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -678,12 +678,12 @@ _cairo_memory_stream_create (void)
     memory_stream_t *stream;
 
     stream = xmemory_alloc (sizeof *stream);
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
-    _cairo_output_stream_init (&stream->base, memory_write, NULL, memory_close);
+    _cairo_output_stream_init (&stream->base, memory_write, XNULL, memory_close);
     _cairo_array_init (&stream->array, 1);
 
     return &stream->base;
@@ -705,7 +705,7 @@ _cairo_memory_stream_destroy (cairo_output_stream_t *abstract_stream,
 
     *length_out = _cairo_array_num_elements (&stream->array);
     *data_out = xmemory_alloc (*length_out);
-    if (unlikely (*data_out == NULL)) {
+    if (unlikely (*data_out == XNULL)) {
 	status = _cairo_output_stream_destroy (abstract_stream);
 	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -755,12 +755,12 @@ _cairo_null_stream_create (void)
     cairo_output_stream_t *stream;
 
     stream = xmemory_alloc (sizeof *stream);
-    if (unlikely (stream == NULL)) {
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
-    _cairo_output_stream_init (stream, null_write, NULL, NULL);
+    _cairo_output_stream_init (stream, null_write, XNULL, XNULL);
 
     return stream;
 }

@@ -201,7 +201,7 @@ _jpx_find_box (const unsigned char *p, const unsigned char *end, xuint32_t type)
 	p = _jpx_next_box (p);
     }
 
-    return NULL;
+    return XNULL;
 }
 
 static void

@@ -51,7 +51,7 @@
  * generate simple masks.
  **/
 
-static const cairo_path_t _cairo_path_nil = { CAIRO_STATUS_NO_MEMORY, NULL, 0 };
+static const cairo_path_t _cairo_path_nil = { CAIRO_STATUS_NO_MEMORY, XNULL, 0 };
 
 /* Closure for path interpretation. */
 typedef struct cairo_path_count {
@@ -295,13 +295,13 @@ _cairo_path_create_in_error (cairo_status_t status)
 	return (cairo_path_t*) &_cairo_path_nil;
 
     path = xmemory_alloc (sizeof (cairo_path_t));
-    if (unlikely (path == NULL)) {
+    if (unlikely (path == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_path_t*) &_cairo_path_nil;
     }
 
     path->num_data = 0;
-    path->data = NULL;
+    path->data = XNULL;
     path->status = status;
 
     return path;
@@ -315,7 +315,7 @@ _cairo_path_create_internal (cairo_path_fixed_t *path_fixed,
     cairo_path_t *path;
 
     path = xmemory_alloc (sizeof (cairo_path_t));
-    if (unlikely (path == NULL)) {
+    if (unlikely (path == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_path_t*) &_cairo_path_nil;
     }
@@ -331,7 +331,7 @@ _cairo_path_create_internal (cairo_path_fixed_t *path_fixed,
     if (path->num_data) {
 	path->data = _cairo_malloc_ab (path->num_data,
 				       sizeof (cairo_path_data_t));
-	if (unlikely (path->data == NULL)) {
+	if (unlikely (path->data == XNULL)) {
 	    xmemory_free (path);
 	    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	    return (cairo_path_t*) &_cairo_path_nil;
@@ -339,7 +339,7 @@ _cairo_path_create_internal (cairo_path_fixed_t *path_fixed,
 
 	path->status = _cairo_path_populate (path, path_fixed, cr, flatten);
     } else {
-	path->data = NULL;
+	path->data = XNULL;
 	path->status = CAIRO_STATUS_SUCCESS;
     }
 
@@ -365,7 +365,7 @@ _cairo_path_create_internal (cairo_path_fixed_t *path_fixed,
 void
 cairo_path_destroy (cairo_path_t *path)
 {
-    if (path == NULL || path == &_cairo_path_nil)
+    if (path == XNULL || path == &_cairo_path_nil)
 	return;
 
     xmemory_free (path->data);

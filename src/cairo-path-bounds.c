@@ -186,7 +186,7 @@ _cairo_path_fixed_stroke_extents (const cairo_path_fixed_t	*path,
     cairo_polygon_t polygon;
     cairo_status_t status;
 
-    _cairo_polygon_init (&polygon, NULL, 0);
+    _cairo_polygon_init (&polygon, XNULL, 0);
     status = _cairo_path_fixed_stroke_to_polygon (path,
 						  stroke_style,
 						  ctm, ctm_inverse,

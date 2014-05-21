@@ -832,7 +832,7 @@ static inline cairo_gl_operand_t *
 source_to_operand (cairo_surface_t *surface)
 {
     cairo_gl_source_t *source = (cairo_gl_source_t *)surface;
-    return source ? &source->operand : NULL;
+    return source ? &source->operand : XNULL;
 }
 
 static inline void
