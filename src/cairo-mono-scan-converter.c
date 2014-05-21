@@ -29,7 +29,7 @@
 
 #include <xC/xmemory.h>
 #include <xClib/string.h>
-#include <limits.h>
+//#include <limits.h>
 
 struct quorem {
     xint32_t quo;
@@ -288,7 +288,7 @@ sort_edges (struct edge *list,
 static struct edge *
 merge_unsorted_edges (struct edge *head, struct edge *unsorted)
 {
-    sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
     return merge_sorted_edges (head, unsorted);
 }
 
@@ -328,7 +328,7 @@ inline static void
 row (struct mono_scan_converter *c, unsigned int mask)
 {
     struct edge *edge = c->head.next;
-    int xstart = INT_MIN, prev_x = INT_MIN;
+    int xstart = XINT32_MIN, prev_x = XINT32_MIN;
     int winding = 0;
 
     c->num_spans = 0;
@@ -368,9 +368,9 @@ row (struct mono_scan_converter *c, unsigned int mask)
 	if ((winding & mask) == 0) {
 	    if (I(next->x.quo) > xend + 1) {
 		add_span (c, xstart, xend);
-		xstart = INT_MIN;
+        xstart = XINT32_MIN;
 	    }
-	} else if (xstart == INT_MIN)
+    } else if (xstart == XINT32_MIN)
 	    xstart = xend;
 
 	edge = next;
@@ -415,14 +415,14 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
     c->ymax = ymax;
 
     c->head.vertical = 1;
-    c->head.height_left = INT_MAX;
-    c->head.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (INT_MIN));
+    c->head.height_left = XINT32_MAX;
+    c->head.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MIN));
     c->head.prev = NULL;
     c->head.next = &c->tail;
     c->tail.prev = &c->head;
     c->tail.next = NULL;
-    c->tail.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (INT_MAX));
-    c->tail.height_left = INT_MAX;
+    c->tail.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MAX));
+    c->tail.height_left = XINT32_MAX;
     c->tail.vertical = 1;
 
     c->is_vertical = 1;

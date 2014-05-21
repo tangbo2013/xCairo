@@ -99,7 +99,7 @@
 
 #include <xC/xmemory.h>
 #include <xClib/string.h>
-#include <limits.h>
+//#include <limits.h>
 #include <xC/xlongjmp.h>
 
 /*-------------------------------------------------------------------------
@@ -181,7 +181,7 @@ glitter_scan_converter_reset(
  */
 #include <xC/xmemory.h>
 #include <xClib/string.h>
-#include <limits.h>
+//#include <limits.h>
 
 /* All polygon coordinates are snapped onto a subsample grid. "Grid
  * scaled" numbers are fixed precision reals with multiplier GRID_X or
@@ -645,8 +645,8 @@ cell_list_init(struct cell_list *cells, xjmp_buf_t *jmp)
 	      256*sizeof(struct cell),
 	      sizeof(cells->cell_pool.embedded));
     cells->tail.next = NULL;
-    cells->tail.x = INT_MAX;
-    cells->head.x = INT_MIN;
+    cells->tail.x = XINT32_MAX;
+    cells->head.x = XINT32_MIN;
     cells->head.next = &cells->tail;
     cell_list_rewind (cells);
 }
@@ -932,14 +932,14 @@ static void
 active_list_reset (struct active_list *active)
 {
     active->head.vertical = 1;
-    active->head.height_left = INT_MAX;
-    active->head.x.quo = INT_MIN;
+    active->head.height_left = XINT32_MAX;
+    active->head.x.quo = XINT32_MIN;
     active->head.prev = NULL;
     active->head.next = &active->tail;
     active->tail.prev = &active->head;
     active->tail.next = NULL;
-    active->tail.x.quo = INT_MAX;
-    active->tail.height_left = INT_MAX;
+    active->tail.x.quo = XINT32_MAX;
+    active->tail.height_left = XINT32_MAX;
     active->tail.vertical = 1;
     active->min_height = 0;
     active->is_vertical = 1;
@@ -1068,7 +1068,7 @@ sort_edges (struct edge *list,
 static struct edge *
 merge_unsorted_edges (struct edge *head, struct edge *unsorted)
 {
-    sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
     return merge_sorted_edges (head, unsorted);
 }
 
@@ -1082,7 +1082,7 @@ can_do_full_row (struct active_list *active)
     /* Recomputes the minimum height of all edges on the active
      * list if we have been dropping edges. */
     if (active->min_height <= 0) {
-	int min_height = INT_MAX;
+    int min_height = XINT32_MAX;
 	int is_vertical = 1;
 
 	e = active->head.next;
@@ -1145,7 +1145,7 @@ sub_row (struct active_list *active,
 	 unsigned int mask)
 {
     struct edge *edge = active->head.next;
-    int xstart = INT_MIN, prev_x = INT_MIN;
+    int xstart = XINT32_MIN, prev_x = XINT32_MIN;
     int winding = 0;
 
     cell_list_rewind (coverages);
@@ -1184,9 +1184,9 @@ sub_row (struct active_list *active,
 	if ((winding & mask) == 0) {
 	    if (next->x.quo != xend) {
 		cell_list_add_subspan (coverages, xstart, xend);
-		xstart = INT_MIN;
+        xstart = XINT32_MIN;
 	    }
-	} else if (xstart == INT_MIN)
+    } else if (xstart == XINT32_MIN)
 	    xstart = xend;
 
 	edge = next;
@@ -1267,12 +1267,12 @@ int_to_grid_scaled(int i, int scale)
 {
     /* Clamp to max/min representable scaled number. */
     if (i >= 0) {
-	if (i >= INT_MAX/scale)
-	    i = INT_MAX/scale;
+    if (i >= XINT32_MAX/scale)
+        i = XINT32_MAX/scale;
     }
     else {
-	if (i <= INT_MIN/scale)
-	    i = INT_MIN/scale;
+    if (i <= XINT32_MIN/scale)
+        i = XINT32_MIN/scale;
     }
     return i*scale;
 }
@@ -1556,7 +1556,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 	 * stepper. */
 	if (! polygon->y_buckets[i]) {
 	    if (active->head.next == &active->tail) {
-		active->min_height = INT_MAX;
+        active->min_height = XINT32_MAX;
 		active->is_vertical = 1;
 		for (; j < h && ! polygon->y_buckets[j]; j++)
 		    ;

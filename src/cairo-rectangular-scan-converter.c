@@ -221,9 +221,9 @@ CAIRO_COMBSORT_DECLARE (rectangle_sort, rectangle_t *, rectangle_compare_start)
 static void
 sweep_line_init (sweep_line_t *sweep)
 {
-    sweep->head.left = INT_MIN;
+    sweep->head.left = XINT32_MIN;
     sweep->head.next = &sweep->tail;
-    sweep->tail.left = INT_MAX;
+    sweep->tail.left = XINT32_MAX;
     sweep->tail.prev = &sweep->head;
     sweep->insert_cursor = &sweep->tail;
 
@@ -233,9 +233,9 @@ sweep_line_init (sweep_line_t *sweep)
     sweep->size_spans = ARRAY_LENGTH (sweep->spans_stack);
 
     sweep->coverage.head.prev = NULL;
-    sweep->coverage.head.x = INT_MIN;
+    sweep->coverage.head.x = XINT32_MIN;
     sweep->coverage.tail.next = NULL;
-    sweep->coverage.tail.x = INT_MAX;
+    sweep->coverage.tail.x = XINT32_MAX;
 
     pqueue_init (&sweep->stop);
 }
@@ -375,7 +375,7 @@ _active_edges_to_spans (sweep_line_t	*sweep)
     }
 
     prev_coverage = coverage = 0;
-    prev_x = INT_MIN;
+    prev_x = XINT32_MIN;
     for (cell = sweep->coverage.head.next; cell != &sweep->coverage.tail; cell = cell->next) {
 	if (cell->x != prev_x && coverage != prev_coverage) {
 	    int n = sweep->num_spans++;

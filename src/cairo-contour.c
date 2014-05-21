@@ -241,8 +241,8 @@ point_distance_sq (const cairo_point_t *p1,
     return _cairo_int32x32_64_mul (dx, dx) + _cairo_int32x32_64_mul (dy, dy);
 }
 
-#define DELETED(p) ((p)->x == INT_MIN && (p)->y == INT_MAX)
-#define MARK_DELETED(p) ((p)->x = INT_MIN, (p)->y = INT_MAX)
+#define DELETED(p) ((p)->x == XINT32_MIN && (p)->y == XINT32_MAX)
+#define MARK_DELETED(p) ((p)->x = XINT32_MIN, (p)->y = XINT32_MAX)
 
 static cairo_bool_t
 _cairo_contour_simplify_chain (cairo_contour_t *contour, const double tolerance,

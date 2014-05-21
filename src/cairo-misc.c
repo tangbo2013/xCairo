@@ -490,8 +490,8 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
 #if DISABLE_SOME_FLOATING_POINT
 /* This function is identical to the C99 function lround(), except that it
  * performs arithmetic rounding (floor(d + .5) instead of away-from-zero rounding) and
- * has a valid input range of (INT_MIN, INT_MAX] instead of
- * [INT_MIN, INT_MAX]. It is much faster on both x86 and FPU-less systems
+ * has a valid input range of (XINT32_MIN, XINT32_MAX] instead of
+ * [XINT32_MIN, XINT32_MAX]. It is much faster on both x86 and FPU-less systems
  * than other commonly used methods for rounding (lround, round, rint, lrint
  * or float (d + 0.5)).
  *
@@ -617,7 +617,7 @@ _cairo_lround (double d)
      * - {shift_amount < 0} Since shift_amount is an unsigned integer, it
      *   really can't have a value less than zero. But, if the shift_amount
      *   calculation above caused underflow (which would happen with
-     *   input > INT_MAX or input <= INT_MIN) then shift_amount will now be
+     *   input > XINT32_MAX or input <= XINT32_MIN) then shift_amount will now be
      *   a very large number, and so this shift will result in complete
      *   garbage. But that's OK, as the input was out of our range, so our
      *   output is undefined.

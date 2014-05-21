@@ -219,7 +219,7 @@ sweep_line_init (sweep_line_t	 *sweep_line,
     sweep_line->stop_size = 0;
 
     sweep_line->insert = NULL;
-    sweep_line->insert_x = INT_MAX;
+    sweep_line->insert_x = XINT32_MAX;
     sweep_line->cursor = &sweep_line->tail;
 
     sweep_line->head.dir = 0;
@@ -420,7 +420,7 @@ sort_edges (edge_t  *list,
 static edge_t *
 merge_unsorted_edges (edge_t *head, edge_t *unsorted)
 {
-    sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
     return merge_sorted_edges (head, unsorted);
 }
 
@@ -444,7 +444,7 @@ active_edges_insert (sweep_line_t *sweep)
     prev->next = merge_unsorted_edges (prev->next, sweep->insert);
     sweep->cursor = sweep->insert;
     sweep->insert = NULL;
-    sweep->insert_x = INT_MAX;
+    sweep->insert_x = XINT32_MAX;
 }
 
 static inline void
@@ -777,7 +777,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 	return CAIRO_STATUS_SUCCESS;
     }
 
-    y_min = INT_MAX; y_max = INT_MIN;
+    y_min = XINT32_MAX; y_max = XINT32_MIN;
     for (chunk = &in->chunks; chunk != NULL; chunk = chunk->next) {
 	const cairo_box_t *box = chunk->base;
 	for (i = 0; i < chunk->count; i++) {

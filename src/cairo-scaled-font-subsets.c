@@ -970,7 +970,7 @@ _cairo_scaled_font_subsets_map_glyph (cairo_scaled_font_subsets_t	*subsets,
             subset_glyph->is_scaled = TRUE;
             subset_glyph->is_composite = FALSE;
             if (subsets->type == CAIRO_SUBSETS_SCALED)
-                max_glyphs = INT_MAX;
+                max_glyphs = XINT32_MAX;
             else
                 max_glyphs = MAX_GLYPHS_PER_SIMPLE_FONT;
 

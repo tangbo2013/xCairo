@@ -506,8 +506,8 @@ _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
 	return clip;
 
     r.clip = clip;
-    r.extents.p1.x = r.extents.p1.y = INT_MAX;
-    r.extents.p2.x = r.extents.p2.y = INT_MIN;
+    r.extents.p1.x = r.extents.p1.y = XINT32_MAX;
+    r.extents.p2.x = r.extents.p2.y = XINT32_MIN;
     r.inside = FALSE;
 
     r.limit.p1.x = _cairo_fixed_from_int (clip->extents.x);

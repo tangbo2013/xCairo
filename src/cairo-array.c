@@ -94,7 +94,7 @@ _cairo_array_grow_by (cairo_array_t *array, unsigned int additional)
     unsigned int new_size;
 
     /* check for integer overflow */
-    if (required_size > INT_MAX || required_size < array->num_elements)
+    if (required_size > XINT32_MAX || required_size < array->num_elements)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     if (CAIRO_INJECT_FAULT ())

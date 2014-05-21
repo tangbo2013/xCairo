@@ -301,8 +301,8 @@ typedef struct _cairo_point_int {
     int x, y;
 } cairo_point_int_t;
 
-#define CAIRO_RECT_INT_MIN (INT_MIN >> CAIRO_FIXED_FRAC_BITS)
-#define CAIRO_RECT_INT_MAX (INT_MAX >> CAIRO_FIXED_FRAC_BITS)
+#define CAIRO_RECT_INT_MIN (XINT32_MIN >> CAIRO_FIXED_FRAC_BITS)
+#define CAIRO_RECT_INT_MAX (XINT32_MAX >> CAIRO_FIXED_FRAC_BITS)
 
 typedef enum _cairo_direction {
     CAIRO_DIRECTION_FORWARD,

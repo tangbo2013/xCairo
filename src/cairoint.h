@@ -66,7 +66,7 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <xClib/math.h>
-#include <limits.h>
+//#include <limits.h>
 #include <xC/xfile.h>
 
 #include "../cairo.h"

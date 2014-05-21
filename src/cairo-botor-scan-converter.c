@@ -1048,10 +1048,10 @@ coverage_init (struct coverage *cells)
 			  sizeof (struct cell));
     cells->head.prev = NULL;
     cells->head.next = &cells->tail;
-    cells->head.x = INT_MIN;
+    cells->head.x = XINT32_MIN;
     cells->tail.prev = &cells->head;
     cells->tail.next = NULL;
-    cells->tail.x = INT_MAX;
+    cells->tail.x = XINT32_MAX;
     cells->count = 0;
     coverage_rewind (cells);
 }

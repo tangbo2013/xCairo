@@ -2204,7 +2204,7 @@ _cairo_scaled_font_glyph_device_extents (cairo_scaled_font_t	 *scaled_font,
 					 cairo_bool_t *overlap_out)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
-    cairo_box_t box = { { INT_MAX, INT_MAX }, { INT_MIN, INT_MIN }};
+    cairo_box_t box = { { XINT32_MAX, XINT32_MAX }, { XINT32_MIN, XINT32_MIN }};
     cairo_scaled_glyph_t *glyph_cache[64];
     cairo_bool_t overlap = overlap_out ? FALSE : TRUE;
     cairo_round_glyph_positions_t round_glyph_positions = _cairo_font_options_get_round_glyph_positions (&scaled_font->options);

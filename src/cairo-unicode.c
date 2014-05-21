@@ -270,7 +270,7 @@ _cairo_utf8_to_ucs4 (const char *str,
 	    return _cairo_error (CAIRO_STATUS_INVALID_STRING);
 
 	n_chars++;
-	if (n_chars == INT_MAX)
+    if (n_chars == XINT32_MAX)
 	    return _cairo_error (CAIRO_STATUS_INVALID_STRING);
 
 	in = UTF8_NEXT_CHAR (in);
@@ -387,7 +387,7 @@ _cairo_utf8_to_utf16 (const char *str,
 	else
 	    n16 += 2;
 
-	if (n16 == INT_MAX - 1 || n16 == INT_MAX)
+    if (n16 == XINT32_MAX - 1 || n16 == XINT32_MAX)
 	    return _cairo_error (CAIRO_STATUS_INVALID_STRING);
 
 	in = UTF8_NEXT_CHAR (in);
