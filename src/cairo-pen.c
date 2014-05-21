@@ -103,7 +103,7 @@ void
 _cairo_pen_fini (cairo_pen_t *pen)
 {
     if (pen->vertices != pen->vertices_embedded)
-	free (pen->vertices);
+	xmemory_free (pen->vertices);
 
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (pen, sizeof (cairo_pen_t)));
@@ -128,7 +128,7 @@ _cairo_pen_init_copy (cairo_pen_t *pen, const cairo_pen_t *other)
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
 
-	memcpy (pen->vertices, other->vertices,
+    xmemory_copy (pen->vertices, other->vertices,
 		pen->num_vertices * sizeof (cairo_pen_vertex_t));
     }
 
@@ -157,7 +157,7 @@ _cairo_pen_add_points (cairo_pen_t *pen, cairo_point_t *point, int num_points)
 	    if (unlikely (vertices == NULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    memcpy (vertices, pen->vertices,
+	    xmemory_copy (vertices, pen->vertices,
 		    pen->num_vertices * sizeof (cairo_pen_vertex_t));
 	} else {
 	    vertices = _cairo_realloc_ab (pen->vertices,

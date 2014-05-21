@@ -353,7 +353,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
     }
 
     if (points != stack_points)
-	free (points);
+	xmemory_free (points);
 
     return status;
 

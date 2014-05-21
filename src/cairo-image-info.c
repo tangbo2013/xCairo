@@ -223,7 +223,7 @@ _cairo_image_info_get_jpx_info (cairo_image_info_t	*info,
 
     /* First 12 bytes must be the JPEG 2000 signature box. */
     if (length < ARRAY_LENGTH(_jpx_signature) ||
-	memcmp(p, _jpx_signature, ARRAY_LENGTH(_jpx_signature)) != 0)
+	xmemory_compare(p, _jpx_signature, ARRAY_LENGTH(_jpx_signature)) != 0)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     p += ARRAY_LENGTH(_jpx_signature);
@@ -269,7 +269,7 @@ _cairo_image_info_get_png_info (cairo_image_info_t     *info,
     const unsigned char *p = data;
     const unsigned char *end = data + length;
 
-    if (length < 8 || memcmp (data, _png_magic, 8) != 0)
+    if (length < 8 || xmemory_compare (data, _png_magic, 8) != 0)
        return CAIRO_INT_STATUS_UNSUPPORTED;
 
     p += 8;

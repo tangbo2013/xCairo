@@ -38,7 +38,7 @@
 #include "cairo-compiler-private.h"
 
 #include <xC/xfile.h>
-#include <stdlib.h>
+#include <xC/xmemory.h>
 
 struct _cairo_boxes_t {
     cairo_status_t status;

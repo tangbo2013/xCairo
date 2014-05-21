@@ -293,7 +293,7 @@ _cairo_clip_intersect_boxes (cairo_clip_t *clip,
 	}
 
 	if (clip->boxes != &clip->embedded_box)
-	    free (clip->boxes);
+	    xmemory_free (clip->boxes);
 
 	clip->boxes = NULL;
 	boxes = &clip_boxes;

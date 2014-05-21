@@ -63,7 +63,7 @@ clear_bits (cairo_mempool_t *pool, size_t first, size_t last)
     if (past_full > first_full) {
 	bytes = past_full - first_full;
 	bytes = bytes >> 3;
-	memset (pool->map + (first_full >> 3), 0, bytes);
+	xmemory_set (pool->map + (first_full >> 3), 0, bytes);
     }
 
     if (past_full < n)
@@ -305,7 +305,7 @@ _cairo_mempool_init (cairo_mempool_t *pool,
     pool->max_free_bits = -1;
 
     num_blocks = bytes >> min_bits;
-    pool->blocks = calloc (num_blocks, sizeof (struct _cairo_memblock));
+    pool->blocks = xmemory_calloc (num_blocks, sizeof (struct _cairo_memblock));
     if (pool->blocks == NULL)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -316,13 +316,13 @@ _cairo_mempool_init (cairo_mempool_t *pool,
     for (i = 0; i < ARRAY_LENGTH (pool->free); i++)
 	cairo_list_init (&pool->free[i]);
 
-    pool->map = malloc ((num_blocks + 7) >> 3);
+    pool->map = xmemory_alloc ((num_blocks + 7) >> 3);
     if (pool->map == NULL) {
-	free (pool->blocks);
+	xmemory_free (pool->blocks);
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
-    memset (pool->map, -1, (num_blocks + 7) >> 3);
+    xmemory_set (pool->map, -1, (num_blocks + 7) >> 3);
     clear_bits (pool, 0, num_blocks);
 
     /* Now add all blocks to the free list */
@@ -364,6 +364,6 @@ _cairo_mempool_free (cairo_mempool_t *pool, void *storage)
 void
 _cairo_mempool_fini (cairo_mempool_t *pool)
 {
-    free (pool->map);
-    free (pool->blocks);
+    xmemory_free (pool->map);
+    xmemory_free (pool->blocks);
 }

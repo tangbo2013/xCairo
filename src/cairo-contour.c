@@ -384,7 +384,7 @@ _cairo_contour_simplify (cairo_contour_t *contour, double tolerance)
 
 	for (chain = iter.chain->next; chain; chain = next) {
 	    next = chain->next;
-	    free (chain);
+        xmemory_free (chain);
 	}
 
 	iter.chain->next = NULL;
@@ -406,7 +406,7 @@ _cairo_contour_fini (cairo_contour_t *contour)
 
     for (chain = contour->chain.next; chain; chain = next) {
 	next = chain->next;
-	free (chain);
+    xmemory_free (chain);
     }
 }
 
@@ -448,7 +448,7 @@ __cairo_contour_remove_last_chain (cairo_contour_t *contour)
 
     for (chain = &contour->chain; chain->next != contour->tail; chain = chain->next)
 	;
-    free (contour->tail);
+    xmemory_free (contour->tail);
     contour->tail = chain;
     chain->next = NULL;
 }

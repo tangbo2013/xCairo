@@ -139,7 +139,7 @@ _cairo_surface_clipper_set_clip (cairo_surface_clipper_t *clipper,
     /* XXX Is this an incremental clip? */
     if (clipper->clip && clip &&
 	clip->num_boxes == clipper->clip->num_boxes &&
-	memcmp (clip->boxes, clipper->clip->boxes,
+    xmemory_compare (clip->boxes, clipper->clip->boxes,
 		sizeof (cairo_box_t) * clip->num_boxes) == 0)
     {
 	cairo_clip_path_t *clip_path = clip->path;

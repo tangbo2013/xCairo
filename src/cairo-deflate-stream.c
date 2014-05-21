@@ -93,7 +93,7 @@ _cairo_deflate_stream_write (cairo_output_stream_t *base,
         count = length;
         if (count > BUFFER_SIZE - stream->zlib_stream.avail_in)
             count = BUFFER_SIZE - stream->zlib_stream.avail_in;
-        memcpy (stream->input_buf + stream->zlib_stream.avail_in, p, count);
+        xmemory_copy (stream->input_buf + stream->zlib_stream.avail_in, p, count);
         p += count;
         stream->zlib_stream.avail_in += count;
         length -= count;
@@ -124,7 +124,7 @@ _cairo_deflate_stream_create (cairo_output_stream_t *output)
     if (output->status)
 	return _cairo_output_stream_create_in_error (output->status);
 
-    stream = malloc (sizeof (cairo_deflate_stream_t));
+    stream = xmemory_alloc (sizeof (cairo_deflate_stream_t));
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -141,7 +141,7 @@ _cairo_deflate_stream_create (cairo_output_stream_t *output)
     stream->zlib_stream.opaque  = Z_NULL;
 
     if (deflateInit (&stream->zlib_stream, Z_DEFAULT_COMPRESSION) != Z_OK) {
-	free (stream);
+	xmemory_free (stream);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 

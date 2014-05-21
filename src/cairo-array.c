@@ -74,7 +74,7 @@ _cairo_array_init (cairo_array_t *array, unsigned int element_size)
 void
 _cairo_array_fini (cairo_array_t *array)
 {
-    free (array->elements);
+    xmemory_free (array->elements);
 }
 
 /**
@@ -240,7 +240,7 @@ _cairo_array_copy_element (const cairo_array_t *array,
 			   unsigned int         index,
 			   void                *dst)
 {
-    memcpy (dst, _cairo_array_index_const (array, index), array->element_size);
+    xmemory_copy (dst, _cairo_array_index_const (array, index), array->element_size);
 }
 
 /**
@@ -289,7 +289,7 @@ _cairo_array_append_multiple (cairo_array_t	*array,
     if (unlikely (status))
 	return status;
 
-    memcpy (dest, elements, num_elements * array->element_size);
+    xmemory_copy (dest, elements, num_elements * array->element_size);
 
     return CAIRO_STATUS_SUCCESS;
 }

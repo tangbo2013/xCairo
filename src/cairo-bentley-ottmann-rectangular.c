@@ -44,7 +44,7 @@
 #include "cairo-list-private.h"
 #include "cairo-traps-private.h"
 
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 typedef struct _rectangle rectangle_t;
 typedef struct _edge edge_t;
@@ -84,7 +84,7 @@ typedef struct _sweep_line {
     cairo_bool_t do_traps;
     void *container;
 
-    jmp_buf unwind;
+    xjmp_buf_t unwind;
 } sweep_line_t;
 
 #define DEBUG_TRAPS 0
@@ -99,7 +99,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
     if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
 	return;
 
-    file = fopen (filename, "a");
+    file = xfile_open (filename, "a");
     if (file != NULL) {
 	for (n = 0; n < traps->num_traps; n++) {
 	    fprintf (file, "%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
@@ -115,7 +115,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
 		     traps->traps[n].right.p2.y);
 	}
 	fprintf (file, "\n");
-	fclose (file);
+    xfile_close (file);
     }
 }
 #else
@@ -272,7 +272,7 @@ edge_end_box (sweep_line_t *sweep_line, edge_t *left, xint32_t bot)
 	}
     }
     if (unlikely (status))
-	longjmp (sweep_line->unwind, status);
+    xlongjmp_jump (sweep_line->unwind, status);
 
     left->right = NULL;
 }
@@ -609,7 +609,7 @@ _cairo_bentley_ottmann_tessellate_rectangular (rectangle_t	**rectangles,
 		     rectangles, num_rectangles,
 		     fill_rule,
 		     do_traps, container);
-    if ((status = setjmp (sweep_line.unwind)))
+    if ((status = xlongjmp_set (sweep_line.unwind)))
 	return status;
 
     rectangle = rectangle_pop_start (&sweep_line);
@@ -726,7 +726,7 @@ _cairo_bentley_ottmann_tessellate_rectangular_traps (cairo_traps_t *traps,
     traps->is_rectangular = TRUE;
 
     if (rectangles != stack_rectangles)
-	free (rectangles);
+    xmemory_free (rectangles);
 
     dump_traps (traps, "bo-rects-traps-out.txt");
 
@@ -798,7 +798,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 	    if (unlikely (rectangles_chain == NULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
-	memset (rectangles_chain, 0, y_max * sizeof (rectangle_t*));
+    xmemory_set (rectangles_chain, 0, y_max * sizeof (rectangle_t*));
     }
 
     rectangles = stack_rectangles;
@@ -810,7 +810,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 					      3*sizeof (rectangle_t *));
 	if (unlikely (rectangles == NULL)) {
 	    if (rectangles_chain != stack_rectangles_chain)
-		free (rectangles_chain);
+        xmemory_free (rectangles_chain);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
 
@@ -866,7 +866,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 	}
 
 	if (rectangles_chain != stack_rectangles_chain)
-	    free (rectangles_chain);
+        xmemory_free (rectangles_chain);
 
 	j -= 2;
     } else {
@@ -878,7 +878,7 @@ _cairo_bentley_ottmann_tessellate_boxes (const cairo_boxes_t *in,
 							    fill_rule,
 							    FALSE, out);
     if (rectangles != stack_rectangles)
-	free (rectangles);
+    xmemory_free (rectangles);
 
     return status;
 }

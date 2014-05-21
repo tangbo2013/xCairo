@@ -47,7 +47,7 @@
 #include "cairo-freelist-private.h"
 #include "cairo-combsort-inline.h"
 
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 #define STEP_X CAIRO_FIXED_ONE
 #define STEP_Y CAIRO_FIXED_ONE
@@ -178,7 +178,7 @@ typedef struct _sweep_line {
 
     cairo_freepool_t runs;
 
-    jmp_buf unwind;
+    xjmp_buf_t unwind;
 } sweep_line_t;
 
 cairo_always_inline static struct quorem
@@ -809,7 +809,7 @@ static void
 pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+	xmemory_free (pq->elements);
 }
 
 static cairo_bool_t
@@ -824,7 +824,7 @@ pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return FALSE;
 
-	memcpy (new_elements, pq->elements_embedded,
+	xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -846,7 +846,7 @@ pqueue_push (sweep_line_t *sweep_line, event_t *event)
 
     if (unlikely (sweep_line->queue.pq.size + 1 == sweep_line->queue.pq.max_size)) {
 	if (unlikely (! pqueue_grow (&sweep_line->queue.pq))) {
-	    longjmp (sweep_line->unwind,
+	    xlongjmp_jump (sweep_line->unwind,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -907,7 +907,7 @@ event_insert (sweep_line_t	*sweep_line,
 
     event = _cairo_freepool_alloc (&sweep_line->queue.pool);
     if (unlikely (event == NULL)) {
-	longjmp (sweep_line->unwind,
+	xlongjmp_jump (sweep_line->unwind,
 		 _cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -1081,7 +1081,7 @@ coverage_alloc (sweep_line_t *sweep_line,
 
     cell = _cairo_freepool_alloc (&sweep_line->coverage.pool);
     if (unlikely (NULL == cell)) {
-	longjmp (sweep_line->unwind,
+	xlongjmp_jump (sweep_line->unwind,
 		 _cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -1371,7 +1371,7 @@ render_rows (cairo_botor_scan_converter_t *self,
     if (unlikely (sweep_line->coverage.count == 0)) {
 	status = renderer->render_rows (renderer, y, height, NULL, 0);
 	if (unlikely (status))
-	    longjmp (sweep_line->unwind, status);
+	    xlongjmp_jump (sweep_line->unwind, status);
 	return;
     }
 
@@ -1381,7 +1381,7 @@ render_rows (cairo_botor_scan_converter_t *self,
     if (unlikely (num_spans > ARRAY_LENGTH (spans_stack))) {
 	spans = _cairo_malloc_ab (num_spans, sizeof (cairo_half_open_span_t));
 	if (unlikely (spans == NULL)) {
-	    longjmp (sweep_line->unwind,
+	    xlongjmp_jump (sweep_line->unwind,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -1429,12 +1429,12 @@ render_rows (cairo_botor_scan_converter_t *self,
     status = renderer->render_rows (renderer, y, height, spans, num_spans);
 
     if (unlikely (spans != spans_stack))
-	free (spans);
+	xmemory_free (spans);
 
     coverage_reset (&sweep_line->coverage);
 
     if (unlikely (status))
-	longjmp (sweep_line->unwind, status);
+	xlongjmp_jump (sweep_line->unwind, status);
 }
 
 static void
@@ -1474,7 +1474,7 @@ full_step (cairo_botor_scan_converter_t *self,
 
 	status = renderer->render_rows (renderer, top, bottom - top, NULL, 0);
 	if (unlikely (status))
-	    longjmp (sweep_line->unwind, status);
+	    xlongjmp_jump (sweep_line->unwind, status);
 
 	return;
     }
@@ -1528,7 +1528,7 @@ sub_add_run (sweep_line_t *sweep_line, edge_t *edge, int y, int sign)
 
     run = _cairo_freepool_alloc (&sweep_line->runs);
     if (unlikely (run == NULL))
-	longjmp (sweep_line->unwind, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+	xlongjmp_jump (sweep_line->unwind, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     run->y = y;
     run->sign = sign;
@@ -1855,7 +1855,7 @@ botor_generate (cairo_botor_scan_converter_t	 *self,
     int bottom;
 
     sweep_line_init (&sweep_line, start_events, self->num_edges);
-    if ((status = setjmp (sweep_line.unwind)))
+    if ((status = xlongjmp_set (sweep_line.unwind)))
 	goto unwind;
 
     ybot = self->extents.p2.y;
@@ -2040,7 +2040,7 @@ _cairo_botor_scan_converter_generate (void			*converter,
     status = botor_generate (self, event_ptrs, renderer);
 
     if (events != stack_events)
-	free (events);
+	xmemory_free (events);
 
     return status;
 }
@@ -2136,7 +2136,7 @@ _cairo_botor_scan_converter_destroy (void *converter)
 
     for (chunk = self->chunks.next; chunk != NULL; chunk = next) {
 	next = chunk->next;
-	free (chunk);
+	xmemory_free (chunk);
     }
 }
 

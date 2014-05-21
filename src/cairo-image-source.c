@@ -343,7 +343,7 @@ _pixman_image_for_gradient (const cairo_gradient_pattern_t *pattern,
     }
 
     if (pixman_stops != pixman_stops_static)
-	free (pixman_stops);
+    xmemory_free (pixman_stops);
 
     if (unlikely (pixman_image == NULL))
 	return NULL;
@@ -429,7 +429,7 @@ _acquire_source_cleanup (pixman_image_t *pixman_image,
     _cairo_surface_release_source_image (data->surface,
 					 data->image,
 					 data->image_extra);
-    free (data);
+    xmemory_free (data);
 }
 
 static void
@@ -663,7 +663,7 @@ attach_proxy (cairo_surface_t *source,
 {
     struct proxy *proxy;
 
-    proxy = malloc (sizeof (*proxy));
+    proxy = xmemory_alloc (sizeof (*proxy));
     if (unlikely (proxy == NULL))
 	return _cairo_surface_create_in_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -974,7 +974,7 @@ _pixman_image_for_surface (cairo_image_surface_t *dst,
 	    return NULL;
 	}
 
-	cleanup = malloc (sizeof (*cleanup));
+    cleanup = xmemory_alloc (sizeof (*cleanup));
 	if (unlikely (cleanup == NULL)) {
 	    _cairo_surface_release_source_image (pattern->surface, image, extra);
 	    pixman_image_unref (pixman_image);
@@ -1018,7 +1018,7 @@ _raster_source_cleanup (pixman_image_t *pixman_image,
     _cairo_raster_source_pattern_release (data->pattern,
 					  data->surface);
 
-    free (data);
+    xmemory_free (data);
 }
 
 static pixman_image_t *
@@ -1065,7 +1065,7 @@ _pixman_image_for_raster (cairo_image_surface_t *dst,
 	return NULL;
     }
 
-    cleanup = malloc (sizeof (*cleanup));
+    cleanup = xmemory_alloc (sizeof (*cleanup));
     if (unlikely (cleanup == NULL)) {
 	pixman_image_unref (pixman_image);
 	_cairo_surface_release_source_image (surface, image, extra);
@@ -1161,7 +1161,7 @@ _cairo_image_source_create_for_pattern (cairo_surface_t *dst,
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
 
-    source = malloc (sizeof (cairo_image_source_t));
+    source = xmemory_alloc (sizeof (cairo_image_source_t));
     if (unlikely (source == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
@@ -1171,7 +1171,7 @@ _cairo_image_source_create_for_pattern (cairo_surface_t *dst,
 				   extents, sample,
 				   src_x, src_y);
     if (unlikely (source->pixman_image == NULL)) {
-	free (source);
+    xmemory_free (source);
 	return _cairo_surface_create_in_error (CAIRO_STATUS_NO_MEMORY);
     }
 

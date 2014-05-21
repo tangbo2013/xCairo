@@ -152,7 +152,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
 	    extents.p1.x, extents.p1.y,
 	    extents.p2.x, extents.p2.y);
 
-    file = fopen (filename, "a");
+    file = xfile_open (filename, "a");
     if (file != NULL) {
 	for (n = 0; n < traps->num_traps; n++) {
 	    fprintf (file, "%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
@@ -168,7 +168,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
 		     traps->traps[n].right.p2.y);
 	}
 	fprintf (file, "\n");
-	fclose (file);
+    xfile_close (file);
     }
 }
 
@@ -183,7 +183,7 @@ dump_edges (cairo_bo_start_event_t *events,
     if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
 	return;
 
-    file = fopen (filename, "a");
+    file = xfile_open (filename, "a");
     if (file != NULL) {
 	for (n = 0; n < num_edges; n++) {
 	    fprintf (file, "(%d, %d), (%d, %d) %d %d %d\n",
@@ -196,7 +196,7 @@ dump_edges (cairo_bo_start_event_t *events,
 		     events[n].edge.edge.dir);
 	}
 	fprintf (file, "\n");
-	fclose (file);
+    xfile_close (file);
     }
 }
 #endif
@@ -900,7 +900,7 @@ static inline void
 _pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+    xmemory_free (pq->elements);
 }
 
 static cairo_status_t
@@ -915,7 +915,7 @@ _pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	memcpy (new_elements, pq->elements_embedded,
+    xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -1296,22 +1296,22 @@ event_log (const char *fmt, ...)
     if (getenv ("CAIRO_DEBUG_EVENTS") == NULL)
 	return;
 
-    file = fopen ("bo-events.txt", "a");
+    file = xfile_open ("bo-events.txt", "a");
     if (file != NULL) {
 	va_list ap;
 
-	va_start (ap, fmt);
+    XVA_START (ap, fmt);
 	vfprintf (file, fmt, ap);
-	va_end (ap);
+    XVA_END (ap);
 
-	fclose (file);
+    xfile_close (file);
     }
 }
 #endif
 
-#define HAS_COLINEAR(a, b) ((cairo_bo_edge_t *)(((uintptr_t)(a))&~1) == (b))
-#define IS_COLINEAR(e) (((uintptr_t)(e))&1)
-#define MARK_COLINEAR(e, v) ((cairo_bo_edge_t *)(((uintptr_t)(e))|(v)))
+#define HAS_COLINEAR(a, b) ((cairo_bo_edge_t *)(((xuintptr_t)(a))&~1) == (b))
+#define IS_COLINEAR(e) (((xuintptr_t)(e))&1)
+#define MARK_COLINEAR(e, v) ((cairo_bo_edge_t *)(((xuintptr_t)(e))|(v)))
 
 static inline cairo_bool_t
 edges_colinear (cairo_bo_edge_t *a, const cairo_bo_edge_t *b)
@@ -1706,7 +1706,7 @@ _cairo_bentley_ottmann_tessellate_polygon (cairo_traps_t	 *traps,
 	    event_y = _cairo_malloc_ab(sizeof (cairo_bo_event_t*), ymax);
 	else
 	    event_y = stack_event_y;
-	memset (event_y, 0, ymax * sizeof(cairo_bo_event_t *));
+    xmemory_set (event_y, 0, ymax * sizeof(cairo_bo_event_t *));
     }
 
     events = stack_events;
@@ -1753,7 +1753,7 @@ _cairo_bentley_ottmann_tessellate_polygon (cairo_traps_t	 *traps,
 		_cairo_bo_event_queue_sort (event_ptrs+j, i-j);
 	}
 	if (event_y != stack_event_y)
-	    free (event_y);
+        xmemory_free (event_y);
     } else
 	_cairo_bo_event_queue_sort (event_ptrs, i);
     event_ptrs[i] = NULL;
@@ -1774,7 +1774,7 @@ _cairo_bentley_ottmann_tessellate_polygon (cairo_traps_t	 *traps,
 #endif
 
     if (events != stack_events)
-	free (events);
+    xmemory_free (events);
 
     return status;
 }
@@ -2058,11 +2058,11 @@ run_test (const char		*test_name,
 	passes++;
 	edges = _cairo_malloc_ab (num_edges, sizeof (cairo_bo_edge_t));
 	XASSERT (edges != NULL);
-	memcpy (edges, _cairo_array_index (&intersected_edges, 0), num_edges * sizeof (cairo_bo_edge_t));
+    xmemory_copy (edges, _cairo_array_index (&intersected_edges, 0), num_edges * sizeof (cairo_bo_edge_t));
 	_cairo_array_fini (&intersected_edges);
 	_cairo_array_init (&intersected_edges, sizeof (cairo_bo_edge_t));
 	intersections = _cairo_bentley_ottmann_intersect_edges (edges, num_edges, &intersected_edges);
-	free (edges);
+    xmemory_free (edges);
 
 	if (intersections){
         XDBGPRINTF ("Pass %d found %d remaining intersections:\n", passes, intersections);

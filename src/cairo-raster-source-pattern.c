@@ -101,7 +101,7 @@ _cairo_raster_source_pattern_init_copy (cairo_pattern_t *abstract_pattern,
     cairo_status_t status;
 
     VG (VALGRIND_MAKE_MEM_UNDEFINED (pattern, sizeof (cairo_raster_source_pattern_t)));
-    memcpy(pattern, other, sizeof (cairo_raster_source_pattern_t));
+    xmemory_copy(pattern, other, sizeof (cairo_raster_source_pattern_t));
 
     status = CAIRO_STATUS_SUCCESS;
     if (pattern->copy)
@@ -170,7 +170,7 @@ cairo_pattern_create_raster_source (void *user_data,
     if (! CAIRO_CONTENT_VALID (content))
 	return _cairo_pattern_create_in_error (CAIRO_STATUS_INVALID_CONTENT);
 
-    pattern = calloc (1, sizeof (*pattern));
+    pattern = xmemory_calloc (1, sizeof (*pattern));
     if (unlikely (pattern == NULL))
 	return _cairo_pattern_create_in_error (CAIRO_STATUS_NO_MEMORY);
 

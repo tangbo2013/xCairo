@@ -949,11 +949,11 @@ add_caps (struct stroker *stroker)
 
 #if DEBUG
 	{
-	    xfile_t *file = fopen ("contours.txt", "a");
+	    xfile_t *file = xfile_open ("contours.txt", "a");
 	    _cairo_debug_print_contour (file, &stroker->path);
 	    _cairo_debug_print_contour (file, &stroker->cw.contour);
 	    _cairo_debug_print_contour (file, &stroker->ccw.contour);
-	    fclose (file);
+	    xfile_close (file);
 	    _cairo_contour_reset (&stroker->path);
 	}
 #endif
@@ -967,9 +967,9 @@ add_caps (struct stroker *stroker)
 	    add_leading_cap (stroker, &stroker->first_face, &stroker->ccw);
 #if DEBUG
 	    {
-		xfile_t *file = fopen ("contours.txt", "a");
+		xfile_t *file = xfile_open ("contours.txt", "a");
 		_cairo_debug_print_contour (file, &stroker->ccw.contour);
-		fclose (file);
+		xfile_close (file);
 	    }
 #endif
 
@@ -1228,11 +1228,11 @@ close_path (void *closure)
 
 #if DEBUG
 	{
-	    xfile_t *file = fopen ("contours.txt", "a");
+	    xfile_t *file = xfile_open ("contours.txt", "a");
 	    _cairo_debug_print_contour (file, &stroker->path);
 	    _cairo_debug_print_contour (file, &stroker->cw.contour);
 	    _cairo_debug_print_contour (file, &stroker->ccw.contour);
-	    fclose (file);
+	    xfile_close (file);
 
 	    _cairo_contour_reset (&stroker->path);
 	}
@@ -1364,9 +1364,9 @@ _cairo_path_fixed_stroke_to_polygon (const cairo_path_fixed_t	*path,
 
 #if DEBUG
     {
-	xfile_t *file = fopen ("polygons.txt", "a");
+	xfile_t *file = xfile_open ("polygons.txt", "a");
 	_cairo_debug_print_polygon (file, polygon);
-	fclose (file);
+	xfile_close (file);
     }
 #endif
 

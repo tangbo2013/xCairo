@@ -461,7 +461,7 @@ cairo_surface_create_for_rectangle (cairo_surface_t *target,
     if (unlikely (target->finished))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_SURFACE_FINISHED));
 
-    surface = malloc (sizeof (cairo_surface_subsurface_t));
+    surface = xmemory_alloc (sizeof (cairo_surface_subsurface_t));
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
@@ -511,7 +511,7 @@ _cairo_surface_create_for_rectangle_int (cairo_surface_t *target,
 
     XASSERT (target->backend->type != CAIRO_SURFACE_TYPE_SUBSURFACE);
 
-    surface = malloc (sizeof (cairo_surface_subsurface_t));
+    surface = xmemory_alloc (sizeof (cairo_surface_subsurface_t));
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 

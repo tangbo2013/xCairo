@@ -53,7 +53,7 @@
 #define CAIRO_TOLERANCE_MINIMUM	_cairo_fixed_to_double(1)
 
 #if !defined(INFINITY)
-#define INFINITY HUGE_VAL
+#define INFINITY XHUGE_VAL
 #endif
 
 static freed_pool_t context_pool;
@@ -77,7 +77,7 @@ _cairo_default_context_fini (cairo_default_context_t *cr)
     while (cr->gstate_freelist != NULL) {
 	cairo_gstate_t *gstate = cr->gstate_freelist;
 	cr->gstate_freelist = gstate->next;
-	free (gstate);
+	xmemory_free (gstate);
     }
 
     _cairo_path_fixed_fini (cr->path);
@@ -1463,7 +1463,7 @@ _cairo_default_context_create (void *target)
 
     cr = _freed_pool_get (&context_pool);
     if (unlikely (cr == NULL)) {
-	cr = malloc (sizeof (cairo_default_context_t));
+	cr = xmemory_alloc (sizeof (cairo_default_context_t));
 	if (unlikely (cr == NULL))
 	    return _cairo_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
     }

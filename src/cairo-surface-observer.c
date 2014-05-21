@@ -60,8 +60,8 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend;
 
 static void init_stats (struct stat *s)
 {
-    s->min = HUGE_VAL;
-    s->max = -HUGE_VAL;
+    s->min = XHUGE_VAL;
+    s->max = -XHUGE_VAL;
 }
 
 static void init_extents (struct extents *e)
@@ -123,7 +123,7 @@ static cairo_status_t
 log_init (cairo_observation_t *log,
 	  cairo_bool_t record)
 {
-    memset (log, 0, sizeof(*log));
+    xmemory_set (log, 0, sizeof(*log));
 
     init_paint (&log->paint);
     init_mask (&log->mask);
@@ -327,7 +327,7 @@ _cairo_device_observer_destroy (void *_device)
 {
     cairo_device_observer_t *device = (cairo_device_observer_t *) _device;
     cairo_device_destroy (device->target);
-    free (device);
+    xmemory_free (device);
 }
 
 static const cairo_device_backend_t _cairo_device_observer_backend = {
@@ -348,14 +348,14 @@ _cairo_device_create_observer_internal (cairo_device_t *target,
     cairo_device_observer_t *device;
     cairo_status_t status;
 
-    device = malloc (sizeof (cairo_device_observer_t));
+    device = xmemory_alloc (sizeof (cairo_device_observer_t));
     if (unlikely (device == NULL))
 	return _cairo_device_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     _cairo_device_init (&device->base, &_cairo_device_observer_backend);
     status = log_init (&device->log, record);
     if (unlikely (status)) {
-	free (device);
+    xmemory_free (device);
 	return _cairo_device_create_in_error (status);
     }
 
@@ -379,7 +379,7 @@ _cairo_surface_create_observer_internal (cairo_device_t *device,
     cairo_surface_observer_t *surface;
     cairo_status_t status;
 
-    surface = malloc (sizeof (cairo_surface_observer_t));
+    surface = xmemory_alloc (sizeof (cairo_surface_observer_t));
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
@@ -390,7 +390,7 @@ _cairo_surface_create_observer_internal (cairo_device_t *device,
     status = log_init (&surface->log,
 		       ((cairo_device_observer_t *)device)->log.record != NULL);
     if (unlikely (status)) {
-	free (surface);
+    xmemory_free (surface);
 	return _cairo_surface_create_in_error (status);
     }
 
@@ -1170,7 +1170,7 @@ _cairo_surface_observer_glyphs (void			*abstract_surface,
     dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
     if (unlikely (dev_glyphs == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
-    memcpy (dev_glyphs, glyphs, num_glyphs * sizeof (cairo_glyph_t));
+    xmemory_copy (dev_glyphs, glyphs, num_glyphs * sizeof (cairo_glyph_t));
 
     t = _cairo_time_get ();
     status = _cairo_surface_show_text_glyphs (surface->target, op, source,
@@ -1179,7 +1179,7 @@ _cairo_surface_observer_glyphs (void			*abstract_surface,
 					      NULL, 0, 0,
 					      scaled_font,
 					      clip);
-    free (dev_glyphs);
+    xmemory_free (dev_glyphs);
     if (unlikely (status))
 	return status;
 
@@ -1414,7 +1414,7 @@ _cairo_surface_observer_add_callback (cairo_list_t *head,
 {
     struct callback_list *cb;
 
-    cb = malloc (sizeof (*cb));
+    cb = xmemory_alloc (sizeof (*cb));
     if (unlikely (cb == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 

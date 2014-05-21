@@ -154,7 +154,7 @@ static void
 _cairo_rectilinear_stroker_fini (cairo_rectilinear_stroker_t	*stroker)
 {
     if (stroker->segments != stroker->segments_embedded)
-	free (stroker->segments);
+	xmemory_free (stroker->segments);
 }
 
 static cairo_status_t
@@ -175,7 +175,7 @@ _cairo_rectilinear_stroker_add_segment (cairo_rectilinear_stroker_t *stroker,
 	    if (unlikely (new_segments == NULL))
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	    memcpy (new_segments, stroker->segments,
+	    xmemory_copy (new_segments, stroker->segments,
 		    stroker->num_segments * sizeof (segment_t));
 	} else {
 	    new_segments = _cairo_realloc_ab (stroker->segments,

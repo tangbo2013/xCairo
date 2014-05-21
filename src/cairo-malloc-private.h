@@ -38,7 +38,7 @@
 #define CAIRO_MALLOC_PRIVATE_H
 
 #include "cairo-wideint-private.h"
-#include <stdlib.h>
+#include <xC/xmemory.h>
 
 #if HAVE_MEMFAULT
 #include <memfault.h>
@@ -60,7 +60,7 @@
  **/
 
 #define _cairo_malloc(size) \
-   ((size) ? malloc((unsigned) (size)) : NULL)
+   ((size) ? xmemory_alloc((unsigned) (size)) : NULL)
 
 /**
  * _cairo_malloc_ab:
@@ -103,7 +103,7 @@
 
 #define _cairo_realloc_ab(ptr, a, size) \
   ((size) && (unsigned) (a) >= INT32_MAX / (unsigned) (size) ? NULL : \
-   realloc(ptr, (unsigned) (a) * (unsigned) (size)))
+   xmemory_realloc(ptr, (unsigned) (a) * (unsigned) (size)))
 
 /**
  * _cairo_malloc_abc:

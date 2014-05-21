@@ -55,16 +55,17 @@
 #endif
 
 #include <xC/xdebug.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <stdarg.h>
 //#include <stddef.h>
+#include <xC/xvarargs.h>
 #include <xC/xpointer.h>
 
 #ifdef _MSC_VER
 #define _USE_MATH_DEFINES
 #endif
-#include <math.h>
+#include <xClib/math.h>
 #include <limits.h>
 #include <xC/xfile.h>
 

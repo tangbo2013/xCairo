@@ -27,8 +27,8 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
 #include <limits.h>
 
 struct quorem {
@@ -127,7 +127,7 @@ polygon_init (struct polygon *polygon, int ymin, int ymax)
 	if (unlikely (NULL == polygon->y_buckets))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
-    memset (polygon->y_buckets, 0, h * sizeof (struct edge *));
+    xmemory_set (polygon->y_buckets, 0, h * sizeof (struct edge *));
     polygon->y_buckets[h-1] = (void *)-1;
 
     polygon->ymin = ymin;
@@ -139,10 +139,10 @@ static void
 polygon_fini (struct polygon *polygon)
 {
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+	xmemory_free (polygon->y_buckets);
 
     if (polygon->edges != polygon->edges_embedded)
-	free (polygon->edges);
+	xmemory_free (polygon->edges);
 }
 
 static void
@@ -433,7 +433,7 @@ static void
 _mono_scan_converter_fini(struct mono_scan_converter *self)
 {
     if (self->spans != self->spans_embedded)
-	free (self->spans);
+	xmemory_free (self->spans);
 
     polygon_fini(self->polygon);
 }
@@ -538,7 +538,7 @@ _cairo_mono_scan_converter_destroy (void *converter)
 {
     cairo_mono_scan_converter_t *self = converter;
     _mono_scan_converter_fini (self->converter);
-    free(self);
+    xmemory_free(self);
 }
 
 cairo_status_t
@@ -550,9 +550,9 @@ _cairo_mono_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    xfile_t *file = fopen ("polygon.txt", "w");
+    xfile_t *file = xfile_open ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
-    fclose (file);
+    xfile_close (file);
 #endif
 
     status = mono_scan_converter_allocate_edges (self->converter,
@@ -587,7 +587,7 @@ _cairo_mono_scan_converter_create (int			xmin,
     cairo_mono_scan_converter_t *self;
     cairo_status_t status;
 
-    self = malloc (sizeof(struct _cairo_mono_scan_converter));
+    self = xmemory_alloc (sizeof(struct _cairo_mono_scan_converter));
     if (unlikely (self == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;

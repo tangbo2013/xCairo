@@ -489,7 +489,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 	    }
 	}
 
-	memcpy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
+	xmemory_copy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
     }
 
     status = _cairo_surface_show_text_glyphs (wrapper->target, op, source,
@@ -502,7 +502,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
  FINISH:
     _cairo_clip_destroy (dev_clip);
     if (dev_glyphs != stack_glyphs)
-	free (dev_glyphs);
+	xmemory_free (dev_glyphs);
     if (dev_scaled_font != scaled_font)
 	cairo_scaled_font_destroy (dev_scaled_font);
     return status;

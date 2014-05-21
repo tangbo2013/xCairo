@@ -812,7 +812,7 @@ static inline void
 _pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+    xmemory_free (pq->elements);
 }
 
 static cairo_status_t
@@ -827,7 +827,7 @@ _pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	memcpy (new_elements, pq->elements_embedded,
+    xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -1383,9 +1383,9 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
 	return CAIRO_STATUS_SUCCESS;
 
     if (DEBUG_POLYGON) {
-    xfile_t *file = fopen ("reduce_in.txt", "w");
+    xfile_t *file = xfile_open ("reduce_in.txt", XOFM_READWRITE);
 	_cairo_debug_print_polygon (file, polygon);
-	fclose (file);
+    xfile_close (file);
     }
 
     events = stack_events;
@@ -1426,12 +1426,12 @@ _cairo_polygon_reduce (cairo_polygon_t *polygon,
     polygon->num_limits = num_limits;
 
     if (events != stack_events)
-	free (events);
+    xmemory_free (events);
 
     if (DEBUG_POLYGON) {
-    xfile_t *file = fopen ("reduce_out.txt", "w");
+    xfile_t *file = xfile_open ("reduce_out.txt", XOFM_READWRITE);
 	_cairo_debug_print_polygon (file, polygon);
-	fclose (file);
+    xfile_close (file);
     }
 
     return status;

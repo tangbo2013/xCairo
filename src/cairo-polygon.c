@@ -246,7 +246,7 @@ void
 _cairo_polygon_fini (cairo_polygon_t *polygon)
 {
     if (polygon->edges != polygon->edges_embedded)
-	free (polygon->edges);
+	xmemory_free (polygon->edges);
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (polygon, sizeof (cairo_polygon_t)));
 }
@@ -267,7 +267,7 @@ _cairo_polygon_grow (cairo_polygon_t *polygon)
     if (polygon->edges == polygon->edges_embedded) {
 	new_edges = _cairo_malloc_ab (new_size, sizeof (cairo_edge_t));
 	if (new_edges != NULL)
-	    memcpy (new_edges, polygon->edges, old_size * sizeof (cairo_edge_t));
+	    xmemory_copy (new_edges, polygon->edges, old_size * sizeof (cairo_edge_t));
     } else {
 	new_edges = _cairo_realloc_ab (polygon->edges,
 		                       new_size, sizeof (cairo_edge_t));

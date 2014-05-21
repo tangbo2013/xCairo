@@ -110,7 +110,7 @@ void
 _cairo_traps_fini (cairo_traps_t *traps)
 {
     if (traps->traps != traps->traps_embedded)
-	free (traps->traps);
+    xmemory_free (traps->traps);
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (traps, sizeof (cairo_traps_t)));
 }
@@ -130,7 +130,7 @@ _cairo_traps_grow (cairo_traps_t *traps)
     if (traps->traps == traps->traps_embedded) {
 	new_traps = _cairo_malloc_ab (new_size, sizeof (cairo_trapezoid_t));
 	if (new_traps != NULL)
-	    memcpy (new_traps, traps->traps, sizeof (traps->traps_embedded));
+        xmemory_copy (new_traps, traps->traps, sizeof (traps->traps_embedded));
     } else {
 	new_traps = _cairo_realloc_ab (traps->traps,
 	                               new_size, sizeof (cairo_trapezoid_t));
@@ -857,7 +857,7 @@ _cairo_traps_extract_region (cairo_traps_t   *traps,
     status = (*region)->status;
 
     if (rects != stack_rects)
-	free (rects);
+    xmemory_free (rects);
 
     return status;
 }

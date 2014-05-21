@@ -811,7 +811,7 @@ static inline void
 _pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+	xmemory_free (pq->elements);
 }
 
 static cairo_status_t
@@ -826,7 +826,7 @@ _pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	memcpy (new_elements, pq->elements_embedded,
+	xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -1451,27 +1451,27 @@ _cairo_polygon_intersect (cairo_polygon_t *a, int winding_a,
 
 #if 0
     {
-	xfile_t *file = fopen ("clip_a.txt", "w");
+	xfile_t *file = xfile_open ("clip_a.txt", "w");
 	_cairo_debug_print_polygon (file, a);
-	fclose (file);
+	xfile_close (file);
     }
     {
-	xfile_t *file = fopen ("clip_b.txt", "w");
+	xfile_t *file = xfile_open ("clip_b.txt", "w");
 	_cairo_debug_print_polygon (file, b);
-	fclose (file);
+	xfile_close (file);
     }
 #endif
 
     a->num_edges = 0;
     status = intersection_sweep (event_ptrs, num_events, a);
     if (events != stack_events)
-	free (events);
+	xmemory_free (events);
 
 #if 0
     {
-	xfile_t *file = fopen ("clip_result.txt", "w");
+	xfile_t *file = xfile_open ("clip_result.txt", "w");
 	_cairo_debug_print_polygon (file, a);
-	fclose (file);
+	xfile_close (file);
     }
 #endif
 

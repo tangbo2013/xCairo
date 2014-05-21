@@ -73,7 +73,7 @@ _lzw_buf_init (lzw_buf_t *buf, int size)
     buf->pending = 0;
     buf->pending_bits = 0;
 
-    buf->data = malloc (size);
+    buf->data = xmemory_alloc (size);
     if (unlikely (buf->data == NULL)) {
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -97,10 +97,10 @@ _lzw_buf_grow (lzw_buf_t *buf)
     new_data = NULL;
     /* check for integer overflow */
     if (new_size / 2 == buf->data_size)
-	new_data = realloc (buf->data, new_size);
+    new_data = xmemory_realloc (buf->data, new_size);
 
     if (unlikely (new_data == NULL)) {
-	free (buf->data);
+	xmemory_free (buf->data);
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return buf->status;
@@ -229,7 +229,7 @@ typedef struct _lzw_symbol_table {
 static void
 _lzw_symbol_table_init (lzw_symbol_table_t *table)
 {
-    memset (table->table, 0, LZW_SYMBOL_TABLE_SIZE * sizeof (lzw_symbol_t));
+    xmemory_set (table->table, 0, LZW_SYMBOL_TABLE_SIZE * sizeof (lzw_symbol_t));
 }
 
 /* Lookup a symbol in the symbol table. The PREV and NEXT fields of

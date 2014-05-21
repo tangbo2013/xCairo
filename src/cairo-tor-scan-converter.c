@@ -97,10 +97,10 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
 #include <limits.h>
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 /*-------------------------------------------------------------------------
  * cairo specific config
@@ -177,8 +177,8 @@ glitter_scan_converter_reset(
 /*-------------------------------------------------------------------------
  * glitter-paths.c: Implementation internal types
  */
-#include <stdlib.h>
-#include <string.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
 #include <limits.h>
 
 /* All polygon coordinates are snapped onto a subsample grid. "Grid
@@ -288,7 +288,7 @@ struct pool {
     /* Chunk we're allocating from. */
     struct _pool_chunk *current;
 
-    jmp_buf *jmp;
+    xjmp_buf_t *jmp;
 
     /* Free list of previously allocated chunks.  All have >= default
      * capacity. */
@@ -506,16 +506,16 @@ _pool_chunk_create(struct pool *pool, size_t size)
 {
     struct _pool_chunk *p;
 
-    p = malloc(size + sizeof(struct _pool_chunk));
+    p = xmemory_alloc(size + sizeof(struct _pool_chunk));
     if (unlikely (NULL == p))
-	longjmp (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+    xlongjmp_jump (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     return _pool_chunk_init(p, pool->current, size);
 }
 
 static void
 pool_init(struct pool *pool,
-	  jmp_buf *jmp,
+      xjmp_buf_t *jmp,
 	  size_t default_capacity,
 	  size_t embedded_capacity)
 {
@@ -534,7 +534,7 @@ pool_fini(struct pool *pool)
 	while (NULL != p) {
 	    struct _pool_chunk *prev = p->prev_chunk;
 	    if (p != pool->sentinel)
-		free(p);
+        xmemory_free(p);
 	    p = prev;
 	}
 	p = pool->first_free;
@@ -641,7 +641,7 @@ cell_list_set_rewind (struct cell_list *cells)
 }
 
 static void
-cell_list_init(struct cell_list *cells, jmp_buf *jmp)
+cell_list_init(struct cell_list *cells, xjmp_buf_t *jmp)
 {
     pool_init(cells->cell_pool.base, jmp,
 	      256*sizeof(struct cell),
@@ -910,7 +910,7 @@ cell_list_render_edge(struct cell_list *cells,
 }
 
 static void
-polygon_init (struct polygon *polygon, jmp_buf *jmp)
+polygon_init (struct polygon *polygon, xjmp_buf_t *jmp)
 {
     polygon->ymin = polygon->ymax = 0;
     polygon->y_buckets = polygon->y_buckets_embedded;
@@ -923,7 +923,7 @@ static void
 polygon_fini (struct polygon *polygon)
 {
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+    xmemory_free (polygon->y_buckets);
 
     pool_fini (polygon->edge_pool.base);
 }
@@ -945,7 +945,7 @@ polygon_reset (struct polygon *polygon,
 	goto bail_no_mem; /* even if you could, you wouldn't want to. */
 
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+    xmemory_free (polygon->y_buckets);
 
     polygon->y_buckets =  polygon->y_buckets_embedded;
     if (num_buckets > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
@@ -954,7 +954,7 @@ polygon_reset (struct polygon *polygon,
 	if (unlikely (NULL == polygon->y_buckets))
 	    goto bail_no_mem;
     }
-    memset (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
+    xmemory_set (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
 
     polygon->ymin = ymin;
     polygon->ymax = ymax;
@@ -1377,7 +1377,7 @@ full_row (struct active_list *active,
 }
 
 static void
-_glitter_scan_converter_init(glitter_scan_converter_t *converter, jmp_buf *jmp)
+_glitter_scan_converter_init(glitter_scan_converter_t *converter, xjmp_buf_t *jmp)
 {
     polygon_init(converter->polygon, jmp);
     active_list_init(converter->active);
@@ -1392,7 +1392,7 @@ static void
 _glitter_scan_converter_fini(glitter_scan_converter_t *self)
 {
     if (self->spans != self->spans_embedded)
-	free (self->spans);
+    xmemory_free (self->spans);
 
     polygon_fini(self->polygon);
     cell_list_fini(self->coverages);
@@ -1558,7 +1558,7 @@ blit_a8 (struct cell_list *cells,
     num_spans = 0;
     for (; cell->x < xmax; cell = cell->next) {
 	int x = cell->x;
-	int16_t area;
+    xint16_t area;
 
 	if (x > prev_x && cover != last_cover) {
 	    spans[num_spans].x = prev_x;
@@ -1628,7 +1628,7 @@ blit_a1 (struct cell_list *cells,
     num_spans = 0;
     for (; cell->x < xmax; cell = cell->next) {
 	int x = cell->x;
-	int16_t area;
+    xint16_t area;
 
 	coverage = GRID_AREA_TO_A1 (cover);
 	if (x > prev_x && coverage != last_cover) {
@@ -1764,7 +1764,7 @@ struct _cairo_tor_scan_converter {
     cairo_fill_rule_t fill_rule;
     cairo_antialias_t antialias;
 
-    jmp_buf jmp;
+    xjmp_buf_t jmp;
 };
 
 typedef struct _cairo_tor_scan_converter cairo_tor_scan_converter_t;
@@ -1777,7 +1777,7 @@ _cairo_tor_scan_converter_destroy (void *converter)
 	return;
     }
     _glitter_scan_converter_fini (self->converter);
-    free(self);
+    xmemory_free(self);
 }
 
 cairo_status_t
@@ -1788,9 +1788,9 @@ _cairo_tor_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    xfile_t *file = fopen ("polygon.txt", "w");
+    xfile_t *file = xfile_open ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
-    fclose (file);
+    xfile_close (file);
 #endif
 
     for (i = 0; i < polygon->num_edges; i++)
@@ -1806,7 +1806,7 @@ _cairo_tor_scan_converter_generate (void			*converter,
     cairo_tor_scan_converter_t *self = converter;
     cairo_status_t status;
 
-    if ((status = setjmp (self->jmp)))
+    if ((status = xlongjmp_set (self->jmp)))
 	return _cairo_scan_converter_set_error (self, _cairo_error (status));
 
     glitter_scan_converter_render (self->converter,
@@ -1827,7 +1827,7 @@ _cairo_tor_scan_converter_create (int			xmin,
     cairo_tor_scan_converter_t *self;
     cairo_status_t status;
 
-    self = malloc (sizeof(struct _cairo_tor_scan_converter));
+    self = xmemory_alloc (sizeof(struct _cairo_tor_scan_converter));
     if (unlikely (self == NULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;

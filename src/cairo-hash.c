@@ -38,6 +38,7 @@
 
 #include "cairoint.h"
 #include "cairo-error-private.h"
+#include <xC/xrand.h>
 
 /*
  * An entry can be in one of three states:
@@ -164,7 +165,7 @@ _cairo_hash_table_create (cairo_hash_keys_equal_func_t keys_equal)
 {
     cairo_hash_table_t *hash_table;
 
-    hash_table = malloc (sizeof (cairo_hash_table_t));
+    hash_table = xmemory_alloc (sizeof (cairo_hash_table_t));
     if (unlikely (hash_table == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;
@@ -175,14 +176,14 @@ _cairo_hash_table_create (cairo_hash_keys_equal_func_t keys_equal)
     else
 	hash_table->keys_equal = keys_equal;
 
-    memset (&hash_table->cache, 0, sizeof (hash_table->cache));
+    xmemory_set (&hash_table->cache, 0, sizeof (hash_table->cache));
     hash_table->table_size = &hash_table_sizes[0];
 
-    hash_table->entries = calloc (*hash_table->table_size,
+    hash_table->entries = xmemory_calloc (*hash_table->table_size,
 				  sizeof (cairo_hash_entry_t *));
     if (unlikely (hash_table->entries == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	free (hash_table);
+	xmemory_free (hash_table);
 	return NULL;
     }
 
@@ -218,8 +219,8 @@ _cairo_hash_table_destroy (cairo_hash_table_t *hash_table)
     /* No iterators can be running. Otherwise, halt. */
     XASSERT (hash_table->iterating == 0);
 
-    free (hash_table->entries);
-    free (hash_table);
+    xmemory_free (hash_table->entries);
+    xmemory_free (hash_table);
 }
 
 static cairo_hash_entry_t **
@@ -304,7 +305,7 @@ _cairo_hash_table_manage (cairo_hash_table_t *hash_table)
     }
 
     new_size = *tmp.table_size;
-    tmp.entries = calloc (new_size, sizeof (cairo_hash_entry_t*));
+    tmp.entries = xmemory_calloc (new_size, sizeof (cairo_hash_entry_t*));
     if (unlikely (tmp.entries == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
@@ -315,7 +316,7 @@ _cairo_hash_table_manage (cairo_hash_table_t *hash_table)
 	}
     }
 
-    free (hash_table->entries);
+    xmemory_free (hash_table->entries);
     hash_table->entries = tmp.entries;
     hash_table->table_size = tmp.table_size;
     hash_table->free_entries = new_size - hash_table->live_entries;
@@ -409,7 +410,7 @@ _cairo_hash_table_random_entry (cairo_hash_table_t	   *hash_table,
     XASSERT (predicate != NULL);
 
     table_size = *hash_table->table_size;
-    hash = rand ();
+    hash = xrand_rand ();
     idx = hash % table_size;
 
     entry = hash_table->entries[idx];

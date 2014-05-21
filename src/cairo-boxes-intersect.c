@@ -44,7 +44,7 @@
 #include "cairo-combsort-inline.h"
 #include "cairo-list-private.h"
 
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 typedef struct _rectangle rectangle_t;
 typedef struct _edge edge_t;
@@ -86,7 +86,7 @@ typedef struct _sweep_line {
     xint32_t current_y;
     xint32_t last_y;
 
-    jmp_buf unwind;
+    xjmp_buf_t unwind;
 } sweep_line_t;
 
 #define DEBUG_TRAPS 0
@@ -101,7 +101,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
     if (getenv ("CAIRO_DEBUG_TRAPS") == NULL)
 	return;
 
-    file = fopen (filename, "a");
+    file = xfile_open (filename, "a");
     if (file != NULL) {
 	for (n = 0; n < traps->num_traps; n++) {
 	    fprintf (file, "%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
@@ -117,7 +117,7 @@ dump_traps (cairo_traps_t *traps, const char *filename)
 		     traps->traps[n].right.p2.y);
 	}
 	fprintf (file, "\n");
-	fclose (file);
+    xfile_close (file);
     }
 }
 #else
@@ -152,7 +152,7 @@ static inline void
 pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+    xmemory_free (pq->elements);
 }
 
 static cairo_bool_t
@@ -167,7 +167,7 @@ pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return FALSE;
 
-	memcpy (new_elements, pq->elements_embedded,
+    xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -189,7 +189,7 @@ pqueue_push (sweep_line_t *sweep, rectangle_t *rectangle)
 
     if (unlikely (sweep->pq.size + 1 == sweep->pq.max_size)) {
 	if (unlikely (! pqueue_grow (&sweep->pq))) {
-	    longjmp (sweep->unwind,
+        xlongjmp_jump (sweep->unwind,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -302,7 +302,7 @@ end_box (sweep_line_t *sweep_line, edge_t *left, xint32_t bot, cairo_boxes_t *ou
 
 	status = _cairo_boxes_add (out, CAIRO_ANTIALIAS_DEFAULT, &box);
 	if (unlikely (status))
-	    longjmp (sweep_line->unwind, status);
+        xlongjmp_jump (sweep_line->unwind, status);
     }
 
     left->right = NULL;
@@ -489,7 +489,7 @@ intersect (rectangle_t **rectangles, int num_rectangles, cairo_boxes_t *out)
     cairo_status_t status;
 
     sweep_line_init (&sweep_line, rectangles, num_rectangles);
-    if ((status = setjmp (sweep_line.unwind)))
+    if ((status = xlongjmp_set (sweep_line.unwind)))
 	goto unwind;
 
     rectangle = rectangle_pop_start (&sweep_line);
@@ -684,7 +684,7 @@ _cairo_boxes_intersect (const cairo_boxes_t *a,
     _cairo_boxes_clear (out);
     status = intersect (rectangles_ptrs, j, out);
     if (rectangles != stack_rectangles)
-	free (rectangles);
+    xmemory_free (rectangles);
 
     return status;
 }

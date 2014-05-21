@@ -959,7 +959,7 @@ cairo_surface_destroy (cairo_surface_t *surface)
     /* paranoid check that nobody took a reference whilst finishing */
     XASSERT (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&surface->ref_count));
 
-    free (surface);
+    xmemory_free (surface);
 }
 slim_hidden_def(cairo_surface_destroy);
 
@@ -1196,7 +1196,7 @@ _cairo_mime_data_destroy (void *ptr)
     if (mime_data->destroy && mime_data->closure)
 	mime_data->destroy (mime_data->closure);
 
-    free (mime_data);
+    xmemory_free (mime_data);
 }
 
 /**
@@ -1301,7 +1301,7 @@ cairo_surface_set_mime_data (cairo_surface_t		*surface,
 	return _cairo_surface_set_error (surface, status);
 
     if (data != NULL) {
-	mime_data = malloc (sizeof (cairo_mime_data_t));
+    mime_data = xmemory_alloc (sizeof (cairo_mime_data_t));
 	if (unlikely (mime_data == NULL))
 	    return _cairo_surface_set_error (surface, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
@@ -1319,7 +1319,7 @@ cairo_surface_set_mime_data (cairo_surface_t		*surface,
 					      mime_data,
 					      _cairo_mime_data_destroy);
     if (unlikely (status)) {
-	free (mime_data);
+    xmemory_free (mime_data);
 
 	return _cairo_surface_set_error (surface, status);
     }

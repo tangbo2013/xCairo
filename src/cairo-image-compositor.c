@@ -901,7 +901,7 @@ out_thaw:
     pixman_glyph_cache_thaw (glyph_cache);
 
     if (pglyphs != pglyphs_stack)
-	free(pglyphs);
+    xmemory_free(pglyphs);
 
 out_unlock:
     CAIRO_MUTEX_UNLOCK (_cairo_glyph_cache_mutex);
@@ -1002,7 +1002,7 @@ composite_glyphs_via_mask (void				*_dst,
 	return status;
     }
 
-    memset (glyph_cache, 0, sizeof (glyph_cache));
+    xmemory_set (glyph_cache, 0, sizeof (glyph_cache));
     glyph_cache[info->glyphs[0].index % ARRAY_LENGTH (glyph_cache)] = scaled_glyph;
 
     format = PIXMAN_a8;
@@ -1018,7 +1018,7 @@ composite_glyphs_via_mask (void				*_dst,
 					info->extents.height,
 					NULL, 0);
     } else {
-	memset (buf, 0, i * info->extents.height);
+    xmemory_set (buf, 0, i * info->extents.height);
 	mask = pixman_image_create_bits (format,
 					info->extents.width,
 					info->extents.height,
@@ -1152,7 +1152,7 @@ composite_glyphs (void				*_dst,
     dst = to_pixman_image (_dst);
     src = ((cairo_image_source_t *)_src)->pixman_image;
 
-    memset (glyph_cache, 0, sizeof (glyph_cache));
+    xmemory_set (glyph_cache, 0, sizeof (glyph_cache));
     status = CAIRO_STATUS_SUCCESS;
 
     for (i = 0; i < info->num_glyphs; i++) {
@@ -1588,7 +1588,7 @@ _cairo_image_spans (void *abstract_renderer,
 	if (spans[0].coverage) {
 	    *row++ = r->opacity * spans[0].coverage;
 	    if (--len)
-		memset (row, row[-1], len);
+        xmemory_set (row, row[-1], len);
 	}
 	row += len;
 	spans++;
@@ -1598,7 +1598,7 @@ _cairo_image_spans (void *abstract_renderer,
     row = mask;
     while (--height) {
 	mask += r->u.mask.stride;
-	memcpy (mask, row, len);
+    xmemory_copy (mask, row, len);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -1617,20 +1617,20 @@ _cairo_image_spans_and_zero (void *abstract_renderer,
     mask = r->u.mask.data;
     if (y > r->u.mask.extents.y) {
 	len = (y - r->u.mask.extents.y) * r->u.mask.stride;
-	memset (mask, 0, len);
+    xmemory_set (mask, 0, len);
 	mask += len;
     }
 
     r->u.mask.extents.y = y + height;
     r->u.mask.data = mask + height * r->u.mask.stride;
     if (num_spans == 0) {
-	memset (mask, 0, height * r->u.mask.stride);
+    xmemory_set (mask, 0, height * r->u.mask.stride);
     } else {
 	xuint8_t *row = mask;
 
 	if (spans[0].x != r->u.mask.extents.x) {
 	    len = spans[0].x - r->u.mask.extents.x;
-	    memset (row, 0, len);
+        xmemory_set (row, 0, len);
 	    row += len;
 	}
 
@@ -1638,7 +1638,7 @@ _cairo_image_spans_and_zero (void *abstract_renderer,
 	    len = spans[1].x - spans[0].x;
 	    *row++ = r->opacity * spans[0].coverage;
 	    if (len > 1) {
-		memset (row, row[-1], --len);
+        xmemory_set (row, row[-1], --len);
 		row += len;
 	    }
 	    spans++;
@@ -1646,13 +1646,13 @@ _cairo_image_spans_and_zero (void *abstract_renderer,
 
 	if (spans[0].x != r->u.mask.extents.x + r->u.mask.extents.width) {
 	    len = r->u.mask.extents.x + r->u.mask.extents.width - spans[0].x;
-	    memset (row, 0, len);
+        xmemory_set (row, 0, len);
 	}
 
 	row = mask;
 	while (--height) {
 	    mask += r->u.mask.stride;
-	    memcpy (mask, row, r->u.mask.extents.width);
+        xmemory_copy (mask, row, r->u.mask.extents.width);
 	}
     }
 
@@ -1665,7 +1665,7 @@ _cairo_image_finish_spans_and_zero (void *abstract_renderer)
     cairo_image_span_renderer_t *r = abstract_renderer;
 
     if (r->u.mask.extents.y < r->u.mask.extents.height)
-	memset (r->u.mask.data, 0, (r->u.mask.extents.height - r->u.mask.extents.y) * r->u.mask.stride);
+    xmemory_set (r->u.mask.data, 0, (r->u.mask.extents.height - r->u.mask.extents.y) * r->u.mask.stride);
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -1687,7 +1687,7 @@ _fill8_spans (void *abstract_renderer, int y, int h,
 		if (len == 1)
 		    *d = r->u.fill.pixel;
 		else
-		    memset(d, r->u.fill.pixel, len);
+            xmemory_set(d, r->u.fill.pixel, len);
 	    }
 	    spans++;
 	} while (--num_spans > 1);
@@ -1701,7 +1701,7 @@ _fill8_spans (void *abstract_renderer, int y, int h,
 		    if (len == 1)
 			*d = r->u.fill.pixel;
 		    else
-			memset(d, r->u.fill.pixel, len);
+            xmemory_set(d, r->u.fill.pixel, len);
 		    yy++;
 		} while (--hh);
 	    }
@@ -1858,7 +1858,7 @@ _blit_spans (void *abstract_renderer, int y, int h,
 		    break;
 #endif
 		default:
-		    memcpy(d, s, len);
+            xmemory_copy(d, s, len);
 		    break;
 		}
 	    }
@@ -1888,7 +1888,7 @@ _blit_spans (void *abstract_renderer, int y, int h,
 			break;
 #endif
 		    default:
-			memcpy(dst, src, len);
+            xmemory_copy(dst, src, len);
 			break;
 		    }
 		    yy++;
@@ -2138,7 +2138,7 @@ _fill_a8_lerp_opaque_spans (void *abstract_renderer, int y, int h,
 	    if (a) {
 		int len = spans[1].x - spans[0].x;
 		if (a == 0xff) {
-		    memset(d + spans[0].x, r->u.fill.pixel, len);
+            xmemory_set(d + spans[0].x, r->u.fill.pixel, len);
 		} else {
 		    xuint8_t s = mul8_8(a, r->u.fill.pixel);
 		    xuint8_t *dst = d + spans[0].x;
@@ -2160,7 +2160,7 @@ _fill_a8_lerp_opaque_spans (void *abstract_renderer, int y, int h,
 		    do {
 			int len = spans[1].x - spans[0].x;
 			xuint8_t *d = r->u.fill.data + r->u.fill.stride*yy + spans[0].x;
-			memset(d, r->u.fill.pixel, len);
+            xmemory_set(d, r->u.fill.pixel, len);
 			yy++;
 		    } while (--hh);
 		} else {
@@ -2368,7 +2368,7 @@ _blit_xrgb32_lerp_spans (void *abstract_renderer, int y, int h,
 		    if (len == 1)
 			*d = *s;
 		    else
-			memcpy(d, s, len*4);
+            xmemory_copy(d, s, len*4);
 		} else {
 		    while (len--) {
 			*d = lerp8x4 (*s, a, *d);
@@ -2391,7 +2391,7 @@ _blit_xrgb32_lerp_spans (void *abstract_renderer, int y, int h,
 			if (len == 1)
 			    *d = *s;
 			else
-			    memcpy(d, s, len * 4);
+                xmemory_copy(d, s, len * 4);
 		    } else {
 			while (len--) {
 			    *d = lerp8x4 (*s, a, *d);
@@ -2465,7 +2465,7 @@ _inplace_spans (void *abstract_renderer,
 		mask = (xuint8_t *)pixman_image_get_data (r->mask);
 		x0 = spans[1].x;
 	    }else {
-		memset (mask, spans[0].coverage, --len);
+        xmemory_set (mask, spans[0].coverage, --len);
 		mask += len;
 	    }
 	}
@@ -2515,7 +2515,7 @@ _inplace_opacity_spans (void *abstract_renderer, int y, int h,
 		mask = (xuint8_t *)pixman_image_get_data (r->mask);
 		x0 = spans[1].x;
 	    }else {
-		memset (mask, m, --len);
+        xmemory_set (mask, m, --len);
 		mask += len;
 	    }
 	}
@@ -2620,7 +2620,7 @@ _inplace_src_spans (void *abstract_renderer, int y, int h,
 	} else {
 	    *m++ = spans[0].coverage;
 	    if (len > 1) {
-		memset (m, spans[0].coverage, --len);
+        xmemory_set (m, spans[0].coverage, --len);
 		m += len;
 	    }
 	}
@@ -2705,7 +2705,7 @@ _inplace_src_opacity_spans (void *abstract_renderer, int y, int h,
 	} else {
 	    *mask++ = m;
 	    if (len > 1) {
-		memset (mask, m, --len);
+        xmemory_set (mask, m, --len);
 		mask += len;
 	    }
 	}
@@ -2743,7 +2743,7 @@ _inplace_src_opacity_spans (void *abstract_renderer, int y, int h,
 
 static void free_pixels (pixman_image_t *image, void *data)
 {
-	free (data);
+    xmemory_free (data);
 }
 
 static cairo_int_status_t
@@ -2874,7 +2874,7 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 	/* Create an effectively unbounded mask by repeating the single line */
 	buf = r->_buf;
 	if (width > SZ_BUF) {
-	    buf = malloc (width);
+        buf = xmemory_alloc (width);
 	    if (unlikely (buf == NULL)) {
 		pixman_image_unref (r->src);
 		return _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -2886,7 +2886,7 @@ inplace_renderer_init (cairo_image_span_renderer_t	*r,
 	if (unlikely (r->mask == NULL)) {
 	    pixman_image_unref (r->src);
 	    if (buf != r->_buf)
-		free (buf);
+        xmemory_free (buf);
 	    return _cairo_error(CAIRO_STATUS_NO_MEMORY);
 	}
 

@@ -33,7 +33,7 @@
  *	Kristian Høgsberg <krh@redhat.com>
  */
 
-#define _BSD_SOURCE /* for snprintf() */
+#define _BSD_SOURCE /* for string_snprintf() */
 #include "cairoint.h"
 
 #include "cairo-output-stream-private.h"
@@ -43,8 +43,8 @@
 #include "cairo-compiler-private.h"
 
 #include <xC/xfile.h>
-#include <locale.h>
-#include <errno.h>
+//#include <locale.h>
+//#include <errno.h>
 
 /* Numbers printed with %f are printed with this number of significant
  * digits after the decimal.
@@ -148,7 +148,7 @@ _cairo_output_stream_create (cairo_write_func_t		write_func,
 {
     cairo_output_stream_with_closure_t *stream;
 
-    stream = malloc (sizeof (cairo_output_stream_with_closure_t));
+    stream = xmemory_alloc (sizeof (cairo_output_stream_with_closure_t));
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -174,7 +174,7 @@ _cairo_output_stream_create_in_error (cairo_status_t status)
     if (status == CAIRO_STATUS_WRITE_ERROR)
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
 
-    stream = malloc (sizeof (cairo_output_stream_t));
+    stream = xmemory_alloc (sizeof (cairo_output_stream_t));
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -250,7 +250,7 @@ _cairo_output_stream_destroy (cairo_output_stream_t *stream)
     }
 
     status = _cairo_output_stream_fini (stream);
-    free (stream);
+    xmemory_free (stream);
 
     return status;
 }
@@ -303,85 +303,85 @@ _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
 static void
 _cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precision)
 {
-    struct lconv *locale_data;
-    const char *decimal_point;
-    int decimal_point_len;
-    char *p;
-    int decimal_len;
-    int num_zeros, decimal_digits;
+//    struct lconv *locale_data;
+//    const char *decimal_point;
+//    int decimal_point_len;
+//    char *p;
+//    int decimal_len;
+//    int num_zeros, decimal_digits;
 
-    /* Omit the minus sign from negative zero. */
-    if (d == 0.0)
-	d = 0.0;
+//    /* Omit the minus sign from negative zero. */
+//    if (d == 0.0)
+//	d = 0.0;
 
-    locale_data = localeconv ();
-    decimal_point = locale_data->decimal_point;
-    decimal_point_len = strlen (decimal_point);
+//    locale_data = localeconv ();
+//    decimal_point = locale_data->decimal_point;
+//    decimal_point_len = strlen (decimal_point);
 
-    XASSERT (decimal_point_len != 0);
+//    XASSERT (decimal_point_len != 0);
 
-    if (limited_precision) {
-	snprintf (buffer, size, "%.*f", FIXED_POINT_DECIMAL_DIGITS, d);
-    } else {
-	/* Using "%f" to print numbers less than 0.1 will result in
-	 * reduced precision due to the default 6 digits after the
-	 * decimal point.
-	 *
-	 * For numbers is < 0.1, we print with maximum precision and count
-	 * the number of zeros between the decimal point and the first
-	 * significant digit. We then print the number again with the
-	 * number of decimal places that gives us the required number of
-	 * significant digits. This ensures the number is correctly
-	 * rounded.
-	 */
-	if (fabs (d) >= 0.1) {
-	    snprintf (buffer, size, "%f", d);
-	} else {
-	    snprintf (buffer, size, "%.18f", d);
-	    p = buffer;
+//    if (limited_precision) {
+//    string_snprintf (buffer, size, "%.*f", FIXED_POINT_DECIMAL_DIGITS, d);
+//    } else {
+//	/* Using "%f" to print numbers less than 0.1 will result in
+//	 * reduced precision due to the default 6 digits after the
+//	 * decimal point.
+//	 *
+//	 * For numbers is < 0.1, we print with maximum precision and count
+//	 * the number of zeros between the decimal point and the first
+//	 * significant digit. We then print the number again with the
+//	 * number of decimal places that gives us the required number of
+//	 * significant digits. This ensures the number is correctly
+//	 * rounded.
+//	 */
+//	if (fabs (d) >= 0.1) {
+//        string_snprintf (buffer, size, "%f", d);
+//	} else {
+//        string_snprintf (buffer, size, "%.18f", d);
+//	    p = buffer;
 
-	    if (*p == '+' || *p == '-')
-		p++;
+//	    if (*p == '+' || *p == '-')
+//		p++;
 
-	    while (_cairo_isdigit (*p))
-		p++;
+//	    while (_cairo_isdigit (*p))
+//		p++;
 
-	    if (strncmp (p, decimal_point, decimal_point_len) == 0)
-		p += decimal_point_len;
+//	    if (strncmp (p, decimal_point, decimal_point_len) == 0)
+//		p += decimal_point_len;
 
-	    num_zeros = 0;
-	    while (*p++ == '0')
-		num_zeros++;
+//	    num_zeros = 0;
+//	    while (*p++ == '0')
+//		num_zeros++;
 
-	    decimal_digits = num_zeros + SIGNIFICANT_DIGITS_AFTER_DECIMAL;
+//	    decimal_digits = num_zeros + SIGNIFICANT_DIGITS_AFTER_DECIMAL;
 
-	    if (decimal_digits < 18)
-		snprintf (buffer, size, "%.*f", decimal_digits, d);
-	}
-    }
-    p = buffer;
+//	    if (decimal_digits < 18)
+//        string_snprintf (buffer, size, "%.*f", decimal_digits, d);
+//	}
+//    }
+//    p = buffer;
 
-    if (*p == '+' || *p == '-')
-	p++;
+//    if (*p == '+' || *p == '-')
+//	p++;
 
-    while (_cairo_isdigit (*p))
-	p++;
+//    while (_cairo_isdigit (*p))
+//	p++;
 
-    if (strncmp (p, decimal_point, decimal_point_len) == 0) {
-	*p = '.';
-	decimal_len = strlen (p + decimal_point_len);
-	memmove (p + 1, p + decimal_point_len, decimal_len);
-	p[1 + decimal_len] = 0;
+//    if (strncmp (p, decimal_point, decimal_point_len) == 0) {
+//	*p = '.';
+//	decimal_len = strlen (p + decimal_point_len);
+//    xmemory_move (p + 1, p + decimal_point_len, decimal_len);
+//	p[1 + decimal_len] = 0;
 
-	/* Remove trailing zeros and decimal point if possible. */
-	for (p = p + decimal_len; *p == '0'; p--)
-	    *p = 0;
+//	/* Remove trailing zeros and decimal point if possible. */
+//	for (p = p + decimal_len; *p == '0'; p--)
+//	    *p = 0;
 
-	if (*p == '.') {
-	    *p = 0;
-	    p--;
-	}
-    }
+//	if (*p == '.') {
+//	    *p = 0;
+//	    p--;
+//	}
+//    }
 }
 
 enum {
@@ -392,13 +392,13 @@ enum {
  * this is primarily to special case handling of doubles.  We want
  * locale independent formatting of doubles and we want to trim
  * trailing zeros.  This is handled by dtostr() above, and the code
- * below handles everything else by calling snprintf() to do the
+ * below handles everything else by calling string_snprintf() to do the
  * formatting.  This functionality is only for internal use and we
  * only implement the formats we actually use.
  */
 void
 _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
-			      const char *fmt, va_list ap)
+                  const char *fmt, xva_list_t ap)
 {
 #define SINGLE_FMT_BUFFER_SIZE 32
     char buffer[512], single_fmt[SINGLE_FMT_BUFFER_SIZE];
@@ -452,10 +452,10 @@ _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
 	XASSERT (single_fmt_length + 1 <= SINGLE_FMT_BUFFER_SIZE);
 
 	/* Reuse the format string for this conversion. */
-	memcpy (single_fmt, start, single_fmt_length);
+    xmemory_copy (single_fmt, start, single_fmt_length);
 	single_fmt[single_fmt_length] = '\0';
 
-	/* Flush contents of buffer before snprintf()'ing into it. */
+    /* Flush contents of buffer before string_snprintf()'ing into it. */
 	_cairo_output_stream_write (stream, buffer, p - buffer);
 
 	/* We group signed and unsigned together in this switch, the
@@ -472,11 +472,11 @@ _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
 	case 'x':
 	case 'X':
             if (var_width) {
-                width = va_arg (ap, int);
-                snprintf (buffer, sizeof buffer,
-                          single_fmt, width, va_arg (ap, int));
+                width = XVA_ARG (ap, int);
+                string_snprintf (buffer, sizeof buffer,
+                          single_fmt, width, XVA_ARG (ap, int));
             } else {
-                snprintf (buffer, sizeof buffer, single_fmt, va_arg (ap, int));
+                string_snprintf (buffer, sizeof buffer, single_fmt, XVA_ARG (ap, int));
             }
 	    break;
 	case 'd' | LENGTH_MODIFIER_LONG:
@@ -485,26 +485,26 @@ _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
 	case 'x' | LENGTH_MODIFIER_LONG:
 	case 'X' | LENGTH_MODIFIER_LONG:
             if (var_width) {
-                width = va_arg (ap, int);
-                snprintf (buffer, sizeof buffer,
-                          single_fmt, width, va_arg (ap, long int));
+                width = XVA_ARG (ap, int);
+                string_snprintf (buffer, sizeof buffer,
+                          single_fmt, width, XVA_ARG (ap, long int));
             } else {
-                snprintf (buffer, sizeof buffer,
-                          single_fmt, va_arg (ap, long int));
+                string_snprintf (buffer, sizeof buffer,
+                          single_fmt, XVA_ARG (ap, long int));
             }
 	    break;
 	case 's':
-	    snprintf (buffer, sizeof buffer,
-		      single_fmt, va_arg (ap, const char *));
+        string_snprintf (buffer, sizeof buffer,
+              single_fmt, XVA_ARG (ap, const char *));
 	    break;
 	case 'f':
-	    _cairo_dtostr (buffer, sizeof buffer, va_arg (ap, double), FALSE);
+        _cairo_dtostr (buffer, sizeof buffer, XVA_ARG (ap, double), FALSE);
 	    break;
 	case 'g':
-	    _cairo_dtostr (buffer, sizeof buffer, va_arg (ap, double), TRUE);
+        _cairo_dtostr (buffer, sizeof buffer, XVA_ARG (ap, double), TRUE);
 	    break;
 	case 'c':
-	    buffer[0] = va_arg (ap, int);
+        buffer[0] = XVA_ARG (ap, int);
 	    buffer[1] = 0;
 	    break;
 	default:
@@ -521,13 +521,13 @@ void
 _cairo_output_stream_printf (cairo_output_stream_t *stream,
 			     const char *fmt, ...)
 {
-    va_list ap;
+    xva_list_t ap;
 
-    va_start (ap, fmt);
+    XVA_START (ap, fmt);
 
     _cairo_output_stream_vprintf (stream, fmt, ap);
 
-    va_end (ap);
+    XVA_END (ap);
 }
 
 long
@@ -557,7 +557,7 @@ stdio_write (cairo_output_stream_t *base,
 {
     stdio_stream_t *stream = (stdio_stream_t *) base;
 
-    if (fwrite (data, 1, length, stream->file) != length)
+    if (xfile_write (stream->file, data, length) != length)
 	return _cairo_error (CAIRO_STATUS_WRITE_ERROR);
 
     return CAIRO_STATUS_SUCCESS;
@@ -584,7 +584,7 @@ stdio_close (cairo_output_stream_t *base)
 
     status = stdio_flush (base);
 
-    fclose (stream->file);
+    xfile_close (stream->file);
 
     return status;
 }
@@ -599,7 +599,7 @@ _cairo_output_stream_create_for_file (xfile_t *file)
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
     }
 
-    stream = malloc (sizeof *stream);
+    stream = xmemory_alloc (sizeof *stream);
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -621,21 +621,21 @@ _cairo_output_stream_create_for_filename (const char *filename)
     if (filename == NULL)
 	return _cairo_null_stream_create ();
 
-    file = fopen (filename, "wb");
+    file = xfile_open (filename, XOFM_READWRITE);
     if (file == NULL) {
-	switch (errno) {
-	case ENOMEM:
-	    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	    return (cairo_output_stream_t *) &_cairo_output_stream_nil;
-	default:
-	    _cairo_error_throw (CAIRO_STATUS_WRITE_ERROR);
-	    return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
-	}
+//	switch (errno) {
+//	case ENOMEM:
+//	    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
+//	    return (cairo_output_stream_t *) &_cairo_output_stream_nil;
+//	default:
+        _cairo_error_throw (CAIRO_STATUS_WRITE_ERROR);
+        return (cairo_output_stream_t *) &_cairo_output_stream_nil_write_error;
+//	}
     }
 
-    stream = malloc (sizeof *stream);
+    stream = xmemory_alloc (sizeof *stream);
     if (unlikely (stream == NULL)) {
-	fclose (file);
+    xfile_close (file);
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
@@ -677,7 +677,7 @@ _cairo_memory_stream_create (void)
 {
     memory_stream_t *stream;
 
-    stream = malloc (sizeof *stream);
+    stream = xmemory_alloc (sizeof *stream);
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
@@ -704,13 +704,13 @@ _cairo_memory_stream_destroy (cairo_output_stream_t *abstract_stream,
     stream = (memory_stream_t *) abstract_stream;
 
     *length_out = _cairo_array_num_elements (&stream->array);
-    *data_out = malloc (*length_out);
+    *data_out = xmemory_alloc (*length_out);
     if (unlikely (*data_out == NULL)) {
 	status = _cairo_output_stream_destroy (abstract_stream);
 	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
-    memcpy (*data_out, _cairo_array_index (&stream->array, 0), *length_out);
+    xmemory_copy (*data_out, _cairo_array_index (&stream->array, 0), *length_out);
 
     return _cairo_output_stream_destroy (abstract_stream);
 }
@@ -754,7 +754,7 @@ _cairo_null_stream_create (void)
 {
     cairo_output_stream_t *stream;
 
-    stream = malloc (sizeof *stream);
+    stream = xmemory_alloc (sizeof *stream);
     if (unlikely (stream == NULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;

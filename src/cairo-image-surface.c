@@ -178,7 +178,7 @@ _cairo_image_surface_create_for_pixman_image (pixman_image_t		*pixman_image,
 {
     cairo_image_surface_t *surface;
 
-    surface = malloc (sizeof (cairo_image_surface_t));
+    surface = xmemory_alloc (sizeof (cairo_image_surface_t));
     if (unlikely (surface == NULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
@@ -422,7 +422,7 @@ _cairo_image_surface_create_with_content (cairo_content_t	content,
  * #cairo_surface_t *surface;
  *
  * stride = cairo_format_stride_for_width (format, width);
- * data = malloc (stride * height);
+ * data = xmemory_alloc (stride * height);
  * surface = cairo_image_surface_create_for_data (data, format,
  *						  width, height,
  *						  stride);
@@ -786,7 +786,7 @@ _cairo_image_surface_snapshot (void *abstract_surface)
 	return &clone->base;
 
     if (clone->stride == image->stride) {
-	memcpy (clone->data, image->data, clone->stride * clone->height);
+    xmemory_copy (clone->data, image->data, clone->stride * clone->height);
     } else {
 	pixman_image_composite32 (PIXMAN_OP_SRC,
 				  image->pixman_image, NULL, clone->pixman_image,
@@ -843,7 +843,7 @@ _cairo_image_surface_finish (void *abstract_surface)
     }
 
     if (surface->owns_data) {
-	free (surface->data);
+    xmemory_free (surface->data);
 	surface->data = NULL;
     }
 
@@ -1144,7 +1144,7 @@ _cairo_image_surface_create_from_image (cairo_image_surface_t *other,
 cleanup_image:
     pixman_image_unref (image);
 cleanup_mem:
-    free (mem);
+    xmemory_free (mem);
 cleanup:
     return (cairo_image_surface_t *) _cairo_surface_create_in_error (status);
 }

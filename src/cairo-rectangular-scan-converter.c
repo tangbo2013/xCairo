@@ -39,7 +39,7 @@
 #include "cairo-list-private.h"
 #include "cairo-spans-private.h"
 
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 typedef struct _rectangle {
     struct _rectangle *next, *prev;
@@ -87,7 +87,7 @@ typedef struct {
     unsigned int num_spans;
     unsigned int size_spans;
 
-    jmp_buf jmpbuf;
+    xjmp_buf_t jmpbuf;
 } sweep_line_t;
 
 static inline int
@@ -124,7 +124,7 @@ static inline void
 pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+	xmemory_free (pq->elements);
 }
 
 static cairo_bool_t
@@ -139,7 +139,7 @@ pqueue_grow (pqueue_t *pq)
 	if (unlikely (new_elements == NULL))
 	    return FALSE;
 
-	memcpy (new_elements, pq->elements_embedded,
+	xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
@@ -161,7 +161,7 @@ pqueue_push (sweep_line_t *sweep, rectangle_t *rectangle)
 
     if (unlikely (sweep->stop.size + 1 == sweep->stop.max_size)) {
 	if (unlikely (! pqueue_grow (&sweep->stop)))
-	    longjmp (sweep->jmpbuf,
+	    xlongjmp_jump (sweep->jmpbuf,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -247,7 +247,7 @@ sweep_line_fini (sweep_line_t *sweep)
     pqueue_fini (&sweep->stop);
 
     if (sweep->spans != sweep->spans_stack)
-	free (sweep->spans);
+	xmemory_free (sweep->spans);
 }
 
 static inline void
@@ -284,7 +284,7 @@ add_cell (sweep_line_t *sweep, int x, int covered, int uncovered)
 
 	c = _cairo_freepool_alloc (&sweep->coverage.pool);
 	if (unlikely (c == NULL)) {
-	    longjmp (sweep->jmpbuf,
+	    xlongjmp_jump (sweep->jmpbuf,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
 
@@ -365,11 +365,11 @@ _active_edges_to_spans (sweep_line_t	*sweep)
 	    size <<= 1;
 
 	if (sweep->spans != sweep->spans_stack)
-	    free (sweep->spans);
+	    xmemory_free (sweep->spans);
 
 	sweep->spans = _cairo_malloc_ab (size, sizeof (cairo_half_open_span_t));
 	if (unlikely (sweep->spans == NULL))
-	    longjmp (sweep->jmpbuf, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+	    xlongjmp_jump (sweep->jmpbuf, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
 	sweep->size_spans = size;
     }
@@ -481,7 +481,7 @@ render_rows (sweep_line_t *sweep_line,
 				    sweep_line->spans,
 				    sweep_line->num_spans);
     if (unlikely (status))
-	longjmp (sweep_line->jmpbuf, status);
+	xlongjmp_jump (sweep_line->jmpbuf, status);
 }
 
 static cairo_status_t
@@ -497,7 +497,7 @@ generate (cairo_rectangular_scan_converter_t *self,
     sweep_line.xmin = _cairo_fixed_integer_part (self->extents.p1.x);
     sweep_line.xmax = _cairo_fixed_integer_part (self->extents.p2.x);
     sweep_line.start = rectangles;
-    if ((status = setjmp (sweep_line.jmpbuf)))
+    if ((status = xlongjmp_set (sweep_line.jmpbuf)))
 	goto out;
 
     sweep_line.current_y = _cairo_fixed_integer_part (self->extents.p1.y);
@@ -694,7 +694,7 @@ _cairo_rectangular_scan_converter_generate (void			*converter,
     status = generate (self, renderer, rectangles);
 
     if (rectangles != rectangles_stack)
-	free (rectangles);
+	xmemory_free (rectangles);
 
     return status;
 }
@@ -768,7 +768,7 @@ _cairo_rectangular_scan_converter_destroy (void *converter)
 
     for (chunk = self->chunks.next; chunk != NULL; chunk = next) {
 	next = chunk->next;
-	free (chunk);
+	xmemory_free (chunk);
     }
 }
 

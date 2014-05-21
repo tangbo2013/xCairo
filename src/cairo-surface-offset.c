@@ -276,7 +276,7 @@ _cairo_surface_offset_glyphs (cairo_surface_t		*surface,
     if (dev_glyphs == NULL)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    memcpy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
+    xmemory_copy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
 
     if (x | y) {
 	cairo_matrix_t m;
@@ -302,7 +302,7 @@ _cairo_surface_offset_glyphs (cairo_surface_t		*surface,
 
     if (dev_clip != clip)
 	_cairo_clip_destroy (dev_clip);
-    free (dev_glyphs);
+    xmemory_free (dev_glyphs);
 
     return status;
 }

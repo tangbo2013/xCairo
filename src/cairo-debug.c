@@ -157,7 +157,7 @@ _cairo_image_surface_write_to_ppm (cairo_image_surface_t *isurf, const char *fn)
     else
         return;
 
-    xfile_t *fp = fopen(fn, "wb");
+    xfile_t *fp = xfile_open(fn, "wb");
     if (!fp)
         return;
 
@@ -180,7 +180,7 @@ _cairo_image_surface_write_to_ppm (cairo_image_surface_t *isurf, const char *fn)
         }
     }
 
-    fclose (fp);
+    xfile_close (fp);
 
     fprintf (stderr, "Wrote %s\n", fn);
 }

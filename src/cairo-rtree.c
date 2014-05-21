@@ -315,7 +315,7 @@ _cairo_rtree_init (cairo_rtree_t	*rtree,
     rtree->min_size = min_size;
     rtree->destroy = destroy;
 
-    memset (&rtree->root, 0, sizeof (rtree->root));
+    xmemory_set (&rtree->root, 0, sizeof (rtree->root));
     rtree->root.width = width;
     rtree->root.height = height;
     rtree->root.state = CAIRO_RTREE_NODE_AVAILABLE;

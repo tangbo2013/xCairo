@@ -74,7 +74,7 @@ _cairo_stroke_style_init_copy (cairo_stroke_style_t *style,
 	if (unlikely (style->dash == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	memcpy (style->dash, other->dash,
+	xmemory_copy (style->dash, other->dash,
 		style->num_dashes * sizeof (double));
     }
 
@@ -86,7 +86,7 @@ _cairo_stroke_style_init_copy (cairo_stroke_style_t *style,
 void
 _cairo_stroke_style_fini (cairo_stroke_style_t *style)
 {
-    free (style->dash);
+    xmemory_free (style->dash);
     style->dash = NULL;
 
     style->num_dashes = 0;

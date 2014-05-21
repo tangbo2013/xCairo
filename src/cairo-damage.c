@@ -51,7 +51,7 @@ _cairo_damage_create (void)
 {
     cairo_damage_t *damage;
 
-    damage = malloc (sizeof (*damage));
+    damage = xmemory_alloc (sizeof (*damage));
     if (unlikely (damage == NULL)) {
 	_cairo_error_throw(CAIRO_STATUS_NO_MEMORY);
 	return (cairo_damage_t *) &__cairo_damage__nil;
@@ -81,10 +81,10 @@ _cairo_damage_destroy (cairo_damage_t *damage)
 
     for (chunk = damage->chunks.next; chunk != NULL; chunk = next) {
 	next = chunk->next;
-	free (chunk);
+    xmemory_free (chunk);
     }
     cairo_region_destroy (damage->region);
-    free (damage);
+    xmemory_free (damage);
 }
 
 static cairo_damage_t *
@@ -108,7 +108,7 @@ _cairo_damage_add_boxes(cairo_damage_t *damage,
     if (n > damage->remain)
 	n = damage->remain;
 
-    memcpy (damage->tail->base + damage->tail->count, boxes,
+    xmemory_copy (damage->tail->base + damage->tail->count, boxes,
 	    n * sizeof (cairo_box_t));
 
     count -= n;
@@ -122,7 +122,7 @@ _cairo_damage_add_boxes(cairo_damage_t *damage,
     if (size < count)
 	size = (count + 64) & ~63;
 
-    chunk = malloc (sizeof (*chunk) + sizeof (cairo_box_t) * size);
+    chunk = xmemory_alloc (sizeof (*chunk) + sizeof (cairo_box_t) * size);
     if (unlikely (chunk == NULL)) {
 	_cairo_damage_destroy (damage);
 	return (cairo_damage_t *) &__cairo_damage__nil;
@@ -136,7 +136,7 @@ _cairo_damage_add_boxes(cairo_damage_t *damage,
     damage->tail->next = chunk;
     damage->tail = chunk;
 
-    memcpy (damage->tail->base, boxes + n,
+    xmemory_copy (damage->tail->base, boxes + n,
 	    count * sizeof (cairo_box_t));
     damage->remain = size - count;
 
@@ -210,7 +210,7 @@ _cairo_damage_reduce (cairo_damage_t *damage)
 
     boxes = damage->tail->base;
     if (damage->dirty > damage->tail->size) {
-	boxes = free_boxes = malloc (damage->dirty * sizeof (cairo_box_t));
+    boxes = free_boxes = xmemory_alloc (damage->dirty * sizeof (cairo_box_t));
 	if (unlikely (boxes == NULL)) {
 	    _cairo_damage_destroy (damage);
 	    return (cairo_damage_t *) &__cairo_damage__nil;
@@ -224,12 +224,12 @@ _cairo_damage_reduce (cairo_damage_t *damage)
     }
 
     for (chunk = &damage->chunks; chunk != last; chunk = chunk->next) {
-	memcpy (b, chunk->base, chunk->count * sizeof (cairo_box_t));
+    xmemory_copy (b, chunk->base, chunk->count * sizeof (cairo_box_t));
 	b += chunk->count;
     }
 
     damage->region = _cairo_region_create_from_boxes (boxes, damage->dirty);
-    free (free_boxes);
+    xmemory_free (free_boxes);
 
     if (unlikely (damage->region->status)) {
 	_cairo_damage_destroy (damage);

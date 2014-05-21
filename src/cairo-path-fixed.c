@@ -132,9 +132,9 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 
     path->buf.base.num_ops = other->buf.base.num_ops;
     path->buf.base.num_points = other->buf.base.num_points;
-    memcpy (path->buf.op, other->buf.base.op,
+    xmemory_copy (path->buf.op, other->buf.base.op,
 	    other->buf.base.num_ops * sizeof (other->buf.op[0]));
-    memcpy (path->buf.points, other->buf.points,
+    xmemory_copy (path->buf.points, other->buf.points,
 	    other->buf.base.num_points * sizeof (other->buf.points[0]));
 
     num_points = num_ops = 0;
@@ -157,11 +157,11 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 	     other_buf != cairo_path_head (other);
 	     other_buf = cairo_path_buf_next (other_buf))
 	{
-	    memcpy (buf->op + buf->num_ops, other_buf->op,
+        xmemory_copy (buf->op + buf->num_ops, other_buf->op,
 		    other_buf->num_ops * sizeof (buf->op[0]));
 	    buf->num_ops += other_buf->num_ops;
 
-	    memcpy (buf->points + buf->num_points, other_buf->points,
+        xmemory_copy (buf->points + buf->num_points, other_buf->points,
 		    other_buf->num_points * sizeof (buf->points[0]));
 	    buf->num_points += other_buf->num_points;
 	}
@@ -275,9 +275,9 @@ _cairo_path_fixed_equal (const cairo_path_fixed_t *a,
 	int num_ops = MIN (num_ops_a, num_ops_b);
 	int num_points = MIN (num_points_a, num_points_b);
 
-	if (memcmp (ops_a, ops_b, num_ops * sizeof (cairo_path_op_t)))
+    if (xmemory_compare (ops_a, ops_b, num_ops * sizeof (cairo_path_op_t)))
 	    return FALSE;
-	if (memcmp (points_a, points_b, num_points * sizeof (cairo_point_t)))
+    if (xmemory_compare (points_a, points_b, num_points * sizeof (cairo_point_t)))
 	    return FALSE;
 
 	num_ops_a -= num_ops;
@@ -325,7 +325,7 @@ _cairo_path_fixed_create (void)
 {
     cairo_path_fixed_t	*path;
 
-    path = malloc (sizeof (cairo_path_fixed_t));
+    path = xmemory_alloc (sizeof (cairo_path_fixed_t));
     if (!path) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return NULL;
@@ -354,7 +354,7 @@ void
 _cairo_path_fixed_destroy (cairo_path_fixed_t *path)
 {
     _cairo_path_fixed_fini (path);
-    free (path);
+    xmemory_free (path);
 }
 
 static cairo_path_op_t
@@ -718,15 +718,15 @@ _cairo_path_fixed_add (cairo_path_fixed_t   *path,
 	int len = 0;
 	int i;
 
-	len += snprintf (buf + len, sizeof (buf), "[");
+    len += string_snprintf (buf + len, sizeof (buf), "[");
 	for (i = 0; i < num_points; i++) {
 	    if (i != 0)
-		len += snprintf (buf + len, sizeof (buf), " ");
-	    len += snprintf (buf + len, sizeof (buf), "(%f, %f)",
+        len += string_snprintf (buf + len, sizeof (buf), " ");
+        len += string_snprintf (buf + len, sizeof (buf), "(%f, %f)",
 			     _cairo_fixed_to_double (points[i].x),
 			     _cairo_fixed_to_double (points[i].y));
 	}
-	len += snprintf (buf + len, sizeof (buf), "]");
+    len += string_snprintf (buf + len, sizeof (buf), "]");
 
 #define STRINGIFYFLAG(x)  (path->x ? #x " " : "")
     XDBGPRINTF (
@@ -782,7 +782,7 @@ _cairo_path_buf_create (int size_ops, int size_points)
 static void
 _cairo_path_buf_destroy (cairo_path_buf_t *buf)
 {
-    free (buf);
+    xmemory_free (buf);
 }
 
 static void
@@ -800,7 +800,7 @@ _cairo_path_buf_add_points (cairo_path_buf_t       *buf,
     if (num_points == 0)
 	return;
 
-    memcpy (buf->points + buf->num_points,
+    xmemory_copy (buf->points + buf->num_points,
 	    points,
 	    sizeof (points[0]) * num_points);
     buf->num_points += num_points;

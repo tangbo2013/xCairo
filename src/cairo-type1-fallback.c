@@ -33,7 +33,7 @@
  *	Adrian Johnson <ajohnson@redneon.com>
  */
 
-#define _BSD_SOURCE /* for snprintf(), strdup() */
+#define _BSD_SOURCE /* for string_snprintf(), strdup() */
 #include "cairoint.h"
 
 #include "cairo-array-private.h"
@@ -87,13 +87,13 @@ cairo_type1_font_create (cairo_scaled_font_subset_t  *scaled_font_subset,
     cairo_font_options_t font_options;
     cairo_status_t status;
 
-    font = calloc (1, sizeof (cairo_type1_font_t));
+    font = xmemory_calloc (1, sizeof (cairo_type1_font_t));
     if (unlikely (font == NULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    font->widths = calloc (scaled_font_subset->num_glyphs, sizeof (int));
+    font->widths = xmemory_calloc (scaled_font_subset->num_glyphs, sizeof (int));
     if (unlikely (font->widths == NULL)) {
-	free (font);
+    xmemory_free (font);
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -125,8 +125,8 @@ cairo_type1_font_create (cairo_scaled_font_subset_t  *scaled_font_subset,
     return CAIRO_STATUS_SUCCESS;
 
 fail:
-    free (font->widths);
-    free (font);
+    xmemory_free (font->widths);
+    xmemory_free (font);
 
     return status;
 }
@@ -708,12 +708,12 @@ cairo_type1_font_destroy (cairo_type1_font_t *font)
 {
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
-    free (font->widths);
+    xmemory_free (font->widths);
     cairo_scaled_font_destroy (font->type1_scaled_font);
     _cairo_array_fini (&font->contents);
     if (font->output)
 	status = _cairo_output_stream_destroy (font->output);
-    free (font);
+    xmemory_free (font);
 
     return status;
 }
@@ -743,7 +743,7 @@ _cairo_type1_fallback_init_internal (cairo_type1_subset_t	*type1_subset,
         goto fail1;
     }
 
-    type1_subset->widths = calloc (sizeof (double), font->scaled_font_subset->num_glyphs);
+    type1_subset->widths = xmemory_calloc (sizeof (double), font->scaled_font_subset->num_glyphs);
     if (unlikely (type1_subset->widths == NULL)) {
         status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
         goto fail2;
@@ -760,15 +760,15 @@ _cairo_type1_fallback_init_internal (cairo_type1_subset_t	*type1_subset,
 
     length = font->header_size + font->data_size +
 	font->trailer_size;
-    type1_subset->data = malloc (length);
+    type1_subset->data = xmemory_alloc (length);
     if (unlikely (type1_subset->data == NULL)) {
         status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto fail3;
     }
-    memcpy (type1_subset->data,
+    xmemory_copy (type1_subset->data,
 	    _cairo_array_index (&font->contents, 0), length);
 
-    len = snprintf(type1_subset->data + font->bbox_position,
+    len = string_snprintf(type1_subset->data + font->bbox_position,
                    font->bbox_max_chars,
                    "%d %d %d %d",
                    (int)font->x_min,
@@ -784,9 +784,9 @@ _cairo_type1_fallback_init_internal (cairo_type1_subset_t	*type1_subset,
     return cairo_type1_font_destroy (font);
 
  fail3:
-    free (type1_subset->widths);
+    xmemory_free (type1_subset->widths);
  fail2:
-    free (type1_subset->base_font);
+    xmemory_free (type1_subset->base_font);
  fail1:
     /* status is already set, ignore further errors */
     cairo_type1_font_destroy (font);
@@ -817,9 +817,9 @@ _cairo_type1_fallback_init_hex (cairo_type1_subset_t	   *type1_subset,
 void
 _cairo_type1_fallback_fini (cairo_type1_subset_t *subset)
 {
-    free (subset->base_font);
-    free (subset->widths);
-    free (subset->data);
+    xmemory_free (subset->base_font);
+    xmemory_free (subset->widths);
+    xmemory_free (subset->data);
 }
 
 cairo_status_t
@@ -837,7 +837,7 @@ _cairo_type2_charstrings_init (cairo_type2_charstrings_t *type2_subset,
 
     _cairo_array_init (&type2_subset->charstrings, sizeof (cairo_array_t));
 
-    type2_subset->widths = calloc (sizeof (int), font->scaled_font_subset->num_glyphs);
+    type2_subset->widths = xmemory_calloc (sizeof (int), font->scaled_font_subset->num_glyphs);
     if (unlikely (type2_subset->widths == NULL)) {
         status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
         goto fail1;
@@ -897,7 +897,7 @@ _cairo_type2_charstrings_fini (cairo_type2_charstrings_t *type2_subset)
     }
     _cairo_array_fini (&type2_subset->charstrings);
 
-    free (type2_subset->widths);
+    xmemory_free (type2_subset->widths);
 }
 
 #endif /* CAIRO_HAS_FONT_SUBSET */

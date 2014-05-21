@@ -39,9 +39,10 @@
 #include "cairo-compiler-private.h"
 #include "cairo-types-private.h"
 
-#include <stdlib.h>
+#include <xC/xmemory.h>
 #include <xC/xfile.h>
-#include <stdarg.h>
+#include <xC/xvarargs.h>
+//#include <stdarg.h>
 
 typedef cairo_status_t
 (*cairo_output_stream_write_func_t) (cairo_output_stream_t *output_stream,
@@ -128,7 +129,7 @@ _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
 cairo_private void
 _cairo_output_stream_vprintf (cairo_output_stream_t *stream,
 			      const char *fmt,
-			      va_list ap) CAIRO_PRINTF_FORMAT ( 2, 0);
+                  xva_list_t ap) CAIRO_PRINTF_FORMAT ( 2, 0);
 
 cairo_private void
 _cairo_output_stream_printf (cairo_output_stream_t *stream,

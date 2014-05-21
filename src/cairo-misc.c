@@ -209,7 +209,7 @@ slim_hidden_def (cairo_glyph_allocate);
 void
 cairo_glyph_free (cairo_glyph_t *glyphs)
 {
-    free (glyphs);
+    xmemory_free (glyphs);
 }
 slim_hidden_def (cairo_glyph_free);
 
@@ -259,7 +259,7 @@ slim_hidden_def (cairo_text_cluster_allocate);
 void
 cairo_text_cluster_free (cairo_text_cluster_t *clusters)
 {
-    free (clusters);
+    xmemory_free (clusters);
 }
 slim_hidden_def (cairo_text_cluster_free);
 
@@ -855,7 +855,7 @@ _intern_string_equal (const void *_a, const void *_b)
     if (a->len != b->len)
 	return FALSE;
 
-    return memcmp (a->string, b->string, a->len) == 0;
+    return xmemory_compare (a->string, b->string, a->len) == 0;
 }
 
 cairo_status_t
@@ -886,18 +886,18 @@ _cairo_intern_string (const char **str_inout, int len)
     istring = _cairo_hash_table_lookup (_cairo_intern_string_ht,
 					&tmpl.hash_entry);
     if (istring == NULL) {
-	istring = malloc (sizeof (cairo_intern_string_t) + len + 1);
+    istring = xmemory_alloc (sizeof (cairo_intern_string_t) + len + 1);
 	if (likely (istring != NULL)) {
 	    istring->hash_entry.hash = tmpl.hash_entry.hash;
 	    istring->len = tmpl.len;
 	    istring->string = (char *) (istring + 1);
-	    memcpy (istring->string, str, len);
+        xmemory_copy (istring->string, str, len);
 	    istring->string[len] = '\0';
 
 	    status = _cairo_hash_table_insert (_cairo_intern_string_ht,
 					       &istring->hash_entry);
 	    if (unlikely (status)) {
-		free (istring);
+        xmemory_free (istring);
 		goto BAIL;
 	    }
 	} else {
@@ -917,7 +917,7 @@ static void
 _intern_string_pluck (void *entry, void *closure)
 {
     _cairo_hash_table_remove (closure, entry);
-    free (entry);
+    xmemory_free (entry);
 }
 
 void

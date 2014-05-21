@@ -38,6 +38,7 @@
 
 #include "cairo-error-private.h"
 #include "cairo-slope-private.h"
+#include <xClib/algorithm.h>
 
 typedef struct cairo_hull {
     cairo_point_t point;
@@ -229,7 +230,7 @@ _cairo_hull_compute (cairo_pen_vertex_t *vertices, int *num_vertices)
     _cairo_hull_to_pen (hull, vertices, num_vertices);
 
     if (hull != hull_stack)
-	free (hull);
+	xmemory_free (hull);
 
     return CAIRO_STATUS_SUCCESS;
 }

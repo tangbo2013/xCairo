@@ -247,7 +247,7 @@ _cairo_gstate_save (cairo_gstate_t **gstate, cairo_gstate_t **freelist)
 
     top = *freelist;
     if (top == NULL) {
-	top = malloc (sizeof (cairo_gstate_t));
+	top = xmemory_alloc (sizeof (cairo_gstate_t));
 	if (unlikely (top == NULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     } else
@@ -521,7 +521,7 @@ _cairo_gstate_set_dash (cairo_gstate_t *gstate, const double *dash, int num_dash
     double dash_total, on_total, off_total;
     int i, j;
 
-    free (gstate->stroke_style.dash);
+    xmemory_free (gstate->stroke_style.dash);
 
     gstate->stroke_style.num_dashes = num_dashes;
 
@@ -572,7 +572,7 @@ _cairo_gstate_set_dash (cairo_gstate_t *gstate, const double *dash, int num_dash
 
     if (dash_total - on_total < CAIRO_FIXED_ERROR_DOUBLE) {
 	/* Degenerate dash -> solid line */
-	free (gstate->stroke_style.dash);
+	xmemory_free (gstate->stroke_style.dash);
 	gstate->stroke_style.dash = NULL;
 	gstate->stroke_style.num_dashes = 0;
 	gstate->stroke_style.dash_offset = 0.0;
@@ -599,7 +599,7 @@ _cairo_gstate_get_dash (cairo_gstate_t *gstate,
 			double         *offset)
 {
     if (dashes) {
-	memcpy (dashes,
+	xmemory_copy (dashes,
 		gstate->stroke_style.dash,
 		sizeof (double) * gstate->stroke_style.num_dashes);
     }
@@ -745,7 +745,7 @@ _cairo_gstate_set_matrix (cairo_gstate_t       *gstate,
 {
     cairo_status_t status;
 
-    if (memcmp (matrix, &gstate->ctm, sizeof (cairo_matrix_t)) == 0)
+    if (xmemory_compare (matrix, &gstate->ctm, sizeof (cairo_matrix_t)) == 0)
 	return CAIRO_STATUS_SUCCESS;
 
     if (! _cairo_matrix_is_invertible (matrix))
@@ -1171,7 +1171,7 @@ _cairo_gstate_stroke (cairo_gstate_t *gstate, cairo_path_fixed_t *path)
 
     XASSERT (gstate->opacity == 1.0);
 
-    memcpy (&style, &gstate->stroke_style, sizeof (gstate->stroke_style));
+    xmemory_copy (&style, &gstate->stroke_style, sizeof (gstate->stroke_style));
     if (_cairo_stroke_style_dash_can_approximate (&gstate->stroke_style, &gstate->ctm, gstate->tolerance)) {
         style.dash = dash;
         _cairo_stroke_style_dash_approximate (&gstate->stroke_style, &gstate->ctm, gstate->tolerance,
@@ -1664,7 +1664,7 @@ cairo_status_t
 _cairo_gstate_set_font_matrix (cairo_gstate_t	    *gstate,
 			       const cairo_matrix_t *matrix)
 {
-    if (memcmp (matrix, &gstate->font_matrix, sizeof (cairo_matrix_t)) == 0)
+    if (xmemory_compare (matrix, &gstate->font_matrix, sizeof (cairo_matrix_t)) == 0)
 	return CAIRO_STATUS_SUCCESS;
 
     _cairo_gstate_unset_scaled_font (gstate);
@@ -1685,7 +1685,7 @@ void
 _cairo_gstate_set_font_options (cairo_gstate_t             *gstate,
 				const cairo_font_options_t *options)
 {
-    if (memcmp (options, &gstate->font_options, sizeof (cairo_font_options_t)) == 0)
+    if (xmemory_compare (options, &gstate->font_options, sizeof (cairo_font_options_t)) == 0)
 	return;
 
     _cairo_gstate_unset_scaled_font (gstate);
@@ -2169,9 +2169,9 @@ _cairo_gstate_transform_glyphs_to_backend (cairo_gstate_t	*gstate,
 	font_matrix->x0 == 0 && font_matrix->y0 == 0)
     {
 	if (! drop) {
-	    memcpy (transformed_glyphs, glyphs,
+	    xmemory_copy (transformed_glyphs, glyphs,
 		    num_glyphs * sizeof (cairo_glyph_t));
-	    memcpy (transformed_clusters, clusters,
+	    xmemory_copy (transformed_clusters, clusters,
 		    num_clusters * sizeof (cairo_text_cluster_t));
 	    j = num_glyphs;
 	} else if (num_clusters == 0) {
@@ -2228,7 +2228,7 @@ _cairo_gstate_transform_glyphs_to_backend (cairo_gstate_t	*gstate,
 		if (!drop || KEEP_GLYPH (transformed_glyphs[j]))
 		    j++;
 	    }
-	    memcpy (transformed_clusters, clusters,
+	    xmemory_copy (transformed_clusters, clusters,
 		    num_clusters * sizeof (cairo_text_cluster_t));
 	} else {
 	    const cairo_glyph_t *cur_glyph;
@@ -2283,7 +2283,7 @@ _cairo_gstate_transform_glyphs_to_backend (cairo_gstate_t	*gstate,
 		if (! drop || KEEP_GLYPH (transformed_glyphs[j]))
 		    j++;
 	    }
-	    memcpy (transformed_clusters, clusters,
+	    xmemory_copy (transformed_clusters, clusters,
 		    num_clusters * sizeof (cairo_text_cluster_t));
 	} else {
 	    const cairo_glyph_t *cur_glyph;
