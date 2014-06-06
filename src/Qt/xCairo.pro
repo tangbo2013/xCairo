@@ -21,12 +21,10 @@ SOURCES += \
     ../cairo.c \
     ../cairo-wideint.c \
     ../cairo-version.c \
-    ../cairo-user-font.c \
     ../cairo-unicode.c \
     ../cairo-tristrip.c \
     ../cairo-traps.c \
     ../cairo-traps-compositor.c \
-    ../cairo-toy-font-face.c \
     ../cairo-tor22-scan-converter.c \
     ../cairo-tor-scan-converter.c \
     ../cairo-time.c \
@@ -45,7 +43,6 @@ SOURCES += \
     ../cairo-spans-compositor.c \
     ../cairo-slope.c \
     ../cairo-shape-mask-compositor.c \
-    ../cairo-scaled-font.c \
     ../cairo-rtree.c \
     ../cairo-region.c \
     ../cairo-rectangular-scan-converter.c \
@@ -87,10 +84,6 @@ SOURCES += \
     ../cairo-hash.c \
     ../cairo-gstate.c \
     ../cairo-freelist.c \
-    ../cairo-font-options.c \
-    ../cairo-font-face.c \
-    ../cairo-font-face-twin.c \
-    ../cairo-font-face-twin-data.c \
     ../cairo-fallback-compositor.c \
     ../cairo-error.c \
     ../cairo-device.c \
@@ -129,9 +122,7 @@ HEADERS += \
     ../cairoint.h \
     ../cairo-wideint-type-private.h \
     ../cairo-wideint-private.h \
-    ../cairo-user-font-private.h \
     ../cairo-types-private.h \
-    ../cairo-type3-glyph-surface-private.h \
     ../cairo-tristrip-private.h \
     ../cairo-traps-private.h \
     ../cairo-time-private.h \
@@ -152,8 +143,6 @@ HEADERS += \
     ../cairo-spans-private.h \
     ../cairo-spans-compositor-private.h \
     ../cairo-slope-private.h \
-    ../cairo-scaled-font-subsets-private.h \
-    ../cairo-scaled-font-private.h \
     ../cairo-rtree-private.h \
     ../cairo-region-private.h \
     ../cairo-reference-count-private.h \
@@ -184,7 +173,6 @@ HEADERS += \
     ../cairo-freelist-type-private.h \
     ../cairo-freelist-private.h \
     ../cairo-freed-pool-private.h \
-    ../cairo-fontconfig-private.h \
     ../cairo-fixed-type-private.h \
     ../cairo-fixed-private.h \
     ../cairo-error-private.h \
