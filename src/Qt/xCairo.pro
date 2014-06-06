@@ -46,7 +46,6 @@ SOURCES += \
     ../cairo-slope.c \
     ../cairo-shape-mask-compositor.c \
     ../cairo-scaled-font.c \
-    ../cairo-scaled-font-subsets.c \
     ../cairo-rtree.c \
     ../cairo-region.c \
     ../cairo-rectangular-scan-converter.c \
@@ -88,16 +87,13 @@ SOURCES += \
     ../cairo-hash.c \
     ../cairo-gstate.c \
     ../cairo-freelist.c \
-    ../cairo-freed-pool.c \
     ../cairo-font-options.c \
     ../cairo-font-face.c \
     ../cairo-font-face-twin.c \
     ../cairo-font-face-twin-data.c \
-    ../cairo-fixed.c \
     ../cairo-fallback-compositor.c \
     ../cairo-error.c \
     ../cairo-device.c \
-    ../cairo-deflate-stream.c \
     ../cairo-default-context.c \
     ../cairo-debug.c \
     ../cairo-damage.c \
@@ -111,7 +107,6 @@ SOURCES += \
     ../cairo-clip-region.c \
     ../cairo-clip-polygon.c \
     ../cairo-clip-boxes.c \
-    ../cairo-cff-subset.c \
     ../cairo-cache.c \
     ../cairo-boxes.c \
     ../cairo-boxes-intersect.c \
