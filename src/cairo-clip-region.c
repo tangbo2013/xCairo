@@ -62,13 +62,13 @@ _cairo_clip_extract_region (cairo_clip_t *clip)
 
     if (clip->num_boxes > ARRAY_LENGTH (stack_rects)) {
 	r = _cairo_malloc_ab (clip->num_boxes, sizeof (cairo_rectangle_int_t));
-	if (r == NULL){
+	if (r == XNULL){
 	    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	    return;
 	}
     }
 
-    is_region = clip->path == NULL;
+    is_region = clip->path == XNULL;
     for (i = 0; i < clip->num_boxes; i++) {
 	cairo_box_t *b = &clip->boxes[i];
 	if (is_region)
@@ -84,16 +84,16 @@ _cairo_clip_extract_region (cairo_clip_t *clip)
     clip->region = cairo_region_create_rectangles (r, i);
 
     if (r != stack_rects)
-	free (r);
+	xmemory_free (r);
 }
 
 cairo_region_t *
 _cairo_clip_get_region (const cairo_clip_t *clip)
 {
-    if (clip == NULL)
-	return NULL;
+    if (clip == XNULL)
+	return XNULL;
 
-    if (clip->region == NULL)
+    if (clip->region == XNULL)
 	_cairo_clip_extract_region ((cairo_clip_t *) clip);
 
     return clip->region;
@@ -102,7 +102,7 @@ _cairo_clip_get_region (const cairo_clip_t *clip)
 cairo_bool_t
 _cairo_clip_is_region (const cairo_clip_t *clip)
 {
-    if (clip == NULL)
+    if (clip == XNULL)
 	return TRUE;
 
     if (clip->is_region)
@@ -116,7 +116,7 @@ _cairo_clip_is_region (const cairo_clip_t *clip)
     if (clip->num_boxes == 0)
 	return TRUE;
 
-    if (clip->region == NULL)
+    if (clip->region == XNULL)
 	_cairo_clip_extract_region ((cairo_clip_t *) clip);
 
     return clip->is_region;

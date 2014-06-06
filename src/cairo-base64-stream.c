@@ -108,10 +108,10 @@ _cairo_base64_stream_close (cairo_output_stream_t *base)
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
     if (stream->in_mem > 0) {
-	memset (stream->src + stream->in_mem, 0, 3 - stream->in_mem);
+    xmemory_set (stream->src + stream->in_mem, 0, 3 - stream->in_mem);
 	stream->trailing = 3 - stream->in_mem;
 	stream->in_mem = 3;
-	status = _cairo_base64_stream_write (base, NULL, 0);
+    status = _cairo_base64_stream_write (base, XNULL, 0);
     }
 
     return status;
@@ -125,15 +125,15 @@ _cairo_base64_stream_create (cairo_output_stream_t *output)
     if (output->status)
 	return _cairo_output_stream_create_in_error (output->status);
 
-    stream = malloc (sizeof (cairo_base64_stream_t));
-    if (unlikely (stream == NULL)) {
+    stream = xmemory_alloc (sizeof (cairo_base64_stream_t));
+    if (unlikely (stream == XNULL)) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_output_stream_t *) &_cairo_output_stream_nil;
     }
 
     _cairo_output_stream_init (&stream->base,
 			       _cairo_base64_stream_write,
-			       NULL,
+                   XNULL,
 			       _cairo_base64_stream_close);
 
     stream->output = output;

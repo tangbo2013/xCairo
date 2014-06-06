@@ -37,7 +37,7 @@
 #include "cairoint.h"
 #include "cairo-error-private.h"
 
-#include <math.h>
+#include <xClib/math.h>
 
 /*
  * This file implements a user-font rendering the descendant of the Hershey
@@ -288,9 +288,9 @@ twin_font_face_create_properties (cairo_font_face_t *twin_face)
 {
     twin_face_properties_t *props;
 
-    props = malloc (sizeof (twin_face_properties_t));
-    if (unlikely (props == NULL))
-	return NULL;
+    props = xmemory_alloc (sizeof (twin_face_properties_t));
+    if (unlikely (props == XNULL))
+	return XNULL;
 
     props->stretch  = TWIN_STRETCH_NORMAL;
     props->slant = CAIRO_FONT_SLANT_NORMAL;
@@ -300,9 +300,9 @@ twin_font_face_create_properties (cairo_font_face_t *twin_face)
 
     if (unlikely (cairo_font_face_set_user_data (twin_face,
 					    &twin_properties_key,
-					    props, free))) {
-	free (props);
-	return NULL;
+                        props, xmemory_free))) {
+    xmemory_free (props);
+	return XNULL;
     }
 
     return props;
@@ -315,7 +315,7 @@ twin_font_face_set_properties_from_toy (cairo_font_face_t *twin_face,
     twin_face_properties_t *props;
 
     props = twin_font_face_create_properties (twin_face);
-    if (unlikely (props == NULL))
+    if (unlikely (props == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     props->slant = toy_face->slant;
@@ -412,8 +412,8 @@ twin_scaled_font_compute_properties (cairo_scaled_font_t *scaled_font,
     cairo_status_t status;
     twin_scaled_properties_t *props;
 
-    props = malloc (sizeof (twin_scaled_properties_t));
-    if (unlikely (props == NULL))
+    props = xmemory_alloc (sizeof (twin_scaled_properties_t));
+    if (unlikely (props == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 
@@ -440,14 +440,14 @@ twin_scaled_font_compute_properties (cairo_scaled_font_t *scaled_font,
     /* Save it */
     status = cairo_scaled_font_set_user_data (scaled_font,
 					      &twin_properties_key,
-					      props, free);
+                          props, xmemory_free);
     if (unlikely (status))
 	goto FREE_PROPS;
 
     return CAIRO_STATUS_SUCCESS;
 
 FREE_PROPS:
-    free (props);
+    xmemory_free (props);
     return status;
 }
 
@@ -472,10 +472,10 @@ twin_scaled_font_init (cairo_scaled_font_t  *scaled_font,
 
 typedef struct {
     int n_snap_x;
-    int8_t snap_x[TWIN_GLYPH_MAX_SNAP_X];
+    xint8_t snap_x[TWIN_GLYPH_MAX_SNAP_X];
     double snapped_x[TWIN_GLYPH_MAX_SNAP_X];
     int n_snap_y;
-    int8_t snap_y[TWIN_GLYPH_MAX_SNAP_Y];
+    xint8_t snap_y[TWIN_GLYPH_MAX_SNAP_Y];
     double snapped_y[TWIN_GLYPH_MAX_SNAP_Y];
 } twin_snap_info_t;
 
@@ -507,7 +507,7 @@ twin_compute_snap (cairo_t             *cr,
     snap = twin_glyph_snap_x (b);
     n = twin_glyph_n_snap_x (b);
     info->n_snap_x = n;
-    assert (n <= TWIN_GLYPH_MAX_SNAP_X);
+    XASSERT (n <= TWIN_GLYPH_MAX_SNAP_X);
     for (s = 0; s < n; s++) {
 	info->snap_x[s] = snap[s];
 	info->snapped_x[s] = SNAPXI (F (snap[s]));
@@ -516,7 +516,7 @@ twin_compute_snap (cairo_t             *cr,
     snap = twin_glyph_snap_y (b);
     n = twin_glyph_n_snap_y (b);
     info->n_snap_y = n;
-    assert (n <= TWIN_GLYPH_MAX_SNAP_Y);
+    XASSERT (n <= TWIN_GLYPH_MAX_SNAP_Y);
     for (s = 0; s < n; s++) {
 	info->snap_y[s] = snap[s];
 	info->snapped_y[s] = SNAPYI (F (snap[s]));
@@ -524,7 +524,7 @@ twin_compute_snap (cairo_t             *cr,
 }
 
 static double
-twin_snap (int8_t v, int n, int8_t *snap, double *snapped)
+twin_snap (xint8_t v, int n, xint8_t *snap, double *snapped)
 {
     int	s;
 
@@ -566,9 +566,9 @@ twin_scaled_font_render_glyph (cairo_scaled_font_t  *scaled_font,
     double marginl;
     twin_scaled_properties_t *props;
     twin_snap_info_t info;
-    const int8_t *b;
-    const int8_t *g;
-    int8_t w;
+    const xint8_t *b;
+    const xint8_t *g;
+    xint8_t w;
     double gw;
 
     props = cairo_scaled_font_get_user_data (scaled_font, &twin_properties_key);

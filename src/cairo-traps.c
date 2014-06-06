@@ -110,7 +110,7 @@ void
 _cairo_traps_fini (cairo_traps_t *traps)
 {
     if (traps->traps != traps->traps_embedded)
-	free (traps->traps);
+    xmemory_free (traps->traps);
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (traps, sizeof (cairo_traps_t)));
 }
@@ -129,14 +129,14 @@ _cairo_traps_grow (cairo_traps_t *traps)
 
     if (traps->traps == traps->traps_embedded) {
 	new_traps = _cairo_malloc_ab (new_size, sizeof (cairo_trapezoid_t));
-	if (new_traps != NULL)
-	    memcpy (new_traps, traps->traps, sizeof (traps->traps_embedded));
+    if (new_traps != XNULL)
+        xmemory_copy (new_traps, traps->traps, sizeof (traps->traps_embedded));
     } else {
 	new_traps = _cairo_realloc_ab (traps->traps,
 	                               new_size, sizeof (cairo_trapezoid_t));
     }
 
-    if (unlikely (new_traps == NULL)) {
+    if (unlikely (new_traps == XNULL)) {
 	traps->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return FALSE;
     }
@@ -435,7 +435,7 @@ _cairo_traps_init_boxes (cairo_traps_t	    *traps,
     traps->maybe_region = boxes->is_pixel_aligned;
 
     trap = &traps->traps[0];
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	const cairo_box_t *box;
 	int i;
 
@@ -823,7 +823,7 @@ _cairo_traps_extract_region (cairo_traps_t   *traps,
     if (traps->num_traps > ARRAY_LENGTH (stack_rects)) {
 	rects = _cairo_malloc_ab (traps->num_traps, sizeof (cairo_rectangle_int_t));
 
-	if (unlikely (rects == NULL))
+    if (unlikely (rects == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -857,7 +857,7 @@ _cairo_traps_extract_region (cairo_traps_t   *traps,
     status = (*region)->status;
 
     if (rects != stack_rects)
-	free (rects);
+    xmemory_free (rects);
 
     return status;
 }
@@ -970,7 +970,7 @@ _cairo_traps_path (const cairo_traps_t *traps,
 }
 
 void
-_cairo_debug_print_traps (FILE *file, const cairo_traps_t *traps)
+_cairo_debug_print_traps (xfile_t *file, const cairo_traps_t *traps)
 {
     cairo_box_t extents;
     int n;
@@ -985,12 +985,12 @@ _cairo_debug_print_traps (FILE *file, const cairo_traps_t *traps)
 #endif
 
     _cairo_traps_extents (traps, &extents);
-    fprintf (file, "extents=(%d, %d, %d, %d)\n",
+    XDBGPRINTF ("extents=(%d, %d, %d, %d)\n",
 	     extents.p1.x, extents.p1.y,
 	     extents.p2.x, extents.p2.y);
 
     for (n = 0; n < traps->num_traps; n++) {
-	fprintf (file, "%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
+    XDBGPRINTF ("%d %d L:(%d, %d), (%d, %d) R:(%d, %d), (%d, %d)\n",
 		 traps->traps[n].top,
 		 traps->traps[n].bottom,
 		 traps->traps[n].left.p1.x,
@@ -1048,7 +1048,7 @@ _cairo_rasterise_polygon_to_traps (cairo_polygon_t			*polygon,
 
     TRACE ((stderr, "%s: fill_rule=%d, antialias=%d\n",
 	    __FUNCTION__, fill_rule, antialias));
-    assert(antialias == CAIRO_ANTIALIAS_NONE);
+    XASSERT(antialias == CAIRO_ANTIALIAS_NONE);
 
     renderer.traps = traps;
     renderer.base.render_rows = span_to_traps;

@@ -97,10 +97,10 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <setjmp.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <limits.h>
+#include <xC/xlongjmp.h>
 
 /*-------------------------------------------------------------------------
  * cairo specific config
@@ -177,9 +177,9 @@ glitter_scan_converter_reset(
 /*-------------------------------------------------------------------------
  * glitter-paths.c: Implementation internal types
  */
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <limits.h>
 
 /* All polygon coordinates are snapped onto a subsample grid. "Grid
  * scaled" numbers are fixed precision reals with multiplier GRID_X or
@@ -261,8 +261,8 @@ typedef int grid_scaled_y_t;
 #define UNROLL3(x) x x x
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 /* Header for a chunk of memory in a memory pool. */
@@ -288,7 +288,7 @@ struct pool {
     /* Chunk we're allocating from. */
     struct _pool_chunk *current;
 
-    jmp_buf *jmp;
+    xjmp_buf_t *jmp;
 
     /* Free list of previously allocated chunks.  All have >= default
      * capacity. */
@@ -404,8 +404,8 @@ struct polygon {
 struct cell {
     struct cell		*next;
     int			 x;
-    int16_t		 uncovered_area;
-    int16_t		 covered_height;
+    xint16_t		 uncovered_area;
+    xint16_t		 covered_height;
 };
 
 /* A cell list represents the scan line sparsely as cells ordered by
@@ -506,24 +506,24 @@ _pool_chunk_create(struct pool *pool, size_t size)
 {
     struct _pool_chunk *p;
 
-    p = malloc(size + sizeof(struct _pool_chunk));
-    if (unlikely (NULL == p))
-	longjmp (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+    p = xmemory_alloc(size + sizeof(struct _pool_chunk));
+    if (unlikely (XNULL == p))
+    xlongjmp_jump (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     return _pool_chunk_init(p, pool->current, size);
 }
 
 static void
 pool_init(struct pool *pool,
-	  jmp_buf *jmp,
+      xjmp_buf_t *jmp,
 	  size_t default_capacity,
 	  size_t embedded_capacity)
 {
     pool->jmp = jmp;
     pool->current = pool->sentinel;
-    pool->first_free = NULL;
+    pool->first_free = XNULL;
     pool->default_capacity = default_capacity;
-    _pool_chunk_init(pool->sentinel, NULL, embedded_capacity);
+    _pool_chunk_init(pool->sentinel, XNULL, embedded_capacity);
 }
 
 static void
@@ -531,15 +531,15 @@ pool_fini(struct pool *pool)
 {
     struct _pool_chunk *p = pool->current;
     do {
-	while (NULL != p) {
+    while (XNULL != p) {
 	    struct _pool_chunk *prev = p->prev_chunk;
 	    if (p != pool->sentinel)
-		free(p);
+        xmemory_free(p);
 	    p = prev;
 	}
 	p = pool->first_free;
-	pool->first_free = NULL;
-    } while (NULL != p);
+    pool->first_free = XNULL;
+    } while (XNULL != p);
 }
 
 /* Satisfy an allocation by first allocating a new large enough chunk
@@ -559,7 +559,7 @@ _pool_alloc_from_new_chunk(
      * try getting a chunk off the free list.  Force alloc of a new
      * chunk for large requests. */
     capacity = size;
-    chunk = NULL;
+    chunk = XNULL;
     if (size < pool->default_capacity) {
 	capacity = pool->default_capacity;
 	chunk = pool->first_free;
@@ -569,7 +569,7 @@ _pool_alloc_from_new_chunk(
 	}
     }
 
-    if (NULL == chunk)
+    if (XNULL == chunk)
 	chunk = _pool_chunk_create (pool, capacity);
     pool->current = chunk;
 
@@ -641,14 +641,14 @@ cell_list_set_rewind (struct cell_list *cells)
 }
 
 static void
-cell_list_init(struct cell_list *cells, jmp_buf *jmp)
+cell_list_init(struct cell_list *cells, xjmp_buf_t *jmp)
 {
     pool_init(cells->cell_pool.base, jmp,
 	      256*sizeof(struct cell),
 	      sizeof(cells->cell_pool.embedded));
-    cells->tail.next = NULL;
-    cells->tail.x = INT_MAX;
-    cells->head.x = INT_MIN;
+    cells->tail.next = XNULL;
+    cells->tail.x = XINT32_MAX;
+    cells->head.x = XINT32_MIN;
     cells->head.next = &cells->tail;
     cell_list_rewind (cells);
 }
@@ -680,7 +680,7 @@ cell_list_alloc (struct cell_list *cells,
     cell->next = tail->next;
     tail->next = cell;
     cell->x = x;
-    *(uint32_t *)&cell->uncovered_area = 0;
+    *(xuint32_t *)&cell->uncovered_area = 0;
 
     return cell;
 }
@@ -910,7 +910,7 @@ cell_list_render_edge(struct cell_list *cells,
 }
 
 static void
-polygon_init (struct polygon *polygon, jmp_buf *jmp)
+polygon_init (struct polygon *polygon, xjmp_buf_t *jmp)
 {
     polygon->ymin = polygon->ymax = 0;
     polygon->y_buckets = polygon->y_buckets_embedded;
@@ -923,7 +923,7 @@ static void
 polygon_fini (struct polygon *polygon)
 {
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+    xmemory_free (polygon->y_buckets);
 
     pool_fini (polygon->edge_pool.base);
 }
@@ -945,16 +945,16 @@ polygon_reset (struct polygon *polygon,
 	goto bail_no_mem; /* even if you could, you wouldn't want to. */
 
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+    xmemory_free (polygon->y_buckets);
 
     polygon->y_buckets =  polygon->y_buckets_embedded;
     if (num_buckets > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
 	polygon->y_buckets = _cairo_malloc_ab (num_buckets,
 					       sizeof (struct edge *));
-	if (unlikely (NULL == polygon->y_buckets))
+    if (unlikely (XNULL == polygon->y_buckets))
 	    goto bail_no_mem;
     }
-    memset (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
+    xmemory_set (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
 
     polygon->ymin = ymin;
     polygon->ymax = ymax;
@@ -1039,14 +1039,14 @@ static void
 active_list_reset (struct active_list *active)
 {
     active->head.vertical = 1;
-    active->head.height_left = INT_MAX;
-    active->head.x.quo = INT_MIN;
-    active->head.prev = NULL;
+    active->head.height_left = XINT32_MAX;
+    active->head.x.quo = XINT32_MIN;
+    active->head.prev = XNULL;
     active->head.next = &active->tail;
     active->tail.prev = &active->head;
-    active->tail.next = NULL;
-    active->tail.x.quo = INT_MAX;
-    active->tail.height_left = INT_MAX;
+    active->tail.next = XNULL;
+    active->tail.x.quo = XINT32_MAX;
+    active->tail.height_left = XINT32_MAX;
     active->tail.vertical = 1;
     active->min_height = 0;
     active->is_vertical = 1;
@@ -1062,7 +1062,7 @@ active_list_init(struct active_list *active)
  * Merge two sorted edge lists.
  * Input:
  *  - head_a: The head of the first list.
- *  - head_b: The head of the second list; head_b cannot be NULL.
+ *  - head_b: The head of the second list; head_b cannot be XNULL.
  * Output:
  * Returns the head of the merged list.
  *
@@ -1080,7 +1080,7 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next, *prev;
-    int32_t x;
+    xint32_t x;
 
     prev = head_a->prev;
     next = &head;
@@ -1094,7 +1094,7 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
     do {
 	x = head_b->x.quo;
-	while (head_a != NULL && head_a->x.quo <= x) {
+    while (head_a != XNULL && head_a->x.quo <= x) {
 	    prev = head_a;
 	    next = &head_a->next;
 	    head_a = head_a->next;
@@ -1102,12 +1102,12 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
 	head_b->prev = prev;
 	*next = head_b;
-	if (head_a == NULL)
+    if (head_a == XNULL)
 	    return head;
 
 start_with_b:
 	x = head_a->x.quo;
-	while (head_b != NULL && head_b->x.quo <= x) {
+    while (head_b != XNULL && head_b->x.quo <= x) {
 	    prev = head_b;
 	    next = &head_b->next;
 	    head_b = head_b->next;
@@ -1115,7 +1115,7 @@ start_with_b:
 
 	head_a->prev = prev;
 	*next = head_a;
-	if (head_b == NULL)
+    if (head_b == XNULL)
 	    return head;
     } while (1);
 }
@@ -1123,13 +1123,13 @@ start_with_b:
 /*
  * Sort (part of) a list.
  * Input:
- *  - list: The list to be sorted; list cannot be NULL.
+ *  - list: The list to be sorted; list cannot be XNULL.
  *  - limit: Recursion limit.
  * Output:
  *  - head_out: The head of the sorted list containing the first 2^(level+1) elements of the
  *              input list; if the input list has fewer elements, head_out be a sorted list
  *              containing all the elements of the input list.
- * Returns the head of the list of unprocessed elements (NULL if the sorted list contains
+ * Returns the head of the list of unprocessed elements (XNULL if the sorted list contains
  * all the elements of the input list).
  *
  * Implementation notes:
@@ -1147,21 +1147,21 @@ sort_edges (struct edge *list,
 
     head_other = list->next;
 
-    if (head_other == NULL) {
+    if (head_other == XNULL) {
 	*head_out = list;
-	return NULL;
+    return XNULL;
     }
 
     remaining = head_other->next;
     if (list->x.quo <= head_other->x.quo) {
 	*head_out = list;
-	head_other->next = NULL;
+    head_other->next = XNULL;
     } else {
 	*head_out = head_other;
 	head_other->prev = list->prev;
 	head_other->next = list;
 	list->prev = head_other;
-	list->next = NULL;
+    list->next = XNULL;
     }
 
     for (i = 0; i < level && remaining; i++) {
@@ -1175,7 +1175,7 @@ sort_edges (struct edge *list,
  static struct edge *
 merge_unsorted_edges (struct edge *head, struct edge *unsorted)
 {
-    sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
     return merge_sorted_edges (head, unsorted);
 }
 
@@ -1185,16 +1185,16 @@ inline static int
 can_do_full_row (struct active_list *active)
 {
     const struct edge *e;
-    int prev_x = INT_MIN;
+    int prev_x = XINT32_MIN;
 
     /* Recomputes the minimum height of all edges on the active
      * list if we have been dropping edges. */
     if (active->min_height <= 0) {
-	int min_height = INT_MAX;
+    int min_height = XINT32_MAX;
 	int is_vertical = 1;
 
 	e = active->head.next;
-	while (NULL != e) {
+    while (XNULL != e) {
 	    if (e->height_left < min_height)
 		min_height = e->height_left;
 	    is_vertical &= e->vertical;
@@ -1252,7 +1252,7 @@ polygon_fill_buckets (struct active_list *active,
 	if (buckets[suby])
 	    buckets[suby]->prev = edge;
 	edge->next = buckets[suby];
-	edge->prev = NULL;
+    edge->prev = XNULL;
 	buckets[suby] = edge;
 	if (edge->height_left < min_height)
 	    min_height = edge->height_left;
@@ -1270,7 +1270,7 @@ sub_row (struct active_list *active,
 	 unsigned int mask)
 {
     struct edge *edge = active->head.next;
-    int xstart = INT_MIN, prev_x = INT_MIN;
+    int xstart = XINT32_MIN, prev_x = XINT32_MIN;
     int winding = 0;
 
     cell_list_rewind (coverages);
@@ -1310,9 +1310,9 @@ sub_row (struct active_list *active,
 	if ((winding & mask) == 0) {
 	    if (next->x.quo != xend) {
 		cell_list_add_subspan (coverages, xstart, xend);
-		xstart = INT_MIN;
+        xstart = XINT32_MIN;
 	    }
-	} else if (xstart == INT_MIN)
+    } else if (xstart == XINT32_MIN)
 	    xstart = xend;
 
 	edge = next;
@@ -1377,7 +1377,7 @@ full_row (struct active_list *active,
 }
 
 static void
-_glitter_scan_converter_init(glitter_scan_converter_t *converter, jmp_buf *jmp)
+_glitter_scan_converter_init(glitter_scan_converter_t *converter, xjmp_buf_t *jmp)
 {
     polygon_init(converter->polygon, jmp);
     active_list_init(converter->active);
@@ -1392,7 +1392,7 @@ static void
 _glitter_scan_converter_fini(glitter_scan_converter_t *self)
 {
     if (self->spans != self->spans_embedded)
-	free (self->spans);
+    xmemory_free (self->spans);
 
     polygon_fini(self->polygon);
     cell_list_fini(self->coverages);
@@ -1408,12 +1408,12 @@ int_to_grid_scaled(int i, int scale)
 {
     /* Clamp to max/min representable scaled number. */
     if (i >= 0) {
-	if (i >= INT_MAX/scale)
-	    i = INT_MAX/scale;
+    if (i >= XINT32_MAX/scale)
+        i = XINT32_MAX/scale;
     }
     else {
-	if (i <= INT_MIN/scale)
-	    i = INT_MIN/scale;
+    if (i <= XINT32_MIN/scale)
+        i = XINT32_MIN/scale;
     }
     return i*scale;
 }
@@ -1438,7 +1438,7 @@ glitter_scan_converter_reset(
     if (max_num_spans > ARRAY_LENGTH(converter->spans_embedded)) {
 	converter->spans = _cairo_malloc_ab (max_num_spans,
 					     sizeof (cairo_half_open_span_t));
-	if (unlikely (converter->spans == NULL))
+    if (unlikely (converter->spans == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     } else
 	converter->spans = converter->spans_embedded;
@@ -1541,7 +1541,7 @@ blit_a8 (struct cell_list *cells,
 {
     struct cell *cell = cells->head.next;
     int prev_x = xmin, last_x = -1;
-    int16_t cover = 0, last_cover = 0;
+    xint16_t cover = 0, last_cover = 0;
     unsigned num_spans;
 
     if (cell == &cells->tail)
@@ -1558,7 +1558,7 @@ blit_a8 (struct cell_list *cells,
     num_spans = 0;
     for (; cell->x < xmax; cell = cell->next) {
 	int x = cell->x;
-	int16_t area;
+    xint16_t area;
 
 	if (x > prev_x && cover != last_cover) {
 	    spans[num_spans].x = prev_x;
@@ -1610,8 +1610,8 @@ blit_a1 (struct cell_list *cells,
 {
     struct cell *cell = cells->head.next;
     int prev_x = xmin, last_x = -1;
-    int16_t cover = 0;
-    uint8_t coverage, last_cover = 0;
+    xint16_t cover = 0;
+    xuint8_t coverage, last_cover = 0;
     unsigned num_spans;
 
     if (cell == &cells->tail)
@@ -1628,7 +1628,7 @@ blit_a1 (struct cell_list *cells,
     num_spans = 0;
     for (; cell->x < xmax; cell = cell->next) {
 	int x = cell->x;
-	int16_t area;
+    xint16_t area;
 
 	coverage = GRID_AREA_TO_A1 (cover);
 	if (x > prev_x && coverage != last_cover) {
@@ -1701,7 +1701,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 	 * stepper. */
 	if (! polygon->y_buckets[i]) {
 	    if (active->head.next == &active->tail) {
-		active->min_height = INT_MAX;
+        active->min_height = XINT32_MAX;
 		active->is_vertical = 1;
 		for (; j < h && ! polygon->y_buckets[j]; j++)
 		    ;
@@ -1717,7 +1717,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 
 	    if (active->is_vertical) {
 		while (j < h &&
-		       polygon->y_buckets[j] == NULL &&
+               polygon->y_buckets[j] == XNULL &&
 		       active->min_height >= 2*GRID_Y)
 		{
 		    active->min_height -= GRID_Y;
@@ -1738,7 +1738,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 	    for (sub = 0; sub < GRID_Y; sub++) {
 		if (buckets[sub]) {
 		    active_list_merge_edges_from_bucket (active, buckets[sub]);
-		    buckets[sub] = NULL;
+            buckets[sub] = XNULL;
 		}
 
 		sub_row (active, coverages, winding_mask);
@@ -1764,7 +1764,7 @@ struct _cairo_tor_scan_converter {
     cairo_fill_rule_t fill_rule;
     cairo_antialias_t antialias;
 
-    jmp_buf jmp;
+    xjmp_buf_t jmp;
 };
 
 typedef struct _cairo_tor_scan_converter cairo_tor_scan_converter_t;
@@ -1773,11 +1773,11 @@ static void
 _cairo_tor_scan_converter_destroy (void *converter)
 {
     cairo_tor_scan_converter_t *self = converter;
-    if (self == NULL) {
+    if (self == XNULL) {
 	return;
     }
     _glitter_scan_converter_fini (self->converter);
-    free(self);
+    xmemory_free(self);
 }
 
 cairo_status_t
@@ -1788,9 +1788,9 @@ _cairo_tor_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    FILE *file = fopen ("polygon.txt", "w");
+    xfile_t *file = xfile_open ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
-    fclose (file);
+    xfile_close (file);
 #endif
 
     for (i = 0; i < polygon->num_edges; i++)
@@ -1806,7 +1806,7 @@ _cairo_tor_scan_converter_generate (void			*converter,
     cairo_tor_scan_converter_t *self = converter;
     cairo_status_t status;
 
-    if ((status = setjmp (self->jmp)))
+    if ((status = xlongjmp_set (self->jmp)))
 	return _cairo_scan_converter_set_error (self, _cairo_error (status));
 
     glitter_scan_converter_render (self->converter,
@@ -1827,8 +1827,8 @@ _cairo_tor_scan_converter_create (int			xmin,
     cairo_tor_scan_converter_t *self;
     cairo_status_t status;
 
-    self = malloc (sizeof(struct _cairo_tor_scan_converter));
-    if (unlikely (self == NULL)) {
+    self = xmemory_alloc (sizeof(struct _cairo_tor_scan_converter));
+    if (unlikely (self == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;
     }

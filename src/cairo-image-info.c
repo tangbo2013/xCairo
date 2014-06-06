@@ -38,7 +38,7 @@
 #include "cairo-error-private.h"
 #include "cairo-image-info-private.h"
 
-static uint32_t
+static xuint32_t
 _get_be32 (const unsigned char *p)
 {
     return p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
@@ -179,9 +179,9 @@ _jpx_get_box_contents (const unsigned char *p)
 }
 
 static cairo_bool_t
-_jpx_match_box (const unsigned char *p, const unsigned char *end, uint32_t type)
+_jpx_match_box (const unsigned char *p, const unsigned char *end, xuint32_t type)
 {
-    uint32_t length;
+    xuint32_t length;
 
     if (p + 8 < end) {
 	length = _get_be32 (p);
@@ -193,7 +193,7 @@ _jpx_match_box (const unsigned char *p, const unsigned char *end, uint32_t type)
 }
 
 static const unsigned char *
-_jpx_find_box (const unsigned char *p, const unsigned char *end, uint32_t type)
+_jpx_find_box (const unsigned char *p, const unsigned char *end, xuint32_t type)
 {
     while (p < end) {
 	if (_jpx_match_box (p, end, type))
@@ -201,7 +201,7 @@ _jpx_find_box (const unsigned char *p, const unsigned char *end, uint32_t type)
 	p = _jpx_next_box (p);
     }
 
-    return NULL;
+    return XNULL;
 }
 
 static void
@@ -223,7 +223,7 @@ _cairo_image_info_get_jpx_info (cairo_image_info_t	*info,
 
     /* First 12 bytes must be the JPEG 2000 signature box. */
     if (length < ARRAY_LENGTH(_jpx_signature) ||
-	memcmp(p, _jpx_signature, ARRAY_LENGTH(_jpx_signature)) != 0)
+	xmemory_compare(p, _jpx_signature, ARRAY_LENGTH(_jpx_signature)) != 0)
 	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     p += ARRAY_LENGTH(_jpx_signature);
@@ -269,7 +269,7 @@ _cairo_image_info_get_png_info (cairo_image_info_t     *info,
     const unsigned char *p = data;
     const unsigned char *end = data + length;
 
-    if (length < 8 || memcmp (data, _png_magic, 8) != 0)
+    if (length < 8 || xmemory_compare (data, _png_magic, 8) != 0)
        return CAIRO_INT_STATUS_UNSUPPORTED;
 
     p += 8;

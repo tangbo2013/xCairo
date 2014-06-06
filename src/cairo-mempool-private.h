@@ -40,7 +40,8 @@
 #include "cairo-compiler-private.h"
 #include "cairo-error-private.h"
 
-#include <stddef.h> /* for size_t */
+//#include <stddef.h> /* for size_t */
+#include <xC/xpointer.h>
 
 CAIRO_BEGIN_DECLS
 

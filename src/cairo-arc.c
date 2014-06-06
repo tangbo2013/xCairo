@@ -186,7 +186,7 @@ _cairo_arc_in_direction (cairo_t	  *cr,
     if (cairo_status (cr))
         return;
 
-    assert (angle_max >= angle_min);
+    XASSERT (angle_max >= angle_min);
 
     if (angle_max - angle_min > 2 * M_PI * MAX_FULL_CIRCLES) {
 	angle_max = fmod (angle_max - angle_min, 2 * M_PI);

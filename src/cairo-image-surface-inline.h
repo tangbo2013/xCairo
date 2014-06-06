@@ -59,7 +59,7 @@ _cairo_image_surface_set_parent (cairo_image_surface_t *image,
 static inline cairo_bool_t
 _cairo_image_surface_is_clone (cairo_image_surface_t *image)
 {
-    return image->parent != NULL;
+    return image->parent != XNULL;
 }
 
 /**
@@ -73,7 +73,7 @@ _cairo_image_surface_is_clone (cairo_image_surface_t *image)
 static inline cairo_bool_t
 _cairo_surface_is_image (const cairo_surface_t *surface)
 {
-    /* _cairo_surface_nil sets a NULL backend so be safe */
+    /* _cairo_surface_nil sets a XNULL backend so be safe */
     return surface->backend && surface->backend->type == CAIRO_SURFACE_TYPE_IMAGE;
 }
 

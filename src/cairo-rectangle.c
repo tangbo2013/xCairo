@@ -85,7 +85,7 @@ _cairo_boxes_get_extents (const cairo_box_t *boxes,
 			  int num_boxes,
 			  cairo_box_t *extents)
 {
-    assert (num_boxes > 0);
+    XASSERT (num_boxes > 0);
     *extents = *boxes;
     while (--num_boxes)
 	_cairo_box_add_box (extents, ++boxes);
@@ -124,7 +124,7 @@ _cairo_rectangle_intersect (cairo_rectangle_int_t *dst,
     x1 = MAX (dst->x, src->x);
     y1 = MAX (dst->y, src->y);
     /* Beware the unsigned promotion, fortunately we have bits to spare
-     * as (CAIRO_RECT_INT_MAX - CAIRO_RECT_INT_MIN) < UINT_MAX
+     * as (CAIRO_RECT_INT_MAX - CAIRO_RECT_INT_MIN) < UINT32_MAX
      */
     x2 = MIN (dst->x + (int) dst->width,  src->x + (int) src->width);
     y2 = MIN (dst->y + (int) dst->height, src->y + (int) src->height);
@@ -158,7 +158,7 @@ _cairo_rectangle_union (cairo_rectangle_int_t *dst,
     x1 = MIN (dst->x, src->x);
     y1 = MIN (dst->y, src->y);
     /* Beware the unsigned promotion, fortunately we have bits to spare
-     * as (CAIRO_RECT_INT_MAX - CAIRO_RECT_INT_MIN) < UINT_MAX
+     * as (CAIRO_RECT_INT_MAX - CAIRO_RECT_INT_MIN) < UINT32_MAX
      */
     x2 = MAX (dst->x + (int) dst->width,  src->x + (int) src->width);
     y2 = MAX (dst->y + (int) dst->height, src->y + (int) src->height);
@@ -284,7 +284,7 @@ _cairo_box_add_curve_to (cairo_box_t *extents,
 
 	status = _cairo_spline_bound (_cairo_box_add_spline_point,
 				      extents, a, b, c, d);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
     }
 }
 

@@ -74,13 +74,13 @@ typedef cairo_int_status_t
 		cairo_clip_t			*clip);
 
 static void do_unaligned_row(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b,
 			     int tx, int y, int h,
-			     uint16_t coverage)
+			     xuint16_t coverage)
 {
     int x1 = _cairo_fixed_integer_part (b->p1.x) - tx;
     int x2 = _cairo_fixed_integer_part (b->p2.x) - tx;
@@ -103,9 +103,9 @@ static void do_unaligned_row(void (*blt)(void *closure,
 }
 
 static void do_unaligned_box(void (*blt)(void *closure,
-					 int16_t x, int16_t y,
-					 int16_t w, int16_t h,
-					 uint16_t coverage),
+					 xint16_t x, xint16_t y,
+					 xint16_t w, xint16_t h,
+					 xuint16_t coverage),
 			     void *closure,
 			     const cairo_box_t *b, int tx, int ty)
 {
@@ -136,9 +136,9 @@ struct blt_in {
 };
 
 static void blt_in(void *closure,
-		   int16_t x, int16_t y,
-		   int16_t w, int16_t h,
-		   uint16_t coverage)
+		   xint16_t x, xint16_t y,
+		   xint16_t w, xint16_t h,
+		   xuint16_t coverage)
 {
     struct blt_in *info = closure;
     cairo_color_t color;
@@ -166,7 +166,7 @@ add_rect_with_offset (cairo_boxes_t *boxes, int x1, int y1, int x2, int y2, int 
     box.p2.y = _cairo_fixed_from_int (y2 - dy);
 
     status = _cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static cairo_int_status_t
@@ -200,8 +200,8 @@ combine_clip_as_traps (const cairo_traps_compositor_t *compositor,
     if (unlikely (status))
 	return status;
 
-    src = compositor->pattern_to_surface (mask, NULL, FALSE,
-					  extents, NULL,
+    src = compositor->pattern_to_surface (mask, XNULL, FALSE,
+                      extents, XNULL,
 					  &src_x, &src_y);
     if (unlikely (src->status)) {
 	_cairo_traps_fini (&traps);
@@ -316,8 +316,8 @@ __clip_to_surface (const cairo_traps_compositor_t *compositor,
 	return status;
     }
 
-    src = compositor->pattern_to_surface (mask, NULL, FALSE,
-					  extents, NULL,
+    src = compositor->pattern_to_surface (mask, XNULL, FALSE,
+                      extents, XNULL,
 					  &src_x, &src_y);
     if (unlikely (status = src->status))
 	goto error;
@@ -364,7 +364,7 @@ traps_get_clip_surface (const cairo_traps_compositor_t *compositor,
 			const cairo_composite_rectangles_t *composite,
 			const cairo_rectangle_int_t *extents)
 {
-    cairo_surface_t *surface = NULL;
+    cairo_surface_t *surface = XNULL;
     cairo_int_status_t status;
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
@@ -488,12 +488,12 @@ create_composite_mask (const cairo_traps_compositor_t *compositor,
     status = draw_func (compositor, surface, draw_closure,
 			CAIRO_OPERATOR_ADD, src, src_x, src_y,
 			extents->bounded.x, extents->bounded.y,
-			&extents->bounded, NULL);
+            &extents->bounded, XNULL);
     if (unlikely (status))
 	goto error;
 
     surface->is_clear = FALSE;
-    if (extents->clip->path != NULL) {
+    if (extents->clip->path != XNULL) {
 	status = combine_clip_as_traps (compositor, surface,
 					extents->clip, &extents->bounded);
 	if (status == CAIRO_INT_STATUS_UNSUPPORTED) {
@@ -552,7 +552,7 @@ clip_and_composite_with_mask (const cairo_traps_compositor_t *compositor,
     if (mask->is_clear)
 	goto skip;
 
-    if (src != NULL || dst->content != CAIRO_CONTENT_ALPHA) {
+    if (src != XNULL || dst->content != CAIRO_CONTENT_ALPHA) {
 	compositor->composite (dst, op, src, mask,
 			       extents->bounded.x + src_x,
 			       extents->bounded.y + src_y,
@@ -560,7 +560,7 @@ clip_and_composite_with_mask (const cairo_traps_compositor_t *compositor,
 			       extents->bounded.x,      extents->bounded.y,
 			       extents->bounded.width,  extents->bounded.height);
     } else {
-	compositor->composite (dst, op, mask, NULL,
+    compositor->composite (dst, op, mask, XNULL,
 			       0, 0,
 			       0, 0,
 			       extents->bounded.x,      extents->bounded.y,
@@ -604,7 +604,7 @@ clip_and_composite_combine (const cairo_traps_compositor_t *compositor,
 
     compositor->composite (tmp,
 			   dst->is_clear ? CAIRO_OPERATOR_CLEAR : CAIRO_OPERATOR_SOURCE,
-			   dst, NULL,
+               dst, XNULL,
 			   extents->bounded.x,      extents->bounded.y,
 			   0, 0,
 			   0, 0,
@@ -613,7 +613,7 @@ clip_and_composite_combine (const cairo_traps_compositor_t *compositor,
     status = draw_func (compositor, tmp, draw_closure, op,
 			src, src_x, src_y,
 			extents->bounded.x, extents->bounded.y,
-			&extents->bounded, NULL);
+            &extents->bounded, XNULL);
 
     if (unlikely (status))
 	goto cleanup;
@@ -739,7 +739,7 @@ fixup_unbounded_with_mask (const cairo_traps_compositor_t *compositor,
 	int width = extents->unbounded.width;
 	int height = extents->bounded.y - y;
 
-	compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, NULL,
+    compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, XNULL,
 			       0, 0,
 			       0, 0,
 			       x, y,
@@ -753,7 +753,7 @@ fixup_unbounded_with_mask (const cairo_traps_compositor_t *compositor,
 	int width = extents->bounded.x - x;
 	int height = extents->bounded.height;
 
-	compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, NULL,
+    compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, XNULL,
 			       0, y - extents->unbounded.y,
 			       0, 0,
 			       x, y,
@@ -767,7 +767,7 @@ fixup_unbounded_with_mask (const cairo_traps_compositor_t *compositor,
 	int width = extents->unbounded.x + extents->unbounded.width - x;
 	int height = extents->bounded.height;
 
-	compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, NULL,
+    compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, XNULL,
 			       x - extents->unbounded.x, y - extents->unbounded.y,
 			       0, 0,
 			       x, y,
@@ -781,7 +781,7 @@ fixup_unbounded_with_mask (const cairo_traps_compositor_t *compositor,
 	int width = extents->unbounded.width;
 	int height = extents->unbounded.y + extents->unbounded.height - y;
 
-	compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, NULL,
+    compositor->composite (dst, CAIRO_OPERATOR_DEST_OUT, mask, XNULL,
 			       0, y - extents->unbounded.y,
 			       0, 0,
 			       x, y,
@@ -805,7 +805,7 @@ add_rect (cairo_boxes_t *boxes, int x1, int y1, int x2, int y2)
     box.p2.y = _cairo_fixed_from_int (y2);
 
     status = _cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static cairo_status_t
@@ -826,7 +826,7 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
 	return CAIRO_STATUS_SUCCESS;
     }
 
-    assert (extents->clip->path == NULL);
+    XASSERT (extents->clip->path == XNULL);
 
     /* subtract the drawn boxes from the unbounded area */
     _cairo_boxes_init (&clear);
@@ -836,7 +836,7 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
     box.p2.x = _cairo_fixed_from_int (extents->unbounded.x);
     box.p2.y = _cairo_fixed_from_int (extents->unbounded.y + extents->unbounded.height);
 
-    if (boxes == NULL) {
+    if (boxes == XNULL) {
 	if (extents->bounded.width == 0 || extents->bounded.height == 0) {
 	    goto empty;
 	} else {
@@ -874,10 +874,10 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
     } else if (boxes->num_boxes) {
 	_cairo_boxes_init (&tmp);
 
-	assert (boxes->is_pixel_aligned);
+	XASSERT (boxes->is_pixel_aligned);
 
 	status = _cairo_boxes_add (&tmp, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
 	tmp.chunks.next = &boxes->chunks;
 	tmp.num_boxes += boxes->num_boxes;
@@ -885,7 +885,7 @@ fixup_unbounded (const cairo_traps_compositor_t *compositor,
 	status = _cairo_bentley_ottmann_tessellate_boxes (&tmp,
 							  CAIRO_FILL_RULE_WINDING,
 							  &clear);
-	tmp.chunks.next = NULL;
+    tmp.chunks.next = XNULL;
 	if (unlikely (status))
 	    goto error;
     } else {
@@ -894,7 +894,7 @@ empty:
 	box.p2.x = _cairo_fixed_from_int (extents->unbounded.x + extents->unbounded.width);
 
 	status = _cairo_boxes_add (&clear, CAIRO_ANTIALIAS_DEFAULT, &box);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     /* Now intersect with the clip boxes */
@@ -957,7 +957,7 @@ need_unbounded_clip (cairo_composite_rectangles_t *extents)
 	if (! _cairo_clip_is_region (extents->clip))
 	    flags |= NEED_CLIP_SURFACE;
     }
-    if (extents->clip->path != NULL)
+    if (extents->clip->path != XNULL)
 	flags |= NEED_CLIP_SURFACE;
     return flags;
 }
@@ -975,19 +975,19 @@ clip_and_composite (const cairo_traps_compositor_t *compositor,
     cairo_pattern_t *source = &extents->source_pattern.base;
     cairo_surface_t *src;
     int src_x, src_y;
-    cairo_region_t *clip_region = NULL;
+    cairo_region_t *clip_region = XNULL;
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
 
     if (reduce_alpha_op (extents)) {
 	op = CAIRO_OPERATOR_ADD;
-	source = NULL;
+    source = XNULL;
     }
 
     if (op == CAIRO_OPERATOR_CLEAR) {
 	op = CAIRO_OPERATOR_DEST_OUT;
-	source = NULL;
+    source = XNULL;
     }
 
     compositor->acquire (dst);
@@ -1001,12 +1001,12 @@ clip_and_composite (const cairo_traps_compositor_t *compositor,
 	    limit = &extents->destination;
 
 	clip_region = _cairo_clip_get_region (extents->clip);
-	if (clip_region != NULL &&
+    if (clip_region != XNULL &&
 	    cairo_region_contains_rectangle (clip_region,
 					     limit) == CAIRO_REGION_OVERLAP_IN)
-	    clip_region = NULL;
+        clip_region = XNULL;
 
-	if (clip_region != NULL) {
+    if (clip_region != XNULL) {
 	    status = compositor->set_clip_region (dst, clip_region);
 	    if (unlikely (status)) {
 		compositor->release (dst);
@@ -1058,12 +1058,12 @@ skip:
 	if (need_clip & NEED_CLIP_SURFACE)
 	    status = fixup_unbounded_with_mask (compositor, extents);
 	else
-	    status = fixup_unbounded (compositor, extents, NULL);
+        status = fixup_unbounded (compositor, extents, XNULL);
     }
 
 error:
     if (clip_region)
-	compositor->set_clip_region (dst, NULL);
+    compositor->set_clip_region (dst, XNULL);
 
     compositor->release (dst);
 
@@ -1135,7 +1135,7 @@ is_recording_pattern (const cairo_pattern_t *pattern)
 	return FALSE;
 
     surface = ((const cairo_surface_pattern_t *) pattern)->surface;
-    surface = _cairo_surface_get_source (surface, NULL);
+    surface = _cairo_surface_get_source (surface, XNULL);
     return _cairo_surface_is_recording (surface);
 }
 
@@ -1145,7 +1145,7 @@ recording_pattern_get_surface (const cairo_pattern_t *pattern)
     cairo_surface_t *surface;
 
     surface = ((const cairo_surface_pattern_t *) pattern)->surface;
-    return _cairo_surface_get_source (surface, NULL);
+    return _cairo_surface_get_source (surface, XNULL);
 }
 
 static cairo_bool_t
@@ -1256,7 +1256,7 @@ composite_aligned_boxes (const cairo_traps_compositor_t *compositor,
     }
     else
     {
-	cairo_surface_t *src, *mask = NULL;
+    cairo_surface_t *src, *mask = XNULL;
 	cairo_pattern_t *source = &extents->source_pattern.base;
 	int src_x, src_y;
 	int mask_x = 0, mask_y = 0;
@@ -1271,7 +1271,7 @@ composite_aligned_boxes (const cairo_traps_compositor_t *compositor,
 	    mask_y = -extents->bounded.y;
 
 	    if (op == CAIRO_OPERATOR_CLEAR) {
-		source = NULL;
+        source = XNULL;
 		op = CAIRO_OPERATOR_DEST_OUT;
 	    }
 	} else if (op_is_source)
@@ -1479,9 +1479,9 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	    if (clip_region &&
 		cairo_region_contains_rectangle (clip_region,
 						 &extents->unbounded) == CAIRO_REGION_OVERLAP_IN)
-		clip_region = NULL;
+        clip_region = XNULL;
 
-	    if (clip_region != NULL) {
+        if (clip_region != XNULL) {
 		status = compositor->set_clip_region (dst, clip_region);
 		if (unlikely (status))
 		    return status;
@@ -1490,16 +1490,16 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	    if (clip_surface)
 		status = fixup_unbounded_with_mask (compositor, extents);
 	    else
-		status = fixup_unbounded (compositor, extents, NULL);
+        status = fixup_unbounded (compositor, extents, XNULL);
 
-	    if (clip_region != NULL)
-		compositor->set_clip_region (dst, NULL);
+        if (clip_region != XNULL)
+        compositor->set_clip_region (dst, XNULL);
 	}
 
 	return status;
     }
 
-    if (extents->clip->path != NULL && extents->is_bounded) {
+    if (extents->clip->path != XNULL && extents->is_bounded) {
 	cairo_polygon_t clipper;
 	cairo_fill_rule_t clipper_fill_rule;
 	cairo_antialias_t clipper_antialias;
@@ -1530,7 +1530,7 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	_cairo_boxes_init (&boxes);
 	status = _cairo_rasterise_polygon_to_boxes (polygon, fill_rule, &boxes);
 	if (likely (status == CAIRO_INT_STATUS_SUCCESS)) {
-	    assert (boxes.is_pixel_aligned);
+	    XASSERT (boxes.is_pixel_aligned);
 	    status = clip_and_composite_boxes (compositor, extents, &boxes);
 	}
 	_cairo_boxes_fini (&boxes);
@@ -1561,7 +1561,7 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 	if (status == CAIRO_INT_STATUS_SUCCESS) {
 	    status = clip_and_composite_boxes (compositor, extents, &boxes);
 	    /* XXX need to reconstruct the traps! */
-	    assert (status != CAIRO_INT_STATUS_UNSUPPORTED);
+	    XASSERT (status != CAIRO_INT_STATUS_UNSUPPORTED);
 	}
     }
     if (status == CAIRO_INT_STATUS_UNSUPPORTED) {
@@ -1582,7 +1582,7 @@ clip_and_composite_polygon (const cairo_traps_compositor_t *compositor,
 
 	traps.antialias = antialias;
 	status = clip_and_composite (compositor, extents,
-				     composite_traps, NULL, &traps,
+                     composite_traps, XNULL, &traps,
 				     need_unbounded_clip (extents) | flags);
     }
 
@@ -1594,7 +1594,7 @@ CLEANUP_TRAPS:
 
 struct composite_opacity_info {
     const cairo_traps_compositor_t *compositor;
-    uint8_t op;
+    xuint8_t op;
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
@@ -1602,9 +1602,9 @@ struct composite_opacity_info {
 };
 
 static void composite_opacity(void *closure,
-			      int16_t x, int16_t y,
-			      int16_t w, int16_t h,
-			      uint16_t coverage)
+			      xint16_t x, xint16_t y,
+			      xint16_t w, xint16_t h,
+			      xuint16_t coverage)
 {
     struct composite_opacity_info *info = closure;
     const cairo_traps_compositor_t *compositor = info->compositor;
@@ -1627,7 +1627,7 @@ static void composite_opacity(void *closure,
 				   x,                y,
 				   w,                h);
 	} else {
-	    compositor->composite (info->dst, info->op, mask, NULL,
+        compositor->composite (info->dst, info->op, mask, XNULL,
 				   mask_x,            mask_y,
 				   0,                 0,
 				   x,                 y,
@@ -1724,7 +1724,7 @@ clip_and_composite_boxes (const cairo_traps_compositor_t *compositor,
     if (unlikely (status))
 	return status;
 
-    if (boxes->is_pixel_aligned && extents->clip->path == NULL &&
+    if (boxes->is_pixel_aligned && extents->clip->path == XNULL &&
 	extents->source_pattern.base.type == CAIRO_PATTERN_TYPE_SURFACE &&
 	(op_reduces_to_source (extents) ||
 	 (extents->op == CAIRO_OPERATOR_OVER &&
@@ -1736,7 +1736,7 @@ clip_and_composite_boxes (const cairo_traps_compositor_t *compositor,
     }
 
     /* Can we reduce drawing through a clip-mask to simply drawing the clip? */
-    if (extents->clip->path != NULL && extents->is_bounded) {
+    if (extents->clip->path != XNULL && extents->is_bounded) {
 	cairo_polygon_t polygon;
 	cairo_fill_rule_t fill_rule;
 	cairo_antialias_t antialias;
@@ -1750,7 +1750,7 @@ clip_and_composite_boxes (const cairo_traps_compositor_t *compositor,
 	status = _cairo_clip_get_polygon (clip, &polygon,
 					  &fill_rule, &antialias);
 	_cairo_clip_path_destroy (clip->path);
-	clip->path = NULL;
+    clip->path = XNULL;
 	if (likely (status == CAIRO_INT_STATUS_SUCCESS)) {
 	    cairo_clip_t *saved_clip = extents->clip;
 	    extents->clip = clip;
@@ -1777,7 +1777,7 @@ clip_and_composite_boxes (const cairo_traps_compositor_t *compositor,
     }
 
     return clip_and_composite (compositor, extents,
-			       composite_boxes, NULL, boxes,
+                   composite_boxes, XNULL, boxes,
 			       need_unbounded_clip (extents));
 }
 
@@ -1825,7 +1825,7 @@ clip_and_composite_traps (const cairo_traps_compositor_t *compositor,
 	    flags |= FORCE_CLIP_REGION;
 
 	status = clip_and_composite (compositor, extents,
-				     composite_traps, NULL, info,
+                     composite_traps, XNULL, info,
 				     need_unbounded_clip (extents) | flags);
     }
 
@@ -1850,7 +1850,7 @@ clip_and_composite_tristrip (const cairo_traps_compositor_t *compositor,
 	flags |= FORCE_CLIP_REGION;
 
     status = clip_and_composite (compositor, extents,
-				 composite_tristrip, NULL, info,
+                 composite_tristrip, XNULL, info,
 				 need_unbounded_clip (extents) | flags);
 
     return status;
@@ -1878,14 +1878,14 @@ composite_mask (const cairo_traps_compositor_t *compositor,
 
     TRACE ((stderr, "%s\n", __FUNCTION__));
 
-    if (src != NULL) {
+    if (src != XNULL) {
 	compositor->composite (dst, op, src, data->mask,
 			       extents->x + src_x, extents->y + src_y,
 			       extents->x + data->mask_x, extents->y + data->mask_y,
 			       extents->x - dst_x,  extents->y - dst_y,
 			       extents->width,      extents->height);
     } else {
-	compositor->composite (dst, op, data->mask, NULL,
+    compositor->composite (dst, op, data->mask, XNULL,
 			       extents->x + data->mask_x, extents->y + data->mask_y,
 			       0, 0,
 			       extents->x - dst_x,  extents->y - dst_y,
@@ -1900,13 +1900,13 @@ struct composite_box_info {
     cairo_surface_t *dst;
     cairo_surface_t *src;
     int src_x, src_y;
-    uint8_t op;
+    xuint8_t op;
 };
 
 static void composite_box(void *closure,
-			  int16_t x, int16_t y,
-			  int16_t w, int16_t h,
-			  uint16_t coverage)
+			  xint16_t x, xint16_t y,
+			  xint16_t w, xint16_t h,
+			  xuint16_t coverage)
 {
     struct composite_box_info *info = closure;
     const cairo_traps_compositor_t *compositor = info->compositor;
@@ -1937,7 +1937,7 @@ static void composite_box(void *closure,
 
 	cairo_surface_destroy (mask);
     } else {
-	compositor->composite (info->dst, info->op, info->src, NULL,
+    compositor->composite (info->dst, info->op, info->src, XNULL,
 			       x + info->src_x,  y + info->src_y,
 			       0,                0,
 			       x,                y,
@@ -2019,7 +2019,7 @@ composite_mask_clip (const cairo_traps_compositor_t *compositor,
 			      data->mask,
 			      data->mask_x + dst_x, data->mask_y + dst_y,
 			      dst_x, dst_y,
-			      extents, NULL);
+                  extents, XNULL);
     _cairo_traps_fini (&info.traps);
 
     return status;
@@ -2062,7 +2062,7 @@ _cairo_traps_compositor_mask (const cairo_compositor_t *_compositor,
 	return status;
 
     if (extents->mask_pattern.base.type == CAIRO_PATTERN_TYPE_SOLID &&
-	extents->clip->path == NULL) {
+    extents->clip->path == XNULL) {
 	status = clip_and_composite (compositor, extents,
 				     composite_opacity_boxes,
 				     composite_opacity_boxes,
@@ -2233,7 +2233,7 @@ _cairo_traps_compositor_fill (const cairo_compositor_t *_compositor,
 	}
 	else
 	{
-	    _cairo_polygon_init (&polygon, NULL, 0);
+        _cairo_polygon_init (&polygon, XNULL, 0);
 	}
 
 	status = _cairo_path_fixed_fill_to_polygon (path, tolerance, &polygon);
@@ -2311,7 +2311,7 @@ _cairo_traps_compositor_glyphs (const cairo_compositor_t	*_compositor,
 	info.extents = extents->bounded;
 
 	status = clip_and_composite (compositor, extents,
-				     composite_glyphs, NULL, &info,
+                     composite_glyphs, XNULL, &info,
 				     need_bounded_clip (extents) | FORCE_CLIP_REGION);
     }
     _cairo_scaled_font_thaw_cache (scaled_font);

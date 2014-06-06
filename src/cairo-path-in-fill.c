@@ -265,7 +265,7 @@ _cairo_path_fixed_in_fill (const cairo_path_fixed_t	*path,
 					  _cairo_in_fill_curve_to,
 					  _cairo_in_fill_close_path,
 					  &in_fill);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     _cairo_in_fill_close_path (&in_fill);
 

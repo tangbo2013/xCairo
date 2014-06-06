@@ -37,32 +37,33 @@
 #ifndef CAIRO_WIDEINT_TYPE_H
 #define CAIRO_WIDEINT_TYPE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #if   HAVE_STDINT_H
-# include <stdint.h>
+# include <xC/xinteger.h>
+//#include <stdint.h>
 #elif HAVE_INTTYPES_H
 # include <inttypes.h>
 #elif HAVE_SYS_INT_TYPES_H
 # include <sys/int_types.h>
 #elif defined(_MSC_VER)
-  typedef __int8 int8_t;
-  typedef unsigned __int8 uint8_t;
-  typedef __int16 int16_t;
-  typedef unsigned __int16 uint16_t;
-  typedef __int32 int32_t;
-  typedef unsigned __int32 uint32_t;
-  typedef __int64 int64_t;
-  typedef unsigned __int64 uint64_t;
+  typedef __int8 xint8_t;
+  typedef unsigned __int8 xuint8_t;
+  typedef __int16 xint16_t;
+  typedef unsigned __int16 xuint16_t;
+  typedef __int32 xint32_t;
+  typedef unsigned __int32 xuint32_t;
+  typedef __int64 xint64_t;
+  typedef unsigned __int64 xuint64_t;
 # ifndef HAVE_UINT64_T
 #  define HAVE_UINT64_T 1
 # endif
 #else
-#error Cannot find definitions for fixed-width integral types (uint8_t, uint32_t, etc.)
+#error Cannot find definitions for fixed-width integral types (xuint8_t, xuint32_t, etc.)
 #endif
 
 #ifndef INT16_MIN
@@ -89,28 +90,28 @@
 #endif
 #ifndef bswap_16
 # define bswap_16(p) \
-	(((((uint16_t)(p)) & 0x00ff) << 8) | \
-	  (((uint16_t)(p))           >> 8));
+    (((((xuint16_t)(p)) & 0x00ff) << 8) | \
+      (((xuint16_t)(p))           >> 8));
 #endif
 #ifndef bswap_32
 # define bswap_32(p) \
-         (((((uint32_t)(p)) & 0x000000ff) << 24) | \
-	  ((((uint32_t)(p)) & 0x0000ff00) << 8)  | \
-	  ((((uint32_t)(p)) & 0x00ff0000) >> 8)  | \
-	  ((((uint32_t)(p)))              >> 24));
+         (((((xuint32_t)(p)) & 0x000000ff) << 24) | \
+      ((((xuint32_t)(p)) & 0x0000ff00) << 8)  | \
+      ((((xuint32_t)(p)) & 0x00ff0000) >> 8)  | \
+      ((((xuint32_t)(p)))              >> 24));
 #endif
 
 
 #if !HAVE_UINT64_T
 
 typedef struct _cairo_uint64 {
-    uint32_t	lo, hi;
+    xuint32_t	lo, hi;
 } cairo_uint64_t, cairo_int64_t;
 
 #else
 
-typedef uint64_t    cairo_uint64_t;
-typedef int64_t	    cairo_int64_t;
+typedef xuint64_t    cairo_uint64_t;
+typedef xint64_t	    cairo_int64_t;
 
 #endif
 

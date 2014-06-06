@@ -75,7 +75,7 @@
  *   // Try to acquire the device
  *   status = cairo_device_acquire (device);
  *   if (status != CAIRO_STATUS_SUCCESS) {
- *     printf ("Failed to acquire the device: %s\n", cairo_status_to_string (status));
+ *     XDBGPRINTF ("Failed to acquire the device: %s\n", cairo_status_to_string (status));
  *     return;
  *   }
  *
@@ -199,13 +199,13 @@ _cairo_device_init (cairo_device_t *device,
 cairo_device_t *
 cairo_device_reference (cairo_device_t *device)
 {
-    if (device == NULL ||
+    if (device == XNULL ||
 	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
 	return device;
     }
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
     _cairo_reference_count_inc (&device->ref_count);
 
     return device;
@@ -227,7 +227,7 @@ slim_hidden_def (cairo_device_reference);
 cairo_status_t
 cairo_device_status (cairo_device_t *device)
 {
-    if (device == NULL)
+    if (device == XNULL)
 	return CAIRO_STATUS_NULL_POINTER;
 
     return device->status;
@@ -253,13 +253,13 @@ cairo_device_flush (cairo_device_t *device)
 {
     cairo_status_t status;
 
-    if (device == NULL || device->status)
+    if (device == XNULL || device->status)
 	return;
 
     if (device->finished)
 	return;
 
-    if (device->backend->flush != NULL) {
+    if (device->backend->flush != XNULL) {
 	status = device->backend->flush (device);
 	if (unlikely (status))
 	    status = _cairo_device_set_error (device, status);
@@ -289,7 +289,7 @@ slim_hidden_def (cairo_device_flush);
 void
 cairo_device_finish (cairo_device_t *device)
 {
-    if (device == NULL ||
+    if (device == XNULL ||
 	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
 	return;
@@ -300,7 +300,7 @@ cairo_device_finish (cairo_device_t *device)
 
     cairo_device_flush (device);
 
-    if (device->backend->finish != NULL)
+    if (device->backend->finish != XNULL)
 	device->backend->finish (device);
 
     /* We only finish the device after the backend's callback returns because
@@ -328,19 +328,19 @@ cairo_device_destroy (cairo_device_t *device)
 {
     cairo_user_data_array_t user_data;
 
-    if (device == NULL ||
+    if (device == XNULL ||
 	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
 	return;
     }
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
     if (! _cairo_reference_count_dec_and_test (&device->ref_count))
 	return;
 
     cairo_device_finish (device);
 
-    assert (device->mutex_depth == 0);
+    XASSERT (device->mutex_depth == 0);
     CAIRO_MUTEX_FINI (device->mutex);
 
     user_data = device->user_data;
@@ -366,7 +366,7 @@ slim_hidden_def (cairo_device_destroy);
 cairo_device_type_t
 cairo_device_get_type (cairo_device_t *device)
 {
-    if (device == NULL ||
+    if (device == XNULL ||
 	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
 	return CAIRO_DEVICE_TYPE_INVALID;
@@ -408,7 +408,7 @@ cairo_device_get_type (cairo_device_t *device)
 cairo_status_t
 cairo_device_acquire (cairo_device_t *device)
 {
-    if (device == NULL)
+    if (device == XNULL)
 	return CAIRO_STATUS_SUCCESS;
 
     if (unlikely (device->status))
@@ -419,7 +419,7 @@ cairo_device_acquire (cairo_device_t *device)
 
     CAIRO_MUTEX_LOCK (device->mutex);
     if (device->mutex_depth++ == 0) {
-	if (device->backend->lock != NULL)
+	if (device->backend->lock != XNULL)
 	    device->backend->lock (device);
     }
 
@@ -439,13 +439,13 @@ slim_hidden_def (cairo_device_acquire);
 void
 cairo_device_release (cairo_device_t *device)
 {
-    if (device == NULL)
+    if (device == XNULL)
 	return;
 
-    assert (device->mutex_depth > 0);
+    XASSERT (device->mutex_depth > 0);
 
     if (--device->mutex_depth == 0) {
-	if (device->backend->unlock != NULL)
+	if (device->backend->unlock != XNULL)
 	    device->backend->unlock (device);
     }
 
@@ -479,7 +479,7 @@ _cairo_device_set_error (cairo_device_t *device,
 unsigned int
 cairo_device_get_reference_count (cairo_device_t *device)
 {
-    if (device == NULL ||
+    if (device == XNULL ||
 	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
 	return 0;
 

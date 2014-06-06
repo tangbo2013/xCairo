@@ -41,7 +41,7 @@
 #ifndef CAIRO_MUTEX_IMPL_PRIVATE_H
 #define CAIRO_MUTEX_IMPL_PRIVATE_H
 
-#include "cairo.h"
+#include "../cairo.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -195,7 +195,7 @@
 # define CAIRO_MUTEX_IMPL_UNLOCK(mutex) LeaveCriticalSection (&(mutex))
 # define CAIRO_MUTEX_IMPL_INIT(mutex) InitializeCriticalSection (&(mutex))
 # define CAIRO_MUTEX_IMPL_FINI(mutex) DeleteCriticalSection (&(mutex))
-# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER { NULL, 0, 0, NULL, NULL, 0 }
+# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER { XNULL, 0, 0, XNULL, XNULL, 0 }
 
 #elif defined __OS2__ /******************************************************/
 
@@ -208,7 +208,7 @@
 # define CAIRO_MUTEX_IMPL_OS2 1
 # define CAIRO_MUTEX_IMPL_LOCK(mutex) DosRequestMutexSem(mutex, SEM_INDEFINITE_WAIT)
 # define CAIRO_MUTEX_IMPL_UNLOCK(mutex) DosReleaseMutexSem(mutex)
-# define CAIRO_MUTEX_IMPL_INIT(mutex) DosCreateMutexSem (NULL, &(mutex), 0L, FALSE)
+# define CAIRO_MUTEX_IMPL_INIT(mutex) DosCreateMutexSem (XNULL, &(mutex), 0L, FALSE)
 # define CAIRO_MUTEX_IMPL_FINI(mutex) DosCloseMutexSem (mutex)
 # define CAIRO_MUTEX_IMPL_NIL_INITIALIZER 0
 
@@ -221,7 +221,7 @@
 # define CAIRO_MUTEX_IMPL_UNLOCK(mutex) (mutex)->Unlock()
 # define CAIRO_MUTEX_IMPL_INIT(mutex) (mutex) = new BLocker()
 # define CAIRO_MUTEX_IMPL_FINI(mutex) delete (mutex)
-# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER NULL
+# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER XNULL
 
 #elif CAIRO_HAS_PTHREAD /* and finally if there are no native mutexes ********/
 
@@ -233,7 +233,7 @@
 # define CAIRO_MUTEX_IMPL_PTHREAD 1
 #if HAVE_LOCKDEP
 /* expose all mutexes to the validator */
-# define CAIRO_MUTEX_IMPL_INIT(mutex) pthread_mutex_init (&(mutex), NULL)
+# define CAIRO_MUTEX_IMPL_INIT(mutex) pthread_mutex_init (&(mutex), XNULL)
 #endif
 # define CAIRO_MUTEX_IMPL_LOCK(mutex) pthread_mutex_lock (&(mutex))
 # define CAIRO_MUTEX_IMPL_UNLOCK(mutex) pthread_mutex_unlock (&(mutex))

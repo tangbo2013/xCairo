@@ -42,7 +42,7 @@
 
 #define WATCH_PATH 0
 #if WATCH_PATH
-#include <stdio.h>
+#include <xC/xfile.h>
 #endif
 
 enum cairo_path_op {

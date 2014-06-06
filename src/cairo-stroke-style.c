@@ -46,7 +46,7 @@ _cairo_stroke_style_init (cairo_stroke_style_t *style)
     style->line_join = CAIRO_GSTATE_LINE_JOIN_DEFAULT;
     style->miter_limit = CAIRO_GSTATE_MITER_LIMIT_DEFAULT;
 
-    style->dash = NULL;
+    style->dash = XNULL;
     style->num_dashes = 0;
     style->dash_offset = 0.0;
 }
@@ -67,14 +67,14 @@ _cairo_stroke_style_init_copy (cairo_stroke_style_t *style,
 
     style->num_dashes = other->num_dashes;
 
-    if (other->dash == NULL) {
-	style->dash = NULL;
+    if (other->dash == XNULL) {
+	style->dash = XNULL;
     } else {
 	style->dash = _cairo_malloc_ab (style->num_dashes, sizeof (double));
-	if (unlikely (style->dash == NULL))
+	if (unlikely (style->dash == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-	memcpy (style->dash, other->dash,
+	xmemory_copy (style->dash, other->dash,
 		style->num_dashes * sizeof (double));
     }
 
@@ -86,8 +86,8 @@ _cairo_stroke_style_init_copy (cairo_stroke_style_t *style,
 void
 _cairo_stroke_style_fini (cairo_stroke_style_t *style)
 {
-    free (style->dash);
-    style->dash = NULL;
+    xmemory_free (style->dash);
+    style->dash = XNULL;
 
     style->num_dashes = 0;
 

@@ -60,8 +60,8 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend;
 
 static void init_stats (struct stat *s)
 {
-    s->min = HUGE_VAL;
-    s->max = -HUGE_VAL;
+    s->min = XHUGE_VAL;
+    s->max = -XHUGE_VAL;
 }
 
 static void init_extents (struct extents *e)
@@ -123,7 +123,7 @@ static cairo_status_t
 log_init (cairo_observation_t *log,
 	  cairo_bool_t record)
 {
-    memset (log, 0, sizeof(*log));
+    xmemory_set (log, 0, sizeof(*log));
 
     init_paint (&log->paint);
     init_mask (&log->mask);
@@ -135,7 +135,7 @@ log_init (cairo_observation_t *log,
 
     if (record) {
 	log->record = (cairo_recording_surface_t *)
-	    cairo_recording_surface_create (CAIRO_CONTENT_COLOR_ALPHA, NULL);
+        cairo_recording_surface_create (CAIRO_CONTENT_COLOR_ALPHA, XNULL);
 	if (unlikely (log->record->base.status))
 	    return log->record->base.status;
 
@@ -237,13 +237,13 @@ classify_clip (const cairo_clip_t *clip)
 {
     int classify;
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	classify = 0;
     else if (_cairo_clip_is_region (clip))
 	classify = 1;
-    else if (clip->path == NULL)
+    else if (clip->path == XNULL)
 	classify = 2;
-    else if (clip->path->prev == NULL)
+    else if (clip->path->prev == XNULL)
 	classify = 3;
     else if (_cairo_clip_is_polygon (clip))
 	classify = 4;
@@ -307,7 +307,7 @@ _cairo_device_observer_flush (void *_device)
 {
     cairo_device_observer_t *device = (cairo_device_observer_t *) _device;
 
-    if (device->target == NULL)
+    if (device->target == XNULL)
 	return CAIRO_STATUS_SUCCESS;
 
     cairo_device_flush (device->target);
@@ -327,7 +327,7 @@ _cairo_device_observer_destroy (void *_device)
 {
     cairo_device_observer_t *device = (cairo_device_observer_t *) _device;
     cairo_device_destroy (device->target);
-    free (device);
+    xmemory_free (device);
 }
 
 static const cairo_device_backend_t _cairo_device_observer_backend = {
@@ -348,14 +348,14 @@ _cairo_device_create_observer_internal (cairo_device_t *target,
     cairo_device_observer_t *device;
     cairo_status_t status;
 
-    device = malloc (sizeof (cairo_device_observer_t));
-    if (unlikely (device == NULL))
+    device = xmemory_alloc (sizeof (cairo_device_observer_t));
+    if (unlikely (device == XNULL))
 	return _cairo_device_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     _cairo_device_init (&device->base, &_cairo_device_observer_backend);
     status = log_init (&device->log, record);
     if (unlikely (status)) {
-	free (device);
+    xmemory_free (device);
 	return _cairo_device_create_in_error (status);
     }
 
@@ -379,8 +379,8 @@ _cairo_surface_create_observer_internal (cairo_device_t *device,
     cairo_surface_observer_t *surface;
     cairo_status_t status;
 
-    surface = malloc (sizeof (cairo_surface_observer_t));
-    if (unlikely (surface == NULL))
+    surface = xmemory_alloc (sizeof (cairo_surface_observer_t));
+    if (unlikely (surface == XNULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     _cairo_surface_init (&surface->base,
@@ -388,9 +388,9 @@ _cairo_surface_create_observer_internal (cairo_device_t *device,
 			 target->content);
 
     status = log_init (&surface->log,
-		       ((cairo_device_observer_t *)device)->log.record != NULL);
+               ((cairo_device_observer_t *)device)->log.record != XNULL);
     if (unlikely (status)) {
-	free (surface);
+    xmemory_free (surface);
 	return _cairo_surface_create_in_error (status);
     }
 
@@ -444,11 +444,11 @@ _cairo_surface_observer_create_similar (void *abstract_other,
     cairo_surface_observer_t *other = abstract_other;
     cairo_surface_t *target, *surface;
 
-    target = NULL;
+    target = XNULL;
     if (other->target->backend->create_similar)
 	target = other->target->backend->create_similar (other->target, content,
 							 width, height);
-    if (target == NULL)
+    if (target == XNULL)
 	target = _cairo_image_surface_create_with_content (content,
 							   width, height);
 
@@ -471,7 +471,7 @@ _cairo_surface_observer_create_similar_image (void *other,
 							       format,
 							       width, height);
 
-    return NULL;
+    return XNULL;
 }
 
 static cairo_image_surface_t *
@@ -649,7 +649,7 @@ add_record (cairo_observation_t *log,
     r->index = log->record ? log->record->commands.num_elements : 0;
 
     status = _cairo_array_append (&log->timings, r);
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static void
@@ -695,7 +695,7 @@ add_record_paint (cairo_observation_t *log,
     if (log->record) {
 	status = log->record->base.backend->paint (&log->record->base,
 						   op, source, clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->paint.slowest.elapsed))
@@ -780,7 +780,7 @@ add_record_mask (cairo_observation_t *log,
     if (log->record) {
 	status = log->record->base.backend->mask (&log->record->base,
 						  op, source, mask, clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->mask.slowest.elapsed))
@@ -879,7 +879,7 @@ add_record_fill (cairo_observation_t *log,
 						  path, fill_rule,
 						  tolerance, antialias,
 						  clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->fill.slowest.elapsed))
@@ -992,7 +992,7 @@ add_record_stroke (cairo_observation_t *log,
 						    path, style, ctm,ctm_inverse,
 						    tolerance, antialias,
 						    clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->stroke.slowest.elapsed))
@@ -1106,12 +1106,12 @@ add_record_glyphs (cairo_observation_t	*log,
     if (log->record) {
 	status = log->record->base.backend->show_text_glyphs (&log->record->base,
 							      op, source,
-							      NULL, 0,
+                                  XNULL, 0,
 							      glyphs, num_glyphs,
-							      NULL, 0, 0,
+                                  XNULL, 0, 0,
 							      scaled_font,
 							      clip);
-	assert (status == CAIRO_INT_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
     }
 
     if (_cairo_time_gt (elapsed, log->glyphs.slowest.elapsed))
@@ -1152,7 +1152,7 @@ _cairo_surface_observer_glyphs (void			*abstract_surface,
 							  scaled_font,
 							  glyphs, num_glyphs,
 							  clip,
-							  NULL);
+                              XNULL);
     if (unlikely (status)) {
 	surface->log.glyphs.noop++;
 	device->log.glyphs.noop++;
@@ -1168,18 +1168,18 @@ _cairo_surface_observer_glyphs (void			*abstract_surface,
     /* XXX We have to copy the glyphs, because the backend is allowed to
      * modify! */
     dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-    if (unlikely (dev_glyphs == NULL))
+    if (unlikely (dev_glyphs == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
-    memcpy (dev_glyphs, glyphs, num_glyphs * sizeof (cairo_glyph_t));
+    xmemory_copy (dev_glyphs, glyphs, num_glyphs * sizeof (cairo_glyph_t));
 
     t = _cairo_time_get ();
     status = _cairo_surface_show_text_glyphs (surface->target, op, source,
-					      NULL, 0,
+                          XNULL, 0,
 					      dev_glyphs, num_glyphs,
-					      NULL, 0, 0,
+                          XNULL, 0, 0,
 					      scaled_font,
 					      clip);
-    free (dev_glyphs);
+    xmemory_free (dev_glyphs);
     if (unlikely (status))
 	return status;
 
@@ -1218,7 +1218,7 @@ _cairo_surface_observer_mark_dirty (void *abstract_surface,
     cairo_surface_observer_t *surface = abstract_surface;
     cairo_status_t status;
 
-    printf ("mark-dirty (%d, %d) x (%d, %d)\n", x, y, width, height);
+    XDBGPRINTF ("mark-dirty (%d, %d) x (%d, %d)\n", x, y, width, height);
 
     status = CAIRO_STATUS_SUCCESS;
     if (surface->target->backend->mark_dirty_rectangle)
@@ -1268,7 +1268,7 @@ _cairo_surface_observer_get_font_options (void *abstract_surface,
 {
     cairo_surface_observer_t *surface = abstract_surface;
 
-    if (surface->target->backend->get_font_options != NULL)
+    if (surface->target->backend->get_font_options != XNULL)
 	surface->target->backend->get_font_options (surface->target, options);
 }
 
@@ -1314,7 +1314,7 @@ _cairo_surface_observer_snapshot (void *abstract_surface)
     if (surface->target->backend->snapshot)
 	return surface->target->backend->snapshot (surface->target);
 
-    return NULL;
+    return XNULL;
 }
 
 static cairo_t *
@@ -1361,7 +1361,7 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend = {
     _cairo_surface_observer_mask,
     _cairo_surface_observer_stroke,
     _cairo_surface_observer_fill,
-    NULL, /* fill-stroke */
+    XNULL, /* fill-stroke */
     _cairo_surface_observer_glyphs,
 };
 
@@ -1414,8 +1414,8 @@ _cairo_surface_observer_add_callback (cairo_list_t *head,
 {
     struct callback_list *cb;
 
-    cb = malloc (sizeof (*cb));
-    if (unlikely (cb == NULL))
+    cb = xmemory_alloc (sizeof (*cb));
+    if (unlikely (cb == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     cairo_list_add (&cb->link, head);
@@ -1577,7 +1577,7 @@ print_array (cairo_output_stream_t *stream,
     int order[64];
     int i, j;
 
-    assert (count < ARRAY_LENGTH (order));
+    XASSERT (count < ARRAY_LENGTH (order));
     for (i = j = 0; i < count; i++) {
 	if (array[i] != 0)
 	    order[j++] = i;
@@ -1783,7 +1783,7 @@ replay_record (cairo_observation_t *log,
     cairo_surface_t *surface;
     cairo_int_status_t status;
 
-    if (log->record == NULL || script == NULL)
+    if (log->record == XNULL || script == XNULL)
 	return FALSE;
 
     surface = cairo_script_surface_create (script,
@@ -1794,7 +1794,7 @@ replay_record (cairo_observation_t *log,
 	_cairo_recording_surface_replay_one (log->record, r->index, surface);
     cairo_surface_destroy (surface);
 
-    assert (status == CAIRO_INT_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_INT_STATUS_SUCCESS);
 
     return TRUE;
 #else
@@ -1827,7 +1827,7 @@ _cairo_observation_print (cairo_output_stream_t *stream,
     script = _cairo_script_context_create_internal (stream);
     _cairo_script_context_attach_snapshots (script, FALSE);
 #else
-    script = NULL;
+    script = XNULL;
 #endif
 
     total = _cairo_observation_total_elapsed (log);
@@ -1969,7 +1969,7 @@ cairo_surface_observer_print (cairo_surface_t *abstract_surface,
 
     surface = (cairo_surface_observer_t *) abstract_surface;
 
-    stream = _cairo_output_stream_create (write_func, NULL, closure);
+    stream = _cairo_output_stream_create (write_func, XNULL, closure);
     _cairo_observation_print (stream, &surface->log);
     return _cairo_output_stream_destroy (stream);
 }
@@ -2005,7 +2005,7 @@ cairo_device_observer_print (cairo_device_t *abstract_device,
 
     device = (cairo_device_observer_t *) abstract_device;
 
-    stream = _cairo_output_stream_create (write_func, NULL, closure);
+    stream = _cairo_output_stream_create (write_func, XNULL, closure);
     _cairo_observation_print (stream, &device->log);
     return _cairo_output_stream_destroy (stream);
 }

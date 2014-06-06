@@ -134,16 +134,16 @@ _cairo_surface_clipper_set_clip (cairo_surface_clipper_t *clipper,
 	return CAIRO_STATUS_SUCCESS;
 
     /* all clipped out state should never propagate this far */
-    assert (!_cairo_clip_is_all_clipped (clip));
+    XASSERT (!_cairo_clip_is_all_clipped (clip));
 
     /* XXX Is this an incremental clip? */
     if (clipper->clip && clip &&
 	clip->num_boxes == clipper->clip->num_boxes &&
-	memcmp (clip->boxes, clipper->clip->boxes,
+    xmemory_compare (clip->boxes, clipper->clip->boxes,
 		sizeof (cairo_box_t) * clip->num_boxes) == 0)
     {
 	cairo_clip_path_t *clip_path = clip->path;
-	while (clip_path != NULL && clip_path != clipper->clip->path)
+    while (clip_path != XNULL && clip_path != clipper->clip->path)
 	    clip_path = clip_path->prev;
 
 	if (clip_path) {
@@ -160,21 +160,21 @@ _cairo_surface_clipper_set_clip (cairo_surface_clipper_t *clipper,
     if (incremental)
 	return status;
 
-    status = clipper->intersect_clip_path (clipper, NULL, 0, 0, 0);
+    status = clipper->intersect_clip_path (clipper, XNULL, 0, 0, 0);
     if (unlikely (status))
 	return status;
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	return CAIRO_STATUS_SUCCESS;
 
     status = _cairo_surface_clipper_intersect_clip_boxes (clipper, clip);
     if (unlikely (status))
 	return status;
 
-    if (clip->path != NULL) {
+    if (clip->path != XNULL) {
 	    status = _cairo_surface_clipper_intersect_clip_path_recursive (clipper,
 									   clip->path,
-									   NULL);
+                                       XNULL);
     }
 
     return status;
@@ -184,7 +184,7 @@ void
 _cairo_surface_clipper_init (cairo_surface_clipper_t *clipper,
 			     cairo_surface_clipper_intersect_clip_path_func_t func)
 {
-    clipper->clip = NULL;
+    clipper->clip = XNULL;
     clipper->intersect_clip_path = func;
 }
 
@@ -192,5 +192,5 @@ void
 _cairo_surface_clipper_reset (cairo_surface_clipper_t *clipper)
 {
     _cairo_clip_destroy (clipper->clip);
-    clipper->clip = NULL;
+    clipper->clip = XNULL;
 }

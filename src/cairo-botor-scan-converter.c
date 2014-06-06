@@ -47,7 +47,7 @@
 #include "cairo-freelist-private.h"
 #include "cairo-combsort-inline.h"
 
-#include <setjmp.h>
+#include <xC/xlongjmp.h>
 
 #define STEP_X CAIRO_FIXED_ONE
 #define STEP_Y CAIRO_FIXED_ONE
@@ -57,7 +57,7 @@
 #define AREA_TO_ALPHA(c)  (((c)*255 + STEP_XY/2) / STEP_XY)
 
 typedef struct _cairo_bo_intersect_ordinate {
-    int32_t ordinate;
+    xint32_t ordinate;
     enum { EXACT, INEXACT } exactness;
 } cairo_bo_intersect_ordinate_t;
 
@@ -178,7 +178,7 @@ typedef struct _sweep_line {
 
     cairo_freepool_t runs;
 
-    jmp_buf unwind;
+    xjmp_buf_t unwind;
 } sweep_line_t;
 
 cairo_always_inline static struct quorem
@@ -259,16 +259,16 @@ line_compute_intersection_x_for_y (const cairo_line_t *line,
 static int
 edges_compare_x_for_y_general (const cairo_edge_t *a,
 			       const cairo_edge_t *b,
-			       int32_t y)
+			       xint32_t y)
 {
     /* XXX: We're assuming here that dx and dy will still fit in 32
      * bits. That's not true in general as there could be overflow. We
      * should prevent that before the tessellation algorithm
      * begins.
      */
-    int32_t dx;
-    int32_t adx, ady;
-    int32_t bdx, bdy;
+    xint32_t dx;
+    xint32_t adx, ady;
+    xint32_t bdx, bdy;
     enum {
        HAVE_NONE    = 0x0,
        HAVE_DX      = 0x1,
@@ -283,8 +283,8 @@ edges_compare_x_for_y_general (const cairo_edge_t *a,
     /* don't bother solving for abscissa if the edges' bounding boxes
      * can be used to order them. */
     {
-           int32_t amin, amax;
-           int32_t bmin, bmax;
+           xint32_t amin, amax;
+           xint32_t bmin, bmax;
            if (a->line.p1.x < a->line.p2.x) {
                    amin = a->line.p1.x;
                    amax = a->line.p2.x;
@@ -404,11 +404,11 @@ edges_compare_x_for_y_general (const cairo_edge_t *a,
  */
 static int
 edge_compare_for_y_against_x (const cairo_edge_t *a,
-			      int32_t y,
-			      int32_t x)
+			      xint32_t y,
+			      xint32_t x)
 {
-    int32_t adx, ady;
-    int32_t dx, dy;
+    xint32_t adx, ady;
+    xint32_t dx, dy;
     cairo_int64_t L, R;
 
     if (a->line.p1.x <= a->line.p2.x) {
@@ -443,7 +443,7 @@ edge_compare_for_y_against_x (const cairo_edge_t *a,
 static int
 edges_compare_x_for_y (const cairo_edge_t *a,
 		       const cairo_edge_t *b,
-		       int32_t y)
+		       xint32_t y)
 {
     /* If the sweep-line is currently on an end-point of a line,
      * then we know its precise x value (and considering that we often need to
@@ -456,7 +456,7 @@ edges_compare_x_for_y (const cairo_edge_t *a,
        HAVE_BX      = 0x2,
        HAVE_BOTH    = HAVE_AX | HAVE_BX
     } have_ax_bx = HAVE_BOTH;
-    int32_t ax, bx;
+    xint32_t ax, bx;
 
     /* XXX given we have x and dx? */
 
@@ -533,8 +533,8 @@ sweep_line_compare_edges (const edge_t	*a,
 }
 
 static inline cairo_int64_t
-det32_64 (int32_t a, int32_t b,
-	  int32_t c, int32_t d)
+det32_64 (xint32_t a, xint32_t b,
+	  xint32_t c, xint32_t d)
 {
     /* det = a * d - b * c */
     return _cairo_int64_sub (_cairo_int32x32_64_mul (a, d),
@@ -542,8 +542,8 @@ det32_64 (int32_t a, int32_t b,
 }
 
 static inline cairo_int128_t
-det64x32_128 (cairo_int64_t a, int32_t       b,
-	      cairo_int64_t c, int32_t       d)
+det64x32_128 (cairo_int64_t a, xint32_t       b,
+	      cairo_int64_t c, xint32_t       d)
 {
     /* det = a * d - b * c */
     return _cairo_int128_sub (_cairo_int64x32_128_mul (a, d),
@@ -568,11 +568,11 @@ intersect_lines (const edge_t *a, const edge_t *b,
      * What we're doing to mitigate this is to perform clamping in
      * cairo_bo_tessellate_polygon().
      */
-    int32_t dx1 = a->edge.line.p1.x - a->edge.line.p2.x;
-    int32_t dy1 = a->edge.line.p1.y - a->edge.line.p2.y;
+    xint32_t dx1 = a->edge.line.p1.x - a->edge.line.p2.x;
+    xint32_t dy1 = a->edge.line.p1.y - a->edge.line.p2.y;
 
-    int32_t dx2 = b->edge.line.p1.x - b->edge.line.p2.x;
-    int32_t dy2 = b->edge.line.p1.y - b->edge.line.p2.y;
+    xint32_t dx2 = b->edge.line.p1.x - b->edge.line.p2.x;
+    xint32_t dy2 = b->edge.line.p1.y - b->edge.line.p2.y;
 
     cairo_int64_t den_det;
     cairo_int64_t R;
@@ -674,7 +674,7 @@ intersect_lines (const edge_t *a, const edge_t *b,
 }
 
 static int
-bo_intersect_ordinate_32_compare (int32_t a, int32_t b, int exactness)
+bo_intersect_ordinate_32_compare (xint32_t a, xint32_t b, int exactness)
 {
     int cmp;
 
@@ -809,7 +809,7 @@ static void
 pqueue_fini (pqueue_t *pq)
 {
     if (pq->elements != pq->elements_embedded)
-	free (pq->elements);
+	xmemory_free (pq->elements);
 }
 
 static cairo_bool_t
@@ -821,16 +821,16 @@ pqueue_grow (pqueue_t *pq)
     if (pq->elements == pq->elements_embedded) {
 	new_elements = _cairo_malloc_ab (pq->max_size,
 					 sizeof (event_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return FALSE;
 
-	memcpy (new_elements, pq->elements_embedded,
+	xmemory_copy (new_elements, pq->elements_embedded,
 		sizeof (pq->elements_embedded));
     } else {
 	new_elements = _cairo_realloc_ab (pq->elements,
 					  pq->max_size,
 					  sizeof (event_t *));
-	if (unlikely (new_elements == NULL))
+    if (unlikely (new_elements == XNULL))
 	    return FALSE;
     }
 
@@ -846,7 +846,7 @@ pqueue_push (sweep_line_t *sweep_line, event_t *event)
 
     if (unlikely (sweep_line->queue.pq.size + 1 == sweep_line->queue.pq.max_size)) {
 	if (unlikely (! pqueue_grow (&sweep_line->queue.pq))) {
-	    longjmp (sweep_line->unwind,
+	    xlongjmp_jump (sweep_line->unwind,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -873,7 +873,7 @@ pqueue_pop (pqueue_t *pq)
 
     tail = elements[pq->size--];
     if (pq->size == 0) {
-	elements[PQ_FIRST_ENTRY] = NULL;
+    elements[PQ_FIRST_ENTRY] = XNULL;
 	return;
     }
 
@@ -906,8 +906,8 @@ event_insert (sweep_line_t	*sweep_line,
     queue_event_t *event;
 
     event = _cairo_freepool_alloc (&sweep_line->queue.pool);
-    if (unlikely (event == NULL)) {
-	longjmp (sweep_line->unwind,
+    if (unlikely (event == XNULL)) {
+	xlongjmp_jump (sweep_line->unwind,
 		 _cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -933,8 +933,8 @@ event_next (sweep_line_t *sweep_line)
 
     event = sweep_line->queue.pq.elements[PQ_FIRST_ENTRY];
     cmp = *sweep_line->queue.start_events;
-    if (event == NULL ||
-	(cmp != NULL && event_compare (cmp, event) < 0))
+    if (event == XNULL ||
+    (cmp != XNULL && event_compare (cmp, event) < 0))
     {
 	event = cmp;
 	sweep_line->queue.start_events++;
@@ -955,7 +955,7 @@ event_insert_stop (sweep_line_t	*sweep_line,
 {
     event_insert (sweep_line,
 		  EVENT_TYPE_STOP,
-		  edge, NULL,
+          edge, XNULL,
 		  edge->edge.bottom);
 }
 
@@ -1046,12 +1046,12 @@ coverage_init (struct coverage *cells)
 {
     _cairo_freepool_init (&cells->pool,
 			  sizeof (struct cell));
-    cells->head.prev = NULL;
+    cells->head.prev = XNULL;
     cells->head.next = &cells->tail;
-    cells->head.x = INT_MIN;
+    cells->head.x = XINT32_MIN;
     cells->tail.prev = &cells->head;
-    cells->tail.next = NULL;
-    cells->tail.x = INT_MAX;
+    cells->tail.next = XNULL;
+    cells->tail.x = XINT32_MAX;
     cells->count = 0;
     coverage_rewind (cells);
 }
@@ -1080,8 +1080,8 @@ coverage_alloc (sweep_line_t *sweep_line,
     struct cell *cell;
 
     cell = _cairo_freepool_alloc (&sweep_line->coverage.pool);
-    if (unlikely (NULL == cell)) {
-	longjmp (sweep_line->unwind,
+    if (unlikely (XNULL == cell)) {
+	xlongjmp_jump (sweep_line->unwind,
 		 _cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -1369,9 +1369,9 @@ render_rows (cairo_botor_scan_converter_t *self,
     cairo_status_t status;
 
     if (unlikely (sweep_line->coverage.count == 0)) {
-	status = renderer->render_rows (renderer, y, height, NULL, 0);
+    status = renderer->render_rows (renderer, y, height, XNULL, 0);
 	if (unlikely (status))
-	    longjmp (sweep_line->unwind, status);
+	    xlongjmp_jump (sweep_line->unwind, status);
 	return;
     }
 
@@ -1380,8 +1380,8 @@ render_rows (cairo_botor_scan_converter_t *self,
     num_spans = 2*sweep_line->coverage.count+2;
     if (unlikely (num_spans > ARRAY_LENGTH (spans_stack))) {
 	spans = _cairo_malloc_ab (num_spans, sizeof (cairo_half_open_span_t));
-	if (unlikely (spans == NULL)) {
-	    longjmp (sweep_line->unwind,
+    if (unlikely (spans == XNULL)) {
+	    xlongjmp_jump (sweep_line->unwind,
 		     _cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -1429,12 +1429,12 @@ render_rows (cairo_botor_scan_converter_t *self,
     status = renderer->render_rows (renderer, y, height, spans, num_spans);
 
     if (unlikely (spans != spans_stack))
-	free (spans);
+	xmemory_free (spans);
 
     coverage_reset (&sweep_line->coverage);
 
     if (unlikely (status))
-	longjmp (sweep_line->unwind, status);
+	xlongjmp_jump (sweep_line->unwind, status);
 }
 
 static void
@@ -1472,9 +1472,9 @@ full_step (cairo_botor_scan_converter_t *self,
     if (cairo_list_is_empty (&sweep_line->active)) {
 	cairo_status_t  status;
 
-	status = renderer->render_rows (renderer, top, bottom - top, NULL, 0);
+    status = renderer->render_rows (renderer, top, bottom - top, XNULL, 0);
 	if (unlikely (status))
-	    longjmp (sweep_line->unwind, status);
+	    xlongjmp_jump (sweep_line->unwind, status);
 
 	return;
     }
@@ -1527,8 +1527,8 @@ sub_add_run (sweep_line_t *sweep_line, edge_t *edge, int y, int sign)
     struct run *run;
 
     run = _cairo_freepool_alloc (&sweep_line->runs);
-    if (unlikely (run == NULL))
-	longjmp (sweep_line->unwind, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+    if (unlikely (run == XNULL))
+	xlongjmp_jump (sweep_line->unwind, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     run->y = y;
     run->sign = sign;
@@ -1651,7 +1651,7 @@ coverage_render_runs (sweep_line_t *sweep, edge_t *edge,
     struct run tail;
     struct run *run = &tail;
 
-    tail.next = NULL;
+    tail.next = XNULL;
     tail.y = y2;
 
     /* Order the runs top->bottom */
@@ -1702,7 +1702,7 @@ coverage_render_runs (sweep_line_t *sweep, edge_t *edge,
 	}
 
 	run = run->next;
-    } while (run->next != NULL);
+    } while (run->next != XNULL);
 }
 
 static void
@@ -1712,7 +1712,7 @@ coverage_render_vertical_runs (sweep_line_t *sweep, edge_t *edge, cairo_fixed_t 
     struct run *run;
     int height = 0;
 
-    for (run = edge->runs; run != NULL; run = run->next) {
+    for (run = edge->runs; run != XNULL; run = run->next) {
 	if (run->sign)
 	    height += run->sign * (y2 - run->y);
 	y2 = run->y;
@@ -1735,7 +1735,7 @@ sub_emit (cairo_botor_scan_converter_t *self,
     /* convert the runs into coverages */
 
     cairo_list_foreach_entry (edge, edge_t, &sweep->active, link) {
-	if (edge->runs == NULL) {
+    if (edge->runs == XNULL) {
 	    if (! edge->vertical) {
 		if (edge->flags & START) {
 		    sub_inc_edge (edge,
@@ -1757,7 +1757,7 @@ sub_emit (cairo_botor_scan_converter_t *self,
 	    }
 	}
 	edge->current_sign = 0;
-	edge->runs = NULL;
+    edge->runs = XNULL;
     }
 
     cairo_list_foreach_entry (edge, edge_t, &sweep->stopped, link) {
@@ -1796,14 +1796,14 @@ sweep_line_init (sweep_line_t	 *sweep_line,
     _cairo_freepool_init (&sweep_line->runs, sizeof (struct run));
 
     start_event_sort (start_events, num_events);
-    start_events[num_events] = NULL;
+    start_events[num_events] = XNULL;
 
     sweep_line->queue.start_events = start_events;
 
     _cairo_freepool_init (&sweep_line->queue.pool,
 			  sizeof (queue_event_t));
     pqueue_init (&sweep_line->queue.pq);
-    sweep_line->queue.pq.elements[PQ_FIRST_ENTRY] = NULL;
+    sweep_line->queue.pq.elements[PQ_FIRST_ENTRY] = XNULL;
 }
 
 static void
@@ -1855,7 +1855,7 @@ botor_generate (cairo_botor_scan_converter_t	 *self,
     int bottom;
 
     sweep_line_init (&sweep_line, start_events, self->num_edges);
-    if ((status = setjmp (sweep_line.unwind)))
+    if ((status = xlongjmp_set (sweep_line.unwind)))
 	goto unwind;
 
     ybot = self->extents.p2.y;
@@ -1954,7 +1954,7 @@ botor_generate (cairo_botor_scan_converter_t	 *self,
 		}
 
 		event = event_next (&sweep_line);
-		if (event == NULL)
+        if (event == XNULL)
 		    goto end;
 	    } while (event->y == sweep_line.current_subrow);
 	} while (event->y < sweep_line.current_row + STEP_Y);
@@ -1977,7 +1977,7 @@ botor_generate (cairo_botor_scan_converter_t	 *self,
 	bottom = _cairo_fixed_integer_part (sweep_line.current_row);
 	status = renderer->render_rows (renderer,
 					bottom, _cairo_fixed_integer_ceil (ybot) - bottom,
-					NULL, 0);
+                    XNULL, 0);
     }
 
  unwind:
@@ -2006,7 +2006,7 @@ _cairo_botor_scan_converter_generate (void			*converter,
 				      _cairo_fixed_integer_floor (self->extents.p1.y),
 				      _cairo_fixed_integer_ceil (self->extents.p2.y) -
 				      _cairo_fixed_integer_floor (self->extents.p1.y),
-				      NULL, 0);
+                      XNULL, 0);
     }
 
     events = stack_events;
@@ -2015,14 +2015,14 @@ _cairo_botor_scan_converter_generate (void			*converter,
 	events = _cairo_malloc_ab_plus_c (num_events,
 					  sizeof (start_event_t) + sizeof (event_t *),
 					  sizeof (event_t *));
-	if (unlikely (events == NULL))
+    if (unlikely (events == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	event_ptrs = (event_t **) (events + num_events);
     }
 
     j = 0;
-    for (chunk = &self->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &self->chunks; chunk != XNULL; chunk = chunk->next) {
 	edge_t *edge;
 
 	edge = chunk->base;
@@ -2040,7 +2040,7 @@ _cairo_botor_scan_converter_generate (void			*converter,
     status = botor_generate (self, event_ptrs, renderer);
 
     if (events != stack_events)
-	free (events);
+	xmemory_free (events);
 
     return status;
 }
@@ -2058,11 +2058,11 @@ botor_allocate_edge (cairo_botor_scan_converter_t *self)
 	chunk->next = _cairo_malloc_ab_plus_c (size,
 					       sizeof (edge_t),
 					       sizeof (struct _cairo_botor_scan_converter_chunk));
-	if (unlikely (chunk->next == NULL))
-	    return NULL;
+    if (unlikely (chunk->next == XNULL))
+        return XNULL;
 
 	chunk = chunk->next;
-	chunk->next = NULL;
+    chunk->next = XNULL;
 	chunk->count = 0;
 	chunk->size = size;
 	chunk->base = chunk + 1;
@@ -2080,7 +2080,7 @@ botor_add_edge (cairo_botor_scan_converter_t *self,
     cairo_fixed_t dx, dy;
 
     e = botor_allocate_edge (self);
-    if (unlikely (e == NULL))
+    if (unlikely (e == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     cairo_list_init (&e->link);
@@ -2120,7 +2120,7 @@ botor_add_edge (cairo_botor_scan_converter_t *self,
 
     e->x.rem = -e->dy;
     e->current_sign = 0;
-    e->runs = NULL;
+    e->runs = XNULL;
     e->flags = START;
 
     self->num_edges++;
@@ -2134,9 +2134,9 @@ _cairo_botor_scan_converter_destroy (void *converter)
     cairo_botor_scan_converter_t *self = converter;
     struct _cairo_botor_scan_converter_chunk *chunk, *next;
 
-    for (chunk = self->chunks.next; chunk != NULL; chunk = next) {
+    for (chunk = self->chunks.next; chunk != XNULL; chunk = next) {
 	next = chunk->next;
-	free (chunk);
+	xmemory_free (chunk);
     }
 }
 
@@ -2155,7 +2155,7 @@ _cairo_botor_scan_converter_init (cairo_botor_scan_converter_t *self,
     self->xmax = _cairo_fixed_integer_ceil (extents->p2.x);
 
     self->chunks.base = self->buf;
-    self->chunks.next = NULL;
+    self->chunks.next = XNULL;
     self->chunks.count = 0;
     self->chunks.size = sizeof (self->buf) / sizeof (edge_t);
     self->tail = &self->chunks;

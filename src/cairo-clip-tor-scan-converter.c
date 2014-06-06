@@ -97,11 +97,11 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <setjmp.h>
+#include <xC/xdebug.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <limits.h>
+#include <xC/xlongjmp.h>
 
 /* The input coordinate scale and the rasterisation grid scales. */
 #define GLITTER_INPUT_BITS CAIRO_FIXED_FRAC_BITS
@@ -135,9 +135,9 @@ typedef struct glitter_scan_converter glitter_scan_converter_t;
 /*-------------------------------------------------------------------------
  * glitter-paths.c: Implementation internal types
  */
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <limits.h>
 
 /* All polygon coordinates are snapped onto a subsample grid. "Grid
  * scaled" numbers are fixed precision reals with multiplier GRID_X or
@@ -220,8 +220,8 @@ typedef int grid_area_t;
 #define UNROLL3(x) x x x
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 /* Header for a chunk of memory in a memory pool. */
@@ -247,7 +247,7 @@ struct pool {
     /* Chunk we're allocating from. */
     struct _pool_chunk *current;
 
-    jmp_buf *jmp;
+    xjmp_buf_t *jmp;
 
     /* Free list of previously allocated chunks.  All have >= default
      * capacity. */
@@ -465,24 +465,24 @@ _pool_chunk_create(struct pool *pool, size_t size)
 {
     struct _pool_chunk *p;
 
-    p = malloc(size + sizeof(struct _pool_chunk));
-    if (unlikely (NULL == p))
-	longjmp (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
+    p = xmemory_alloc(size + sizeof(struct _pool_chunk));
+    if (unlikely (XNULL == p))
+    xlongjmp_jump (*pool->jmp, _cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     return _pool_chunk_init(p, pool->current, size);
 }
 
 static void
 pool_init(struct pool *pool,
-	  jmp_buf *jmp,
+      xjmp_buf_t *jmp,
 	  size_t default_capacity,
 	  size_t embedded_capacity)
 {
     pool->jmp = jmp;
     pool->current = pool->sentinel;
-    pool->first_free = NULL;
+    pool->first_free = XNULL;
     pool->default_capacity = default_capacity;
-    _pool_chunk_init(pool->sentinel, NULL, embedded_capacity);
+    _pool_chunk_init(pool->sentinel, XNULL, embedded_capacity);
 }
 
 static void
@@ -490,15 +490,15 @@ pool_fini(struct pool *pool)
 {
     struct _pool_chunk *p = pool->current;
     do {
-	while (NULL != p) {
+    while (XNULL != p) {
 	    struct _pool_chunk *prev = p->prev_chunk;
 	    if (p != pool->sentinel)
-		free(p);
+        xmemory_free(p);
 	    p = prev;
 	}
 	p = pool->first_free;
-	pool->first_free = NULL;
-    } while (NULL != p);
+    pool->first_free = XNULL;
+    } while (XNULL != p);
 }
 
 /* Satisfy an allocation by first allocating a new large enough chunk
@@ -518,7 +518,7 @@ _pool_alloc_from_new_chunk(
      * try getting a chunk off the free list.  Force alloc of a new
      * chunk for large requests. */
     capacity = size;
-    chunk = NULL;
+    chunk = XNULL;
     if (size < pool->default_capacity) {
 	capacity = pool->default_capacity;
 	chunk = pool->first_free;
@@ -528,7 +528,7 @@ _pool_alloc_from_new_chunk(
 	}
     }
 
-    if (NULL == chunk)
+    if (XNULL == chunk)
 	chunk = _pool_chunk_create (pool, capacity);
     pool->current = chunk;
 
@@ -593,14 +593,14 @@ cell_list_maybe_rewind (struct cell_list *cells, int x)
 }
 
 static void
-cell_list_init(struct cell_list *cells, jmp_buf *jmp)
+cell_list_init(struct cell_list *cells, xjmp_buf_t *jmp)
 {
     pool_init(cells->cell_pool.base, jmp,
 	      256*sizeof(struct cell),
 	      sizeof(cells->cell_pool.embedded));
-    cells->tail.next = NULL;
-    cells->tail.x = INT_MAX;
-    cells->head.x = INT_MIN;
+    cells->tail.next = XNULL;
+    cells->tail.x = XINT32_MAX;
+    cells->head.x = XINT32_MIN;
     cells->head.next = &cells->tail;
     cell_list_rewind (cells);
 }
@@ -876,7 +876,7 @@ cell_list_render_edge(
 }
 
 static void
-polygon_init (struct polygon *polygon, jmp_buf *jmp)
+polygon_init (struct polygon *polygon, xjmp_buf_t *jmp)
 {
     polygon->ymin = polygon->ymax = 0;
     polygon->y_buckets = polygon->y_buckets_embedded;
@@ -889,7 +889,7 @@ static void
 polygon_fini (struct polygon *polygon)
 {
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+	xmemory_free (polygon->y_buckets);
 
     pool_fini (polygon->edge_pool.base);
 }
@@ -912,16 +912,16 @@ polygon_reset (struct polygon *polygon,
 	goto bail_no_mem; /* even if you could, you wouldn't want to. */
 
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+	xmemory_free (polygon->y_buckets);
 
     polygon->y_buckets =  polygon->y_buckets_embedded;
     if (num_buckets > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
 	polygon->y_buckets = _cairo_malloc_ab (num_buckets,
 					       sizeof (struct edge *));
-	if (unlikely (NULL == polygon->y_buckets))
+    if (unlikely (XNULL == polygon->y_buckets))
 	    goto bail_no_mem;
     }
-    memset (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
+    xmemory_set (polygon->y_buckets, 0, num_buckets * sizeof (struct edge *));
 
     polygon->ymin = ymin;
     polygon->ymax = ymax;
@@ -956,7 +956,7 @@ polygon_add_edge (struct polygon *polygon,
     grid_scaled_y_t ymin = polygon->ymin;
     grid_scaled_y_t ymax = polygon->ymax;
 
-    assert (edge->bottom > edge->top);
+    XASSERT (edge->bottom > edge->top);
 
     if (unlikely (edge->top >= ymax || edge->bottom <= ymin))
 	return;
@@ -1010,7 +1010,7 @@ polygon_add_edge (struct polygon *polygon,
 static void
 active_list_reset (struct active_list *active)
 {
-    active->head = NULL;
+    active->head = XNULL;
     active->min_height = 0;
 }
 
@@ -1024,7 +1024,7 @@ active_list_init(struct active_list *active)
  * Merge two sorted edge lists.
  * Input:
  *  - head_a: The head of the first list.
- *  - head_b: The head of the second list; head_b cannot be NULL.
+ *  - head_b: The head of the second list; head_b cannot be XNULL.
  * Output:
  * Returns the head of the merged list.
  *
@@ -1042,9 +1042,9 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next;
-    int32_t x;
+    xint32_t x;
 
-    if (head_a == NULL)
+    if (head_a == XNULL)
 	return head_b;
 
     next = &head;
@@ -1057,24 +1057,24 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
     do {
 	x = head_b->x.quo;
-	while (head_a != NULL && head_a->x.quo <= x) {
+    while (head_a != XNULL && head_a->x.quo <= x) {
 	    next = &head_a->next;
 	    head_a = head_a->next;
 	}
 
 	*next = head_b;
-	if (head_a == NULL)
+    if (head_a == XNULL)
 	    return head;
 
 start_with_b:
 	x = head_a->x.quo;
-	while (head_b != NULL && head_b->x.quo <= x) {
+    while (head_b != XNULL && head_b->x.quo <= x) {
 	    next = &head_b->next;
 	    head_b = head_b->next;
 	}
 
 	*next = head_a;
-	if (head_b == NULL)
+    if (head_b == XNULL)
 	    return head;
     } while (1);
 }
@@ -1082,13 +1082,13 @@ start_with_b:
 /*
  * Sort (part of) a list.
  * Input:
- *  - list: The list to be sorted; list cannot be NULL.
+ *  - list: The list to be sorted; list cannot be XNULL.
  *  - limit: Recursion limit.
  * Output:
  *  - head_out: The head of the sorted list containing the first 2^(level+1) elements of the
  *              input list; if the input list has fewer elements, head_out be a sorted list
  *              containing all the elements of the input list.
- * Returns the head of the list of unprocessed elements (NULL if the sorted list contains
+ * Returns the head of the list of unprocessed elements (XNULL if the sorted list contains
  * all the elements of the input list).
  *
  * Implementation notes:
@@ -1107,9 +1107,9 @@ sort_edges (struct edge  *list,
     head_other = list->next;
 
     /* Single element list -> return */
-    if (head_other == NULL) {
+    if (head_other == XNULL) {
 	*head_out = list;
-	return NULL;
+    return XNULL;
     }
 
     /* Unroll the first iteration of the following loop (halves the number of calls to merge_sorted_edges):
@@ -1120,11 +1120,11 @@ sort_edges (struct edge  *list,
     if (list->x.quo <= head_other->x.quo) {
 	*head_out = list;
 	/* list->next = head_other; */ /* The input list is already like this. */
-	head_other->next = NULL;
+    head_other->next = XNULL;
     } else {
 	*head_out = head_other;
 	head_other->next = list;
-	list->next = NULL;
+    list->next = XNULL;
     }
 
     for (i = 0; i < level && remaining; i++) {
@@ -1145,15 +1145,15 @@ inline static int
 active_list_can_step_full_row (struct active_list *active)
 {
     const struct edge *e;
-    int prev_x = INT_MIN;
+    int prev_x = XINT32_MIN;
 
     /* Recomputes the minimum height of all edges on the active
      * list if we have been dropping edges. */
     if (active->min_height <= 0) {
-	int min_height = INT_MAX;
+    int min_height = XINT32_MAX;
 
 	e = active->head;
-	while (NULL != e) {
+    while (XNULL != e) {
 	    if (e->height_left < min_height)
 		min_height = e->height_left;
 	    e = e->next;
@@ -1167,7 +1167,7 @@ active_list_can_step_full_row (struct active_list *active)
 
     /* Check for intersections as no edges end during the next row. */
     e = active->head;
-    while (NULL != e) {
+    while (XNULL != e) {
 	struct quorem x = e->x;
 
 	if (! e->vertical) {
@@ -1198,7 +1198,7 @@ active_list_merge_edges_from_polygon(struct active_list *active,
     /* Split off the edges on the current subrow and merge them into
      * the active list. */
     int min_height = active->min_height;
-    struct edge *subrow_edges = NULL;
+    struct edge *subrow_edges = XNULL;
     struct edge *tail = *ptail;
 
     do {
@@ -1219,7 +1219,7 @@ active_list_merge_edges_from_polygon(struct active_list *active,
     } while (tail);
 
     if (subrow_edges) {
-	sort_edges (subrow_edges, UINT_MAX, &subrow_edges);
+    sort_edges (subrow_edges, XUINT32_MAX, &subrow_edges);
 	active->head = merge_sorted_edges (active->head, subrow_edges);
 	active->min_height = min_height;
     }
@@ -1231,15 +1231,15 @@ inline static void
 active_list_substep_edges(struct active_list *active)
 {
     struct edge **cursor = &active->head;
-    grid_scaled_x_t prev_x = INT_MIN;
-    struct edge *unsorted = NULL;
+    grid_scaled_x_t prev_x = XINT32_MIN;
+    struct edge *unsorted = XNULL;
     struct edge *edge = *cursor;
 
     do {
 	UNROLL3({
 	    struct edge *next;
 
-	    if (NULL == edge)
+        if (XNULL == edge)
 		break;
 
 	    next = edge->next;
@@ -1267,7 +1267,7 @@ active_list_substep_edges(struct active_list *active)
     } while (1);
 
     if (unsorted) {
-	sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
 	active->head = merge_sorted_edges (active->head, unsorted);
     }
 }
@@ -1283,19 +1283,19 @@ apply_nonzero_fill_rule_for_subrow (struct active_list *active,
 
     cell_list_rewind (coverages);
 
-    while (NULL != edge) {
+    while (XNULL != edge) {
 	xstart = edge->x.quo;
 	winding = edge->dir;
 	while (1) {
 	    edge = edge->next;
-	    if (NULL == edge) {
+        if (XNULL == edge) {
 		ASSERT_NOT_REACHED;
 		return;
 	    }
 
 	    winding += edge->dir;
 	    if (0 == winding) {
-		if (edge->next == NULL || edge->next->x.quo != edge->x.quo)
+        if (edge->next == XNULL || edge->next->x.quo != edge->x.quo)
 		    break;
 	    }
 	}
@@ -1317,17 +1317,17 @@ apply_evenodd_fill_rule_for_subrow (struct active_list *active,
 
     cell_list_rewind (coverages);
 
-    while (NULL != edge) {
+    while (XNULL != edge) {
 	xstart = edge->x.quo;
 
 	while (1) {
 	    edge = edge->next;
-	    if (NULL == edge) {
+        if (XNULL == edge) {
 		ASSERT_NOT_REACHED;
 		return;
 	    }
 
-	    if (edge->next == NULL || edge->next->x.quo != edge->x.quo)
+        if (edge->next == XNULL || edge->next->x.quo != edge->x.quo)
 		break;
 
 	    edge = edge->next;
@@ -1348,7 +1348,7 @@ apply_nonzero_fill_rule_and_step_edges (struct active_list *active,
     struct edge *left_edge;
 
     left_edge = *cursor;
-    while (NULL != left_edge) {
+    while (XNULL != left_edge) {
 	struct edge *right_edge;
 	int winding = left_edge->dir;
 
@@ -1360,7 +1360,7 @@ apply_nonzero_fill_rule_and_step_edges (struct active_list *active,
 
 	while (1) {
 	    right_edge = *cursor;
-	    if (NULL == right_edge) {
+        if (XNULL == right_edge) {
 		cell_list_render_edge (coverages, left_edge, +1);
 		return;
 	    }
@@ -1373,7 +1373,7 @@ apply_nonzero_fill_rule_and_step_edges (struct active_list *active,
 
 	    winding += right_edge->dir;
 	    if (0 == winding) {
-		if (right_edge->next == NULL ||
+        if (right_edge->next == XNULL ||
 		    right_edge->next->x.quo != right_edge->x.quo)
 		{
 		    break;
@@ -1405,7 +1405,7 @@ apply_evenodd_fill_rule_and_step_edges (struct active_list *active,
     struct edge *left_edge;
 
     left_edge = *cursor;
-    while (NULL != left_edge) {
+    while (XNULL != left_edge) {
 	struct edge *right_edge;
 
 	left_edge->height_left -= GRID_Y;
@@ -1416,7 +1416,7 @@ apply_evenodd_fill_rule_and_step_edges (struct active_list *active,
 
 	while (1) {
 	    right_edge = *cursor;
-	    if (NULL == right_edge) {
+        if (XNULL == right_edge) {
 		cell_list_render_edge (coverages, left_edge, +1);
 		return;
 	    }
@@ -1427,7 +1427,7 @@ apply_evenodd_fill_rule_and_step_edges (struct active_list *active,
 	    else
 		*cursor = right_edge->next;
 
-	    if (right_edge->next == NULL ||
+        if (right_edge->next == XNULL ||
 		right_edge->next->x.quo != right_edge->x.quo)
 	    {
 		break;
@@ -1451,7 +1451,7 @@ apply_evenodd_fill_rule_and_step_edges (struct active_list *active,
 }
 
 static void
-_glitter_scan_converter_init(glitter_scan_converter_t *converter, jmp_buf *jmp)
+_glitter_scan_converter_init(glitter_scan_converter_t *converter, xjmp_buf_t *jmp)
 {
     polygon_init(converter->polygon, jmp);
     active_list_init(converter->active);
@@ -1474,12 +1474,12 @@ int_to_grid_scaled(int i, int scale)
 {
     /* Clamp to max/min representable scaled number. */
     if (i >= 0) {
-	if (i >= INT_MAX/scale)
-	    i = INT_MAX/scale;
+    if (i >= XINT32_MAX/scale)
+        i = XINT32_MAX/scale;
     }
     else {
-	if (i <= INT_MIN/scale)
-	    i = INT_MIN/scale;
+    if (i <= XINT32_MIN/scale)
+        i = XINT32_MIN/scale;
     }
     return i*scale;
 }
@@ -1566,7 +1566,7 @@ active_list_is_vertical (struct active_list *active)
 {
     struct edge *e;
 
-    for (e = active->head; e != NULL; e = e->next) {
+    for (e = active->head; e != XNULL; e = e->next) {
 	if (! e->vertical)
 	    return FALSE;
     }
@@ -1580,7 +1580,7 @@ step_edges (struct active_list *active, int count)
     struct edge **cursor = &active->head;
     struct edge *edge;
 
-    for (edge = *cursor; edge != NULL; edge = *cursor) {
+    for (edge = *cursor; edge != XNULL; edge = *cursor) {
 	edge->height_left -= GRID_Y * count;
 	if (edge->height_left)
 	    cursor = &edge->next;
@@ -1602,7 +1602,7 @@ blit_coverages (struct cell_list *cells,
     cairo_half_open_span_t *spans;
     unsigned num_spans;
 
-    assert (cell != &cells->tail);
+    XASSERT (cell != &cells->tail);
 
     /* Count number of cells remaining. */
     {
@@ -1693,7 +1693,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 
 	    if (active_list_is_vertical (active)) {
 		while (j < h &&
-		       polygon->y_buckets[j] == NULL &&
+               polygon->y_buckets[j] == XNULL &&
 		       active->min_height >= 2*GRID_Y)
 		{
 		    active->min_height -= GRID_Y;
@@ -1728,7 +1728,7 @@ glitter_scan_converter_render(glitter_scan_converter_t *converter,
 	cell_list_reset (coverages);
 
 	if (! active->head)
-	    active->min_height = INT_MAX;
+        active->min_height = XINT32_MAX;
 	else
 	    active->min_height -= GRID_Y;
     }
@@ -1744,7 +1744,7 @@ struct _cairo_clip_tor_scan_converter {
     cairo_fill_rule_t clip_fill_rule;
     cairo_antialias_t clip_antialias;
 
-    jmp_buf jmp;
+    xjmp_buf_t jmp;
 
     struct {
 	struct pool base[1];
@@ -1758,12 +1758,12 @@ static void
 _cairo_clip_tor_scan_converter_destroy (void *converter)
 {
     cairo_clip_tor_scan_converter_t *self = converter;
-    if (self == NULL) {
+    if (self == XNULL) {
 	return;
     }
     _glitter_scan_converter_fini (self->converter);
     pool_fini (self->span_pool.base);
-    free(self);
+    xmemory_free(self);
 }
 
 static cairo_status_t
@@ -1773,7 +1773,7 @@ _cairo_clip_tor_scan_converter_generate (void			*converter,
     cairo_clip_tor_scan_converter_t *self = converter;
     cairo_status_t status;
 
-    if ((status = setjmp (self->jmp)))
+    if ((status = xlongjmp_set (self->jmp)))
 	return _cairo_scan_converter_set_error (self, _cairo_error (status));
 
     glitter_scan_converter_render (self->converter,
@@ -1794,8 +1794,8 @@ _cairo_clip_tor_scan_converter_create (cairo_clip_t *clip,
     cairo_status_t status;
     int i;
 
-    self = calloc (1, sizeof(struct _cairo_clip_tor_scan_converter));
-    if (unlikely (self == NULL)) {
+    self = xmemory_calloc (1, sizeof(struct _cairo_clip_tor_scan_converter));
+    if (unlikely (self == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;
     }

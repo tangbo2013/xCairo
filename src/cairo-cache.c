@@ -93,10 +93,10 @@ _cairo_cache_init (cairo_cache_t		*cache,
 		   unsigned long		 max_size)
 {
     cache->hash_table = _cairo_hash_table_create (keys_equal);
-    if (unlikely (cache->hash_table == NULL))
+    if (unlikely (cache->hash_table == XNULL))
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    if (predicate == NULL)
+    if (predicate == XNULL)
 	predicate = _cairo_cache_entry_is_non_zero;
     cache->predicate = predicate;
     cache->entry_destroy = entry_destroy;
@@ -130,7 +130,7 @@ _cairo_cache_fini (cairo_cache_t *cache)
     _cairo_hash_table_foreach (cache->hash_table,
 			       _cairo_cache_pluck,
 			       cache);
-    assert (cache->size == 0);
+    XASSERT (cache->size == 0);
     _cairo_hash_table_destroy (cache->hash_table);
 }
 
@@ -151,7 +151,7 @@ _cairo_cache_fini (cairo_cache_t *cache)
 void
 _cairo_cache_freeze (cairo_cache_t *cache)
 {
-    assert (cache->freeze_count >= 0);
+    XASSERT (cache->freeze_count >= 0);
 
     cache->freeze_count++;
 }
@@ -173,7 +173,7 @@ _cairo_cache_freeze (cairo_cache_t *cache)
 void
 _cairo_cache_thaw (cairo_cache_t *cache)
 {
-    assert (cache->freeze_count > 0);
+    XASSERT (cache->freeze_count > 0);
 
     if (--cache->freeze_count == 0)
 	_cairo_cache_shrink_to_accommodate (cache, 0);
@@ -217,7 +217,7 @@ _cairo_cache_remove_random (cairo_cache_t *cache)
 
     entry = _cairo_hash_table_random_entry (cache->hash_table,
 					    cache->predicate);
-    if (unlikely (entry == NULL))
+    if (unlikely (entry == XNULL))
 	return FALSE;
 
     _cairo_cache_remove (cache, entry);
@@ -330,7 +330,7 @@ _cairo_hash_bytes (unsigned long hash,
 		   const void *ptr,
 		   unsigned int length)
 {
-    const uint8_t *bytes = ptr;
+    const xuint8_t *bytes = ptr;
     /* This is the djb2 hash. */
     while (length--)
 	hash = ((hash << 5) + hash) + *bytes++;

@@ -51,7 +51,7 @@ typedef struct _cairo_scaled_font_subsets_glyph {
     double       x_advance;
     double       y_advance;
     cairo_bool_t utf8_is_mapped;
-    uint32_t 	 unicode;
+    xuint32_t 	 unicode;
 } cairo_scaled_font_subsets_glyph_t;
 
 /**
@@ -664,7 +664,7 @@ _cairo_type2_charstrings_fini (cairo_type2_charstrings_t *charstrings);
 cairo_private cairo_int_status_t
 _cairo_truetype_index_to_ucs4 (cairo_scaled_font_t *scaled_font,
                                unsigned long        index,
-                               uint32_t            *ucs4);
+                               xuint32_t            *ucs4);
 
 /**
  * _cairo_truetype_read_font_name:

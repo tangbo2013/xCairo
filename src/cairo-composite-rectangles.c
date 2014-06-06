@@ -57,7 +57,7 @@ _cairo_composite_reduce_pattern (const cairo_pattern_t *src,
     if (dst->base.type == CAIRO_PATTERN_TYPE_SOLID)
 	return;
 
-    dst->base.filter = _cairo_pattern_analyze_filter (&dst->base, NULL),
+    dst->base.filter = _cairo_pattern_analyze_filter (&dst->base, XNULL),
 
     tx = ty = 0;
     if (_cairo_matrix_is_pixman_translation (&dst->base.matrix,
@@ -83,7 +83,7 @@ _cairo_composite_rectangles_init (cairo_composite_rectangles_t *extents,
     extents->op = op;
 
     _cairo_surface_get_extents (surface, &extents->destination);
-    extents->clip = NULL;
+    extents->clip = XNULL;
 
     extents->unbounded = extents->destination;
     if (clip && ! _cairo_rectangle_intersect (&extents->unbounded,
@@ -103,7 +103,7 @@ _cairo_composite_rectangles_init (cairo_composite_rectangles_t *extents,
 	    return FALSE;
     }
 
-    extents->original_mask_pattern = NULL;
+    extents->original_mask_pattern = XNULL;
     extents->mask_pattern.base.type = CAIRO_PATTERN_TYPE_SOLID;
     extents->mask_pattern.solid.color.alpha = 1.; /* XXX full initialisation? */
     extents->mask_pattern.solid.color.alpha_short = 0xffff;
@@ -468,7 +468,7 @@ _cairo_composite_rectangles_can_reduce_clip (cairo_composite_rectangles_t *compo
     cairo_rectangle_int_t extents;
     cairo_box_t box;
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	return TRUE;
 
     extents = composite->destination;

@@ -45,7 +45,7 @@
 #include "cairo-stroke-dash-private.h"
 #include "cairo-traps-private.h"
 
-#include <float.h>
+#include <xC/xfloat.h>
 
 struct stroker {
     const cairo_stroke_style_t	*style;
@@ -94,7 +94,7 @@ stroker_init (struct stroker		*stroker,
 
     stroker->style = style;
     stroker->ctm = ctm;
-    stroker->ctm_inverse = NULL;
+    stroker->ctm_inverse = XNULL;
     if (! _cairo_matrix_is_identity (ctm_inverse))
 	stroker->ctm_inverse = ctm_inverse;
     stroker->line_join = style->line_join;
@@ -824,7 +824,7 @@ line_to_dashed (void *closure, const cairo_point_t *point)
     if (stroker->ctm_inverse)
 	cairo_matrix_transform_distance (stroker->ctm_inverse, &slope_dx, &slope_dy);
     mag = normalize_slope (&slope_dx, &slope_dy);
-    if (mag <= DBL_EPSILON)
+    if (mag <= XDBL_EPSILON)
 	return CAIRO_STATUS_SUCCESS;
 
     remain = mag;
@@ -1021,11 +1021,11 @@ curve_to_dashed (void *closure,
     if (stroker->has_bounds &&
 	! _cairo_spline_intersects (&stroker->current_face.point, b, c, b,
 				    &stroker->line_bounds))
-	return func (closure, d, NULL);
+    return func (closure, d, XNULL);
 
     if (! _cairo_spline_init (&spline, func, stroker,
 			      &stroker->current_face.point, b, c, d))
-	return func (closure, d, NULL);
+    return func (closure, d, XNULL);
 
     /* Temporarily modify the stroker to use round joins to guarantee
      * smooth stroked curves. */
@@ -1113,7 +1113,7 @@ _cairo_path_fixed_stroke_to_traps (const cairo_path_fixed_t	*path,
 					      curve_to,
 					      close_path,
 					      &stroker);
-    assert(status == CAIRO_STATUS_SUCCESS);
+    XASSERT(status == CAIRO_STATUS_SUCCESS);
     add_caps (&stroker);
 
     stroker_fini (&stroker);

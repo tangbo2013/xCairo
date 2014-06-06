@@ -172,7 +172,7 @@ _cairo_region_init_rectangle (cairo_region_t *region,
 void
 _cairo_region_fini (cairo_region_t *region)
 {
-    assert (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (! CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
     pixman_region32_fini (&region->rgn);
     VG (VALGRIND_MAKE_MEM_NOACCESS (region, sizeof (cairo_region_t)));
 }
@@ -196,7 +196,7 @@ cairo_region_create (void)
     cairo_region_t *region;
 
     region = _cairo_malloc (sizeof (cairo_region_t));
-    if (region == NULL)
+    if (region == XNULL)
 	return (cairo_region_t *) &_cairo_region_nil;
 
     region->status = CAIRO_STATUS_SUCCESS;
@@ -233,7 +233,7 @@ cairo_region_create_rectangles (const cairo_rectangle_int_t *rects,
     int i;
 
     region = _cairo_malloc (sizeof (cairo_region_t));
-    if (unlikely (region == NULL))
+    if (unlikely (region == XNULL))
 	return _cairo_region_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     CAIRO_REFERENCE_COUNT_INIT (&region->ref_count, 1);
@@ -249,8 +249,8 @@ cairo_region_create_rectangles (const cairo_rectangle_int_t *rects,
 
     if (count > ARRAY_LENGTH (stack_pboxes)) {
 	pboxes = _cairo_malloc_ab (count, sizeof (pixman_box32_t));
-	if (unlikely (pboxes == NULL)) {
-	    free (region);
+    if (unlikely (pboxes == XNULL)) {
+	    xmemory_free (region);
 	    return _cairo_region_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 	}
     }
@@ -265,10 +265,10 @@ cairo_region_create_rectangles (const cairo_rectangle_int_t *rects,
     i = pixman_region32_init_rects (&region->rgn, pboxes, count);
 
     if (pboxes != stack_pboxes)
-	free (pboxes);
+    xmemory_free (pboxes);
 
     if (unlikely (i == 0)) {
-	free (region);
+    xmemory_free (region);
 	return _cairo_region_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -282,7 +282,7 @@ _cairo_region_create_from_boxes (const cairo_box_t *boxes, int count)
     cairo_region_t *region;
 
     region = _cairo_malloc (sizeof (cairo_region_t));
-    if (unlikely (region == NULL))
+    if (unlikely (region == XNULL))
 	return _cairo_region_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     CAIRO_REFERENCE_COUNT_INIT (&region->ref_count, 1);
@@ -290,7 +290,7 @@ _cairo_region_create_from_boxes (const cairo_box_t *boxes, int count)
 
     if (! pixman_region32_init_rects (&region->rgn,
 				      (pixman_box32_t *)boxes, count)) {
-	free (region);
+    xmemory_free (region);
 	return _cairo_region_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
@@ -302,7 +302,7 @@ _cairo_region_get_boxes (const cairo_region_t *region, int *nbox)
 {
     if (region->status) {
 	nbox = 0;
-	return NULL;
+    return XNULL;
     }
 
     return (cairo_box_t *) pixman_region32_rectangles (CONST_CAST &region->rgn, nbox);
@@ -328,7 +328,7 @@ cairo_region_create_rectangle (const cairo_rectangle_int_t *rectangle)
     cairo_region_t *region;
 
     region = _cairo_malloc (sizeof (cairo_region_t));
-    if (unlikely (region == NULL))
+    if (unlikely (region == XNULL))
 	return (cairo_region_t *) &_cairo_region_nil;
 
     region->status = CAIRO_STATUS_SUCCESS;
@@ -361,14 +361,14 @@ cairo_region_copy (const cairo_region_t *original)
 {
     cairo_region_t *copy;
 
-    if (original != NULL && original->status)
+    if (original != XNULL && original->status)
 	return (cairo_region_t *) &_cairo_region_nil;
 
     copy = cairo_region_create ();
     if (unlikely (copy->status))
 	return copy;
 
-    if (original != NULL &&
+    if (original != XNULL &&
 	! pixman_region32_copy (&copy->rgn, CONST_CAST &original->rgn))
     {
 	cairo_region_destroy (copy);
@@ -394,10 +394,10 @@ slim_hidden_def (cairo_region_copy);
 cairo_region_t *
 cairo_region_reference (cairo_region_t *region)
 {
-    if (region == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
-	return NULL;
+    if (region == XNULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
+    return XNULL;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
 
     _cairo_reference_count_inc (&region->ref_count);
     return region;
@@ -417,16 +417,16 @@ slim_hidden_def (cairo_region_reference);
 void
 cairo_region_destroy (cairo_region_t *region)
 {
-    if (region == NULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
+    if (region == XNULL || CAIRO_REFERENCE_COUNT_IS_INVALID (&region->ref_count))
 	return;
 
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&region->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&region->ref_count))
 	return;
 
     _cairo_region_fini (region);
-    free (region);
+    xmemory_free (region);
 }
 slim_hidden_def (cairo_region_destroy);
 
@@ -473,7 +473,7 @@ cairo_region_get_rectangle (const cairo_region_t *region,
 	return;
     }
 
-    pbox = pixman_region32_rectangles (CONST_CAST &region->rgn, NULL) + nth;
+    pbox = pixman_region32_rectangles (CONST_CAST &region->rgn, XNULL) + nth;
 
     rectangle->x = pbox->x1;
     rectangle->y = pbox->y1;
@@ -936,13 +936,13 @@ cairo_region_equal (const cairo_region_t *a,
 		    const cairo_region_t *b)
 {
     /* error objects are never equal */
-    if ((a != NULL && a->status) || (b != NULL && b->status))
+    if ((a != XNULL && a->status) || (b != XNULL && b->status))
 	return FALSE;
 
     if (a == b)
 	return TRUE;
 
-    if (a == NULL || b == NULL)
+    if (a == XNULL || b == XNULL)
 	return FALSE;
 
     return pixman_region32_equal (CONST_CAST &a->rgn, CONST_CAST &b->rgn);

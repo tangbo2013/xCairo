@@ -132,9 +132,9 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 
     path->buf.base.num_ops = other->buf.base.num_ops;
     path->buf.base.num_points = other->buf.base.num_points;
-    memcpy (path->buf.op, other->buf.base.op,
+    xmemory_copy (path->buf.op, other->buf.base.op,
 	    other->buf.base.num_ops * sizeof (other->buf.op[0]));
-    memcpy (path->buf.points, other->buf.points,
+    xmemory_copy (path->buf.points, other->buf.points,
 	    other->buf.base.num_points * sizeof (other->buf.points[0]));
 
     num_points = num_ops = 0;
@@ -148,7 +148,7 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 
     if (num_ops) {
 	buf = _cairo_path_buf_create (num_ops, num_points);
-	if (unlikely (buf == NULL)) {
+    if (unlikely (buf == XNULL)) {
 	    _cairo_path_fixed_fini (path);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
@@ -157,11 +157,11 @@ _cairo_path_fixed_init_copy (cairo_path_fixed_t *path,
 	     other_buf != cairo_path_head (other);
 	     other_buf = cairo_path_buf_next (other_buf))
 	{
-	    memcpy (buf->op + buf->num_ops, other_buf->op,
+        xmemory_copy (buf->op + buf->num_ops, other_buf->op,
 		    other_buf->num_ops * sizeof (buf->op[0]));
 	    buf->num_ops += other_buf->num_ops;
 
-	    memcpy (buf->points + buf->num_points, other_buf->points,
+        xmemory_copy (buf->points + buf->num_points, other_buf->points,
 		    other_buf->num_points * sizeof (buf->points[0]));
 	    buf->num_points += other_buf->num_points;
 	}
@@ -275,9 +275,9 @@ _cairo_path_fixed_equal (const cairo_path_fixed_t *a,
 	int num_ops = MIN (num_ops_a, num_ops_b);
 	int num_points = MIN (num_points_a, num_points_b);
 
-	if (memcmp (ops_a, ops_b, num_ops * sizeof (cairo_path_op_t)))
+    if (xmemory_compare (ops_a, ops_b, num_ops * sizeof (cairo_path_op_t)))
 	    return FALSE;
-	if (memcmp (points_a, points_b, num_points * sizeof (cairo_point_t)))
+    if (xmemory_compare (points_a, points_b, num_points * sizeof (cairo_point_t)))
 	    return FALSE;
 
 	num_ops_a -= num_ops;
@@ -325,10 +325,10 @@ _cairo_path_fixed_create (void)
 {
     cairo_path_fixed_t	*path;
 
-    path = malloc (sizeof (cairo_path_fixed_t));
+    path = xmemory_alloc (sizeof (cairo_path_fixed_t));
     if (!path) {
 	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return NULL;
+    return XNULL;
     }
 
     _cairo_path_fixed_init (path);
@@ -354,7 +354,7 @@ void
 _cairo_path_fixed_destroy (cairo_path_fixed_t *path)
 {
     _cairo_path_fixed_fini (path);
-    free (path);
+    xmemory_free (path);
 }
 
 static cairo_path_op_t
@@ -363,7 +363,7 @@ _cairo_path_fixed_last_op (cairo_path_fixed_t *path)
     cairo_path_buf_t *buf;
 
     buf = cairo_path_tail (path);
-    assert (buf->num_ops != 0);
+    XASSERT (buf->num_ops != 0);
 
     return buf->op[buf->num_ops - 1];
 }
@@ -379,7 +379,7 @@ _cairo_path_fixed_penultimate_point (cairo_path_fixed_t *path)
     } else {
 	cairo_path_buf_t *prev_buf = cairo_path_buf_prev (buf);
 
-	assert (prev_buf->num_points >= 2 - buf->num_points);
+	XASSERT (prev_buf->num_points >= 2 - buf->num_points);
 	return &prev_buf->points[prev_buf->num_points - (2 - buf->num_points)];
     }
 }
@@ -389,7 +389,7 @@ _cairo_path_fixed_drop_line_to (cairo_path_fixed_t *path)
 {
     cairo_path_buf_t *buf;
 
-    assert (_cairo_path_fixed_last_op (path) == CAIRO_PATH_OP_LINE_TO);
+    XASSERT (_cairo_path_fixed_last_op (path) == CAIRO_PATH_OP_LINE_TO);
 
     buf = cairo_path_tail (path);
     buf->num_points--;
@@ -588,7 +588,7 @@ _cairo_path_fixed_curve_to (cairo_path_fixed_t	*path,
     /* make sure subpaths are started properly */
     if (! path->has_current_point) {
 	status = _cairo_path_fixed_move_to (path, x0, y0);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
     }
 
     status = _cairo_path_fixed_move_to_apply (path);
@@ -672,7 +672,7 @@ _cairo_path_fixed_close_path (cairo_path_fixed_t *path)
 
     path->needs_move_to = TRUE; /* After close_path, add an implicit move_to */
 
-    return _cairo_path_fixed_add (path, CAIRO_PATH_OP_CLOSE_PATH, NULL, 0);
+    return _cairo_path_fixed_add (path, CAIRO_PATH_OP_CLOSE_PATH, XNULL, 0);
 }
 
 cairo_bool_t
@@ -701,7 +701,7 @@ _cairo_path_fixed_add (cairo_path_fixed_t   *path,
 	buf->num_points + num_points > buf->size_points)
     {
 	buf = _cairo_path_buf_create (buf->num_ops * 2, buf->num_points * 2);
-	if (unlikely (buf == NULL))
+    if (unlikely (buf == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
 	_cairo_path_fixed_add_buf (path, buf);
@@ -718,18 +718,18 @@ _cairo_path_fixed_add (cairo_path_fixed_t   *path,
 	int len = 0;
 	int i;
 
-	len += snprintf (buf + len, sizeof (buf), "[");
+    len += string_snprintf (buf + len, sizeof (buf), "[");
 	for (i = 0; i < num_points; i++) {
 	    if (i != 0)
-		len += snprintf (buf + len, sizeof (buf), " ");
-	    len += snprintf (buf + len, sizeof (buf), "(%f, %f)",
+        len += string_snprintf (buf + len, sizeof (buf), " ");
+        len += string_snprintf (buf + len, sizeof (buf), "(%f, %f)",
 			     _cairo_fixed_to_double (points[i].x),
 			     _cairo_fixed_to_double (points[i].y));
 	}
-	len += snprintf (buf + len, sizeof (buf), "]");
+    len += string_snprintf (buf + len, sizeof (buf), "]");
 
 #define STRINGIFYFLAG(x)  (path->x ? #x " " : "")
-	fprintf (stderr,
+    XDBGPRINTF (
 		 "_cairo_path_fixed_add (%s, %s) [%s%s%s%s%s%s%s%s]\n",
 		 op_str[(int) op], buf,
 		 STRINGIFYFLAG(has_current_point),
@@ -782,7 +782,7 @@ _cairo_path_buf_create (int size_ops, int size_points)
 static void
 _cairo_path_buf_destroy (cairo_path_buf_t *buf)
 {
-    free (buf);
+    xmemory_free (buf);
 }
 
 static void
@@ -800,7 +800,7 @@ _cairo_path_buf_add_points (cairo_path_buf_t       *buf,
     if (num_points == 0)
 	return;
 
-    memcpy (buf->points + buf->num_points,
+    xmemory_copy (buf->points + buf->num_points,
 	    points,
 	    sizeof (points[0]) * num_points);
     buf->num_points += num_points;
@@ -1087,7 +1087,7 @@ _cairo_path_fixed_transform (cairo_path_fixed_t	*path,
 	    cairo_bool_t has_extents;
 
 	    has_extents = _cairo_path_bounder_extents (path, &extents);
-	    assert (has_extents);
+	    XASSERT (has_extents);
 	}
 	path->extents = extents;
     }
@@ -1177,7 +1177,7 @@ _cairo_path_fixed_interpret_flat (const cairo_path_fixed_t		*path,
 	return _cairo_path_fixed_interpret (path,
 					    move_to,
 					    line_to,
-					    NULL,
+                        XNULL,
 					    close_path,
 					    closure);
     }
@@ -1471,7 +1471,7 @@ _cairo_path_fixed_iter_next_op (cairo_path_fixed_iter_t *iter)
     if (++iter->n_op >= iter->buf->num_ops) {
 	iter->buf = cairo_path_buf_next (iter->buf);
 	if (iter->buf == iter->first) {
-	    iter->buf = NULL;
+        iter->buf = XNULL;
 	    return FALSE;
 	}
 
@@ -1489,7 +1489,7 @@ _cairo_path_fixed_iter_is_fill_box (cairo_path_fixed_iter_t *_iter,
     cairo_point_t points[5];
     cairo_path_fixed_iter_t iter;
 
-    if (_iter->buf == NULL)
+    if (_iter->buf == XNULL)
 	return FALSE;
 
     iter = *_iter;
@@ -1579,7 +1579,7 @@ _cairo_path_fixed_iter_is_fill_box (cairo_path_fixed_iter_t *_iter,
 cairo_bool_t
 _cairo_path_fixed_iter_at_end (const cairo_path_fixed_iter_t *iter)
 {
-    if (iter->buf == NULL)
+    if (iter->buf == XNULL)
 	return TRUE;
 
     return iter->n_op == iter->buf->num_ops;

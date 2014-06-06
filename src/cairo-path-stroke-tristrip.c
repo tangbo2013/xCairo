@@ -680,7 +680,7 @@ normalize_slope (double *dx, double *dy)
     double dx0 = *dx, dy0 = *dy;
     double mag;
 
-    assert (dx0 != 0.0 || dy0 != 0.0);
+    XASSERT (dx0 != 0.0 || dy0 != 0.0);
 
     if (dx0 == 0.0) {
 	*dx = 0.0;

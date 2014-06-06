@@ -53,10 +53,10 @@ enum {
 typedef struct _cairo_rtree_node {
     struct _cairo_rtree_node *children[4], *parent;
     cairo_list_t link;
-    uint16_t pinned;
-    uint16_t state;
-    uint16_t x, y;
-    uint16_t width, height;
+    xuint16_t pinned;
+    xuint16_t state;
+    xuint16_t x, y;
+    xuint16_t width, height;
 } cairo_rtree_node_t;
 
 typedef struct _cairo_rtree {
@@ -121,7 +121,7 @@ _cairo_rtree_foreach (cairo_rtree_t *rtree,
 static inline void *
 _cairo_rtree_pin (cairo_rtree_t *rtree, cairo_rtree_node_t *node)
 {
-    assert (node->state == CAIRO_RTREE_NODE_OCCUPIED);
+    XASSERT (node->state == CAIRO_RTREE_NODE_OCCUPIED);
     if (! node->pinned) {
 	cairo_list_move (&node->link, &rtree->pinned);
 	node->pinned = 1;

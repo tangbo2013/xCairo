@@ -61,10 +61,10 @@ _cairo_clip_path_create (cairo_clip_t *clip)
     cairo_clip_path_t *clip_path;
 
     clip_path = _freed_pool_get (&clip_path_pool);
-    if (unlikely (clip_path == NULL)) {
-	clip_path = malloc (sizeof (cairo_clip_path_t));
-	if (unlikely (clip_path == NULL))
-	    return NULL;
+    if (unlikely (clip_path == XNULL)) {
+    clip_path = xmemory_alloc (sizeof (cairo_clip_path_t));
+    if (unlikely (clip_path == XNULL))
+        return XNULL;
     }
 
     CAIRO_REFERENCE_COUNT_INIT (&clip_path->ref_count, 1);
@@ -78,7 +78,7 @@ _cairo_clip_path_create (cairo_clip_t *clip)
 cairo_clip_path_t *
 _cairo_clip_path_reference (cairo_clip_path_t *clip_path)
 {
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
 
     _cairo_reference_count_inc (&clip_path->ref_count);
 
@@ -88,14 +88,14 @@ _cairo_clip_path_reference (cairo_clip_path_t *clip_path)
 void
 _cairo_clip_path_destroy (cairo_clip_path_t *clip_path)
 {
-    assert (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
+    XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&clip_path->ref_count));
 
     if (! _cairo_reference_count_dec_and_test (&clip_path->ref_count))
 	return;
 
     _cairo_path_fixed_fini (&clip_path->path);
 
-    if (clip_path->prev != NULL)
+    if (clip_path->prev != XNULL)
 	_cairo_clip_path_destroy (clip_path->prev);
 
     _freed_pool_put (&clip_path_pool, clip_path);
@@ -107,18 +107,18 @@ _cairo_clip_create (void)
     cairo_clip_t *clip;
 
     clip = _freed_pool_get (&clip_pool);
-    if (unlikely (clip == NULL)) {
-	clip = malloc (sizeof (cairo_clip_t));
-	if (unlikely (clip == NULL))
-	    return NULL;
+    if (unlikely (clip == XNULL)) {
+    clip = xmemory_alloc (sizeof (cairo_clip_t));
+    if (unlikely (clip == XNULL))
+        return XNULL;
     }
 
     clip->extents = _cairo_unbounded_rectangle;
 
-    clip->path = NULL;
-    clip->boxes = NULL;
+    clip->path = XNULL;
+    clip->boxes = XNULL;
     clip->num_boxes = 0;
-    clip->region = NULL;
+    clip->region = XNULL;
     clip->is_region = FALSE;
 
     return clip;
@@ -127,14 +127,14 @@ _cairo_clip_create (void)
 void
 _cairo_clip_destroy (cairo_clip_t *clip)
 {
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return;
 
-    if (clip->path != NULL)
+    if (clip->path != XNULL)
 	_cairo_clip_path_destroy (clip->path);
 
     if (clip->boxes != &clip->embedded_box)
-	free (clip->boxes);
+    xmemory_free (clip->boxes);
     cairo_region_destroy (clip->region);
 
     _freed_pool_put (&clip_pool, clip);
@@ -145,7 +145,7 @@ _cairo_clip_copy (const cairo_clip_t *clip)
 {
     cairo_clip_t *copy;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *) clip;
 
     copy = _cairo_clip_create ();
@@ -158,11 +158,11 @@ _cairo_clip_copy (const cairo_clip_t *clip)
 	    copy->boxes = &copy->embedded_box;
 	} else {
 	    copy->boxes = _cairo_malloc_ab (clip->num_boxes, sizeof (cairo_box_t));
-	    if (unlikely (copy->boxes == NULL))
+        if (unlikely (copy->boxes == XNULL))
 		return _cairo_clip_set_all_clipped (copy);
 	}
 
-	memcpy (copy->boxes, clip->boxes,
+    xmemory_copy (copy->boxes, clip->boxes,
 		clip->num_boxes * sizeof (cairo_box_t));
 	copy->num_boxes = clip->num_boxes;
     }
@@ -179,10 +179,10 @@ _cairo_clip_copy_path (const cairo_clip_t *clip)
 {
     cairo_clip_t *copy;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *) clip;
 
-    assert (clip->num_boxes);
+    XASSERT (clip->num_boxes);
 
     copy = _cairo_clip_create ();
     copy->extents = clip->extents;
@@ -198,10 +198,10 @@ _cairo_clip_copy_region (const cairo_clip_t *clip)
     cairo_clip_t *copy;
     int i;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *) clip;
 
-    assert (clip->num_boxes);
+    XASSERT (clip->num_boxes);
 
     copy = _cairo_clip_create ();
     copy->extents = clip->extents;
@@ -210,7 +210,7 @@ _cairo_clip_copy_region (const cairo_clip_t *clip)
 	copy->boxes = &copy->embedded_box;
     } else {
 	copy->boxes = _cairo_malloc_ab (clip->num_boxes, sizeof (cairo_box_t));
-	if (unlikely (copy->boxes == NULL))
+    if (unlikely (copy->boxes == XNULL))
 	    return _cairo_clip_set_all_clipped (copy);
     }
 
@@ -270,7 +270,7 @@ _cairo_clip_intersect_path (cairo_clip_t       *clip,
 	return clip;
 
     clip_path = _cairo_clip_path_create (clip);
-    if (unlikely (clip_path == NULL))
+    if (unlikely (clip_path == XNULL))
 	return _cairo_clip_set_all_clipped (clip);
 
     status = _cairo_path_fixed_init_copy (&clip_path->path, path);
@@ -283,7 +283,7 @@ _cairo_clip_intersect_path (cairo_clip_t       *clip,
 
     if (clip->region) {
 	cairo_region_destroy (clip->region);
-	clip->region = NULL;
+    clip->region = XNULL;
     }
 
     clip->is_region = FALSE;
@@ -311,10 +311,10 @@ _cairo_clip_intersect_clip (cairo_clip_t *clip,
     if (_cairo_clip_is_all_clipped (clip))
 	return clip;
 
-    if (other == NULL)
+    if (other == XNULL)
 	return clip;
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	return _cairo_clip_copy (other);
 
     if (_cairo_clip_is_all_clipped (other))
@@ -332,7 +332,7 @@ _cairo_clip_intersect_clip (cairo_clip_t *clip,
 
     if (! _cairo_clip_is_all_clipped (clip)) {
 	if (other->path) {
-	    if (clip->path == NULL)
+        if (clip->path == XNULL)
 		clip->path = _cairo_clip_path_reference (other->path);
 	    else
 		clip = _cairo_clip_intersect_clip_path (clip, other->path);
@@ -341,7 +341,7 @@ _cairo_clip_intersect_clip (cairo_clip_t *clip,
 
     if (clip->region) {
 	cairo_region_destroy (clip->region);
-	clip->region = NULL;
+    clip->region = XNULL;
     }
     clip->is_region = FALSE;
 
@@ -359,7 +359,7 @@ _cairo_clip_equal (const cairo_clip_t *clip_a,
 	return TRUE;
 
     /* or just one of them? */
-    if (clip_a == NULL || clip_b == NULL ||
+    if (clip_a == XNULL || clip_b == XNULL ||
 	_cairo_clip_is_all_clipped (clip_a) ||
 	_cairo_clip_is_all_clipped (clip_b))
     {
@@ -371,7 +371,7 @@ _cairo_clip_equal (const cairo_clip_t *clip_a,
     if (clip_a->num_boxes != clip_b->num_boxes)
 	return FALSE;
 
-    if (memcmp (clip_a->boxes, clip_b->boxes,
+    if (xmemory_compare (clip_a->boxes, clip_b->boxes,
 		sizeof (cairo_box_t) * clip_a->num_boxes))
 	return FALSE;
 
@@ -400,7 +400,7 @@ _cairo_clip_equal (const cairo_clip_t *clip_a,
 	cp_b = cp_b->prev;
     }
 
-    return cp_a == NULL && cp_b == NULL;
+    return cp_a == XNULL && cp_b == XNULL;
 }
 
 static cairo_clip_t *
@@ -411,14 +411,14 @@ _cairo_clip_path_copy_with_translation (cairo_clip_t      *clip,
     cairo_status_t status;
     cairo_clip_path_t *clip_path;
 
-    if (other_path->prev != NULL)
+    if (other_path->prev != XNULL)
 	clip = _cairo_clip_path_copy_with_translation (clip, other_path->prev,
 						       fx, fy);
     if (_cairo_clip_is_all_clipped (clip))
 	return clip;
 
     clip_path = _cairo_clip_path_create (clip);
-    if (unlikely (clip_path == NULL))
+    if (unlikely (clip_path == XNULL))
 	return _cairo_clip_set_all_clipped (clip);
 
     status = _cairo_path_fixed_init_copy (&clip_path->path,
@@ -441,7 +441,7 @@ _cairo_clip_translate (cairo_clip_t *clip, int tx, int ty)
     int fx, fy, i;
     cairo_clip_path_t *clip_path;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return clip;
 
     if (tx == 0 && ty == 0)
@@ -460,11 +460,11 @@ _cairo_clip_translate (cairo_clip_t *clip, int tx, int ty)
     clip->extents.x += tx;
     clip->extents.y += ty;
 
-    if (clip->path == NULL)
+    if (clip->path == XNULL)
 	return clip;
 
     clip_path = clip->path;
-    clip->path = NULL;
+    clip->path = XNULL;
     clip = _cairo_clip_path_copy_with_translation (clip, clip_path, fx, fy);
     _cairo_clip_path_destroy (clip_path);
 
@@ -553,7 +553,7 @@ _cairo_clip_transform (cairo_clip_t *clip, const cairo_matrix_t *m)
 {
     cairo_clip_t *copy;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return clip;
 
     if (_cairo_matrix_is_translation (m))
@@ -590,14 +590,14 @@ _cairo_clip_copy_with_translation (const cairo_clip_t *clip, int tx, int ty)
     cairo_clip_t *copy;
     int fx, fy, i;
 
-    if (clip == NULL || _cairo_clip_is_all_clipped (clip))
+    if (clip == XNULL || _cairo_clip_is_all_clipped (clip))
 	return (cairo_clip_t *)clip;
 
     if (tx == 0 && ty == 0)
 	return _cairo_clip_copy (clip);
 
     copy = _cairo_clip_create ();
-    if (copy == NULL)
+    if (copy == XNULL)
 	    return _cairo_clip_set_all_clipped (copy);
 
     fx = _cairo_fixed_from_int (tx);
@@ -608,7 +608,7 @@ _cairo_clip_copy_with_translation (const cairo_clip_t *clip, int tx, int ty)
 	    copy->boxes = &copy->embedded_box;
 	} else {
 	    copy->boxes = _cairo_malloc_ab (clip->num_boxes, sizeof (cairo_box_t));
-	    if (unlikely (copy->boxes == NULL))
+        if (unlikely (copy->boxes == XNULL))
 		return _cairo_clip_set_all_clipped (copy);
 	}
 
@@ -625,7 +625,7 @@ _cairo_clip_copy_with_translation (const cairo_clip_t *clip, int tx, int ty)
     copy->extents.x += tx;
     copy->extents.y += ty;
 
-    if (clip->path == NULL)
+    if (clip->path == XNULL)
 	return copy;
 
     return _cairo_clip_path_copy_with_translation (copy, clip->path, fx, fy);
@@ -642,29 +642,29 @@ _cairo_clip_contains_extents (const cairo_clip_t *clip,
 }
 
 void
-_cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip)
+_cairo_debug_print_clip (xfile_t *stream, const cairo_clip_t *clip)
 {
     int i;
 
-    if (clip == NULL) {
-	fprintf (stream, "no clip\n");
+    if (clip == XNULL) {
+    XDBGPRINTF ("no clip\n");
 	return;
     }
 
     if (_cairo_clip_is_all_clipped (clip)) {
-	fprintf (stream, "clip: all-clipped\n");
+    XDBGPRINTF ("clip: all-clipped\n");
 	return;
     }
 
-    fprintf (stream, "clip:\n");
-    fprintf (stream, "  extents: (%d, %d) x (%d, %d), is-region? %d",
+    XDBGPRINTF ("clip:\n");
+    XDBGPRINTF ("  extents: (%d, %d) x (%d, %d), is-region? %d",
 	     clip->extents.x, clip->extents.y,
 	     clip->extents.width, clip->extents.height,
 	     clip->is_region);
 
-    fprintf (stream, "  num_boxes = %d\n", clip->num_boxes);
+    XDBGPRINTF ("  num_boxes = %d\n", clip->num_boxes);
     for (i = 0; i < clip->num_boxes; i++) {
-	fprintf (stream, "  [%d] = (%f, %f), (%f, %f)\n", i,
+    XDBGPRINTF ("  [%d] = (%f, %f), (%f, %f)\n", i,
 		 _cairo_fixed_to_double (clip->boxes[i].p1.x),
 		 _cairo_fixed_to_double (clip->boxes[i].p1.y),
 		 _cairo_fixed_to_double (clip->boxes[i].p2.x),
@@ -674,20 +674,20 @@ _cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip)
     if (clip->path) {
 	cairo_clip_path_t *clip_path = clip->path;
 	do {
-	    fprintf (stream, "path: aa=%d, tolerance=%f, rule=%d: ",
+        XDBGPRINTF ("path: aa=%d, tolerance=%f, rule=%d: ",
 		     clip_path->antialias,
 		     clip_path->tolerance,
 		     clip_path->fill_rule);
 	    _cairo_debug_print_path (stream, &clip_path->path);
-	    fprintf (stream, "\n");
-	} while ((clip_path = clip_path->prev) != NULL);
+        XDBGPRINTF ("\n");
+    } while ((clip_path = clip_path->prev) != XNULL);
     }
 }
 
 const cairo_rectangle_int_t *
 _cairo_clip_get_extents (const cairo_clip_t *clip)
 {
-    if (clip == NULL)
+    if (clip == XNULL)
 	return &_cairo_unbounded_rectangle;
 
     if (_cairo_clip_is_all_clipped (clip))
@@ -697,9 +697,9 @@ _cairo_clip_get_extents (const cairo_clip_t *clip)
 }
 
 const cairo_rectangle_list_t _cairo_rectangles_nil =
-  { CAIRO_STATUS_NO_MEMORY, NULL, 0 };
+  { CAIRO_STATUS_NO_MEMORY, XNULL, 0 };
 static const cairo_rectangle_list_t _cairo_rectangles_not_representable =
-  { CAIRO_STATUS_CLIP_NOT_REPRESENTABLE, NULL, 0 };
+  { CAIRO_STATUS_CLIP_NOT_REPRESENTABLE, XNULL, 0 };
 
 static cairo_bool_t
 _cairo_clip_int_rect_to_user (cairo_gstate_t *gstate,
@@ -735,14 +735,14 @@ _cairo_rectangle_list_create_in_error (cairo_status_t status)
     if (status == CAIRO_STATUS_CLIP_NOT_REPRESENTABLE)
 	return (cairo_rectangle_list_t*) &_cairo_rectangles_not_representable;
 
-    list = malloc (sizeof (*list));
-    if (unlikely (list == NULL)) {
+    list = xmemory_alloc (sizeof (*list));
+    if (unlikely (list == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return (cairo_rectangle_list_t*) &_cairo_rectangles_nil;
     }
 
     list->status = status;
-    list->rectangles = NULL;
+    list->rectangles = XNULL;
     list->num_rectangles = 0;
 
     return list;
@@ -754,12 +754,12 @@ _cairo_clip_copy_rectangle_list (cairo_clip_t *clip, cairo_gstate_t *gstate)
 #define ERROR_LIST(S) _cairo_rectangle_list_create_in_error (_cairo_error (S))
 
     cairo_rectangle_list_t *list;
-    cairo_rectangle_t *rectangles = NULL;
-    cairo_region_t *region = NULL;
+    cairo_rectangle_t *rectangles = XNULL;
+    cairo_region_t *region = XNULL;
     int n_rects = 0;
     int i;
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	return ERROR_LIST (CAIRO_STATUS_CLIP_NOT_REPRESENTABLE);
 
     if (_cairo_clip_is_all_clipped (clip))
@@ -769,13 +769,13 @@ _cairo_clip_copy_rectangle_list (cairo_clip_t *clip, cairo_gstate_t *gstate)
 	return ERROR_LIST (CAIRO_STATUS_CLIP_NOT_REPRESENTABLE);
 
     region = _cairo_clip_get_region (clip);
-    if (region == NULL)
+    if (region == XNULL)
 	return ERROR_LIST (CAIRO_STATUS_NO_MEMORY);
 
     n_rects = cairo_region_num_rectangles (region);
     if (n_rects) {
 	rectangles = _cairo_malloc_ab (n_rects, sizeof (cairo_rectangle_t));
-	if (unlikely (rectangles == NULL)) {
+    if (unlikely (rectangles == XNULL)) {
 	    return ERROR_LIST (CAIRO_STATUS_NO_MEMORY);
 	}
 
@@ -788,16 +788,16 @@ _cairo_clip_copy_rectangle_list (cairo_clip_t *clip, cairo_gstate_t *gstate)
 						&clip_rect,
 						&rectangles[i]))
 	    {
-		free (rectangles);
+        xmemory_free (rectangles);
 		return ERROR_LIST (CAIRO_STATUS_CLIP_NOT_REPRESENTABLE);
 	    }
 	}
     }
 
  DONE:
-    list = malloc (sizeof (cairo_rectangle_list_t));
-    if (unlikely (list == NULL)) {
-        free (rectangles);
+    list = xmemory_alloc (sizeof (cairo_rectangle_list_t));
+    if (unlikely (list == XNULL)) {
+        xmemory_free (rectangles);
 	return ERROR_LIST (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -822,12 +822,12 @@ _cairo_clip_copy_rectangle_list (cairo_clip_t *clip, cairo_gstate_t *gstate)
 void
 cairo_rectangle_list_destroy (cairo_rectangle_list_t *rectangle_list)
 {
-    if (rectangle_list == NULL || rectangle_list == &_cairo_rectangles_nil ||
+    if (rectangle_list == XNULL || rectangle_list == &_cairo_rectangles_nil ||
         rectangle_list == &_cairo_rectangles_not_representable)
         return;
 
-    free (rectangle_list->rectangles);
-    free (rectangle_list);
+    xmemory_free (rectangle_list->rectangles);
+    xmemory_free (rectangle_list);
 }
 
 void

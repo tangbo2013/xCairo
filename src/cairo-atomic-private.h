@@ -137,7 +137,7 @@ typedef unsigned long long cairo_atomic_intptr_t;
 
 #define HAS_ATOMIC_OPS 1
 
-typedef int32_t cairo_atomic_int_t;
+typedef xint32_t cairo_atomic_int_t;
 
 # define _cairo_atomic_int_get(x) (OSMemoryBarrier(), *(x))
 
@@ -147,12 +147,12 @@ typedef int32_t cairo_atomic_int_t;
 # define _cairo_atomic_int_cmpxchg(x, oldv, newv) OSAtomicCompareAndSwap32Barrier(oldv, newv, x)
 
 #if SIZEOF_VOID_P==4
-typedef int32_t cairo_atomic_intptr_t;
+typedef xint32_t cairo_atomic_intptr_t;
 # define _cairo_atomic_ptr_cmpxchg(x, oldv, newv) \
     OSAtomicCompareAndSwap32Barrier((cairo_atomic_intptr_t)oldv, (cairo_atomic_intptr_t)newv, (cairo_atomic_intptr_t *)x)
 
 #elif SIZEOF_VOID_P==8
-typedef int64_t cairo_atomic_intptr_t;
+typedef xint64_t cairo_atomic_intptr_t;
 # define _cairo_atomic_ptr_cmpxchg(x, oldv, newv) \
     OSAtomicCompareAndSwap64Barrier((cairo_atomic_intptr_t)oldv, (cairo_atomic_intptr_t)newv, (cairo_atomic_intptr_t *)x)
 
@@ -260,7 +260,7 @@ _cairo_atomic_ptr_cmpxchg_return_old_fallback(void **x, void *oldv, void *newv)
 
 #define _cairo_status_set_error(status, err) do { \
     int ret__; \
-    assert (err < CAIRO_STATUS_LAST_STATUS); \
+    XASSERT (err < CAIRO_STATUS_LAST_STATUS); \
     /* hide compiler warnings about cairo_status_t != int (gcc treats its as \
      * an unsigned integer instead, and about ignoring the return value. */  \
     ret__ = _cairo_atomic_int_cmpxchg ((cairo_atomic_int_t *) status, CAIRO_STATUS_SUCCESS, err); \

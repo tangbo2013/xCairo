@@ -43,7 +43,7 @@ typedef struct _lzw_buf {
     unsigned char *data;
     int data_size;
     int num_data;
-    uint32_t pending;
+    xuint32_t pending;
     unsigned int pending_bits;
 } lzw_buf_t;
 
@@ -73,8 +73,8 @@ _lzw_buf_init (lzw_buf_t *buf, int size)
     buf->pending = 0;
     buf->pending_bits = 0;
 
-    buf->data = malloc (size);
-    if (unlikely (buf->data == NULL)) {
+    buf->data = xmemory_alloc (size);
+    if (unlikely (buf->data == XNULL)) {
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return;
@@ -94,13 +94,13 @@ _lzw_buf_grow (lzw_buf_t *buf)
     if (buf->status)
 	return buf->status;
 
-    new_data = NULL;
+    new_data = XNULL;
     /* check for integer overflow */
     if (new_size / 2 == buf->data_size)
-	new_data = realloc (buf->data, new_size);
+    new_data = xmemory_realloc (buf->data, new_size);
 
-    if (unlikely (new_data == NULL)) {
-	free (buf->data);
+    if (unlikely (new_data == XNULL)) {
+	xmemory_free (buf->data);
 	buf->data_size = 0;
 	buf->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return buf->status;
@@ -123,11 +123,11 @@ _lzw_buf_grow (lzw_buf_t *buf)
  * Sets buf->status to either %CAIRO_STATUS_SUCCESS or %CAIRO_STATUS_NO_MEMORY.
  */
 static void
-_lzw_buf_store_bits (lzw_buf_t *buf, uint16_t value, int num_bits)
+_lzw_buf_store_bits (lzw_buf_t *buf, xuint16_t value, int num_bits)
 {
     cairo_status_t status;
 
-    assert (value <= (1 << num_bits) - 1);
+    XASSERT (value <= (1 << num_bits) - 1);
 
     if (buf->status)
 	return;
@@ -164,7 +164,7 @@ _lzw_buf_store_pending  (lzw_buf_t *buf)
     if (buf->pending_bits == 0)
 	return;
 
-    assert (buf->pending_bits < 8);
+    XASSERT (buf->pending_bits < 8);
 
     if (buf->num_data >= buf->data_size) {
 	status = _lzw_buf_grow (buf);
@@ -187,7 +187,7 @@ _lzw_buf_store_pending  (lzw_buf_t *buf)
  * 12 bits (19 down to  8):	PREV: previous code value in chain
  *  8 bits ( 7 down to  0):	NEXT: next byte value in chain
  */
-typedef uint32_t lzw_symbol_t;
+typedef xuint32_t lzw_symbol_t;
 
 #define LZW_SYMBOL_SET(sym, prev, next)			((sym) = ((prev) << 8)|(next))
 #define LZW_SYMBOL_SET_CODE(sym, code, prev, next)	((sym) = ((code << 20)|(prev) << 8)|(next))
@@ -229,7 +229,7 @@ typedef struct _lzw_symbol_table {
 static void
 _lzw_symbol_table_init (lzw_symbol_table_t *table)
 {
-    memset (table->table, 0, LZW_SYMBOL_TABLE_SIZE * sizeof (lzw_symbol_t));
+    xmemory_set (table->table, 0, LZW_SYMBOL_TABLE_SIZE * sizeof (lzw_symbol_t));
 }
 
 /* Lookup a symbol in the symbol table. The PREV and NEXT fields of
@@ -271,7 +271,7 @@ _lzw_symbol_table_lookup (lzw_symbol_table_t	 *table,
     idx = hash % LZW_SYMBOL_MOD1;
     step = 0;
 
-    *slot_ret = NULL;
+    *slot_ret = XNULL;
     for (i = 0; i < LZW_SYMBOL_TABLE_SIZE; i++)
     {
 	candidate = table->table[idx];
@@ -328,13 +328,13 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
     int bytes_remaining = *size_in_out;
     lzw_buf_t buf;
     lzw_symbol_table_t table;
-    lzw_symbol_t symbol, *slot = NULL; /* just to squelch a warning */
+    lzw_symbol_t symbol, *slot = XNULL; /* just to squelch a warning */
     int code_next = LZW_CODE_FIRST;
     int code_bits = LZW_BITS_MIN;
     int prev, next = 0; /* just to squelch a warning */
 
     if (*size_in_out == 0)
-	return NULL;
+    return XNULL;
 
     _lzw_buf_init (&buf, *size_in_out);
 
@@ -394,10 +394,10 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
     /* See if we ever ran out of memory while writing to buf. */
     if (buf.status == CAIRO_STATUS_NO_MEMORY) {
 	*size_in_out = 0;
-	return NULL;
+    return XNULL;
     }
 
-    assert (buf.status == CAIRO_STATUS_SUCCESS);
+    XASSERT (buf.status == CAIRO_STATUS_SUCCESS);
 
     *size_in_out = buf.num_data;
     return buf.data;

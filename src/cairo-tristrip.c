@@ -56,7 +56,7 @@ void
 _cairo_tristrip_fini (cairo_tristrip_t *strip)
 {
     if (strip->points != strip->points_embedded)
-	free (strip->points);
+	xmemory_free (strip->points);
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (strip, sizeof (cairo_tristrip_t)));
 }
@@ -94,14 +94,14 @@ _cairo_tristrip_grow (cairo_tristrip_t *strip)
 
     if (strip->points == strip->points_embedded) {
 	points = _cairo_malloc_ab (new_size, sizeof (cairo_point_t));
-	if (points != NULL)
-	    memcpy (points, strip->points, sizeof (strip->points_embedded));
+    if (points != XNULL)
+	    xmemory_copy (points, strip->points, sizeof (strip->points_embedded));
     } else {
 	points = _cairo_realloc_ab (strip->points,
 	                               new_size, sizeof (cairo_trapezoid_t));
     }
 
-    if (unlikely (points == NULL)) {
+    if (unlikely (points == XNULL)) {
 	strip->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return FALSE;
     }

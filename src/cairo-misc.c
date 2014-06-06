@@ -187,7 +187,7 @@ cairo_glyph_t *
 cairo_glyph_allocate (int num_glyphs)
 {
     if (num_glyphs <= 0)
-	return NULL;
+    return XNULL;
 
     return _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
 }
@@ -209,7 +209,7 @@ slim_hidden_def (cairo_glyph_allocate);
 void
 cairo_glyph_free (cairo_glyph_t *glyphs)
 {
-    free (glyphs);
+    xmemory_free (glyphs);
 }
 slim_hidden_def (cairo_glyph_free);
 
@@ -237,7 +237,7 @@ cairo_text_cluster_t *
 cairo_text_cluster_allocate (int num_clusters)
 {
     if (num_clusters <= 0)
-	return NULL;
+    return XNULL;
 
     return _cairo_malloc_ab (num_clusters, sizeof (cairo_text_cluster_t));
 }
@@ -259,7 +259,7 @@ slim_hidden_def (cairo_text_cluster_allocate);
 void
 cairo_text_cluster_free (cairo_text_cluster_t *clusters)
 {
-    free (clusters);
+    xmemory_free (clusters);
 }
 slim_hidden_def (cairo_text_cluster_free);
 
@@ -320,7 +320,7 @@ _cairo_validate_text_clusters (const char		   *utf8,
 	    goto BAD;
 
 	/* Make sure we've got valid UTF-8 for the cluster */
-	status = _cairo_utf8_to_ucs4 (utf8+n_bytes, cluster_bytes, NULL, NULL);
+    status = _cairo_utf8_to_ucs4 (utf8+n_bytes, cluster_bytes, XNULL, XNULL);
 	if (unlikely (status))
 	    return _cairo_error (CAIRO_STATUS_INVALID_CLUSTERS);
 
@@ -445,7 +445,7 @@ _cairo_operator_bounded_by_source (cairo_operator_t op)
     return FALSE;
 }
 
-uint32_t
+xuint32_t
 _cairo_operator_bounded_by_either (cairo_operator_t op)
 {
     switch (op) {
@@ -490,8 +490,8 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
 #if DISABLE_SOME_FLOATING_POINT
 /* This function is identical to the C99 function lround(), except that it
  * performs arithmetic rounding (floor(d + .5) instead of away-from-zero rounding) and
- * has a valid input range of (INT_MIN, INT_MAX] instead of
- * [INT_MIN, INT_MAX]. It is much faster on both x86 and FPU-less systems
+ * has a valid input range of (XINT32_MIN, XINT32_MAX] instead of
+ * [XINT32_MIN, XINT32_MAX]. It is much faster on both x86 and FPU-less systems
  * than other commonly used methods for rounding (lround, round, rint, lrint
  * or float (d + 0.5)).
  *
@@ -510,11 +510,11 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
 int
 _cairo_lround (double d)
 {
-    uint32_t top, shift_amount, output;
+    xuint32_t top, shift_amount, output;
     union {
         double d;
-        uint64_t ui64;
-        uint32_t ui32[2];
+        xuint64_t ui64;
+        xuint32_t ui32[2];
     } u;
 
     u.d = d;
@@ -531,7 +531,7 @@ _cairo_lround (double d)
 #if ( defined(FLOAT_WORDS_BIGENDIAN) && !defined(WORDS_BIGENDIAN)) || \
     (!defined(FLOAT_WORDS_BIGENDIAN) &&  defined(WORDS_BIGENDIAN))
     {
-        uint32_t temp = u.ui32[0];
+        xuint32_t temp = u.ui32[0];
         u.ui32[0] = u.ui32[1];
         u.ui32[1] = temp;
     }
@@ -617,7 +617,7 @@ _cairo_lround (double d)
      * - {shift_amount < 0} Since shift_amount is an unsigned integer, it
      *   really can't have a value less than zero. But, if the shift_amount
      *   calculation above caused underflow (which would happen with
-     *   input > INT_MAX or input <= INT_MIN) then shift_amount will now be
+     *   input > XINT32_MAX or input <= XINT32_MIN) then shift_amount will now be
      *   a very large number, and so this shift will result in complete
      *   garbage. But that's OK, as the input was out of our range, so our
      *   output is undefined.
@@ -703,11 +703,11 @@ _cairo_lround (double d)
 /* Convert a 32-bit IEEE single precision floating point number to a
  * 'half' representation (s10.5)
  */
-uint16_t
+xuint16_t
 _cairo_half_from_float (float f)
 {
     union {
-	uint32_t ui;
+	xuint32_t ui;
 	float f;
     } u;
     int s, e, m;
@@ -787,37 +787,37 @@ _cairo_win32_tmpfile (void)
     WCHAR file_name[MAX_PATH + 1];
     HANDLE handle;
     int fd;
-    FILE *fp;
+    xfile_t *fp;
 
     path_len = GetTempPathW (MAX_PATH, path_name);
     if (path_len <= 0 || path_len >= MAX_PATH)
-	return NULL;
+    return XNULL;
 
     if (GetTempFileNameW (path_name, L"ps_", 0, file_name) == 0)
-	return NULL;
+    return XNULL;
 
     handle = CreateFileW (file_name,
 			 GENERIC_READ | GENERIC_WRITE,
 			 0,
-			 NULL,
+             XNULL,
 			 CREATE_ALWAYS,
-			 FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE,
-			 NULL);
+             xfile_t_ATTRIBUTE_NORMAL | xfile_t_FLAG_DELETE_ON_CLOSE,
+             XNULL);
     if (handle == INVALID_HANDLE_VALUE) {
 	DeleteFileW (file_name);
-	return NULL;
+    return XNULL;
     }
 
     fd = _open_osfhandle((intptr_t) handle, 0);
     if (fd < 0) {
 	CloseHandle (handle);
-	return NULL;
+    return XNULL;
     }
 
     fp = fdopen(fd, "w+b");
-    if (fp == NULL) {
+    if (fp == XNULL) {
 	_close(fd);
-	return NULL;
+    return XNULL;
     }
 
     return fp;
@@ -855,7 +855,7 @@ _intern_string_equal (const void *_a, const void *_b)
     if (a->len != b->len)
 	return FALSE;
 
-    return memcmp (a->string, b->string, a->len) == 0;
+    return xmemory_compare (a->string, b->string, a->len) == 0;
 }
 
 cairo_status_t
@@ -875,9 +875,9 @@ _cairo_intern_string (const char **str_inout, int len)
     tmpl.string = (char *) str;
 
     CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht == NULL) {
+    if (_cairo_intern_string_ht == XNULL) {
 	_cairo_intern_string_ht = _cairo_hash_table_create (_intern_string_equal);
-	if (unlikely (_cairo_intern_string_ht == NULL)) {
+    if (unlikely (_cairo_intern_string_ht == XNULL)) {
 	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	    goto BAIL;
 	}
@@ -885,19 +885,19 @@ _cairo_intern_string (const char **str_inout, int len)
 
     istring = _cairo_hash_table_lookup (_cairo_intern_string_ht,
 					&tmpl.hash_entry);
-    if (istring == NULL) {
-	istring = malloc (sizeof (cairo_intern_string_t) + len + 1);
-	if (likely (istring != NULL)) {
+    if (istring == XNULL) {
+    istring = xmemory_alloc (sizeof (cairo_intern_string_t) + len + 1);
+    if (likely (istring != XNULL)) {
 	    istring->hash_entry.hash = tmpl.hash_entry.hash;
 	    istring->len = tmpl.len;
 	    istring->string = (char *) (istring + 1);
-	    memcpy (istring->string, str, len);
+        xmemory_copy (istring->string, str, len);
 	    istring->string[len] = '\0';
 
 	    status = _cairo_hash_table_insert (_cairo_intern_string_ht,
 					       &istring->hash_entry);
 	    if (unlikely (status)) {
-		free (istring);
+        xmemory_free (istring);
 		goto BAIL;
 	    }
 	} else {
@@ -917,19 +917,19 @@ static void
 _intern_string_pluck (void *entry, void *closure)
 {
     _cairo_hash_table_remove (closure, entry);
-    free (entry);
+    xmemory_free (entry);
 }
 
 void
 _cairo_intern_string_reset_static_data (void)
 {
     CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht != NULL) {
+    if (_cairo_intern_string_ht != XNULL) {
 	_cairo_hash_table_foreach (_cairo_intern_string_ht,
 				   _intern_string_pluck,
 				   _cairo_intern_string_ht);
 	_cairo_hash_table_destroy(_cairo_intern_string_ht);
-	_cairo_intern_string_ht = NULL;
+    _cairo_intern_string_ht = XNULL;
     }
     CAIRO_MUTEX_UNLOCK (_cairo_intern_string_mutex);
 }

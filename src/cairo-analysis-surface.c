@@ -69,8 +69,8 @@ _cairo_analysis_surface_merge_status (cairo_int_status_t status_a,
 				      cairo_int_status_t status_b)
 {
     /* fatal errors should be checked and propagated at source */
-    assert (! _cairo_int_status_is_error (status_a));
-    assert (! _cairo_int_status_is_error (status_b));
+    XASSERT (! _cairo_int_status_is_error (status_a));
+    XASSERT (! _cairo_int_status_is_error (status_b));
 
     /* return the most important status */
     if (status_a == CAIRO_INT_STATUS_UNSUPPORTED ||
@@ -90,7 +90,7 @@ _cairo_analysis_surface_merge_status (cairo_int_status_t status_a,
 	return CAIRO_INT_STATUS_FLATTEN_TRANSPARENCY;
 
     /* at this point we have checked all the valid internal codes, so... */
-    assert (status_a == CAIRO_INT_STATUS_SUCCESS &&
+    XASSERT (status_a == CAIRO_INT_STATUS_SUCCESS &&
 	    status_b == CAIRO_INT_STATUS_SUCCESS);
 
     return CAIRO_INT_STATUS_SUCCESS;
@@ -118,14 +118,14 @@ attach_proxy (cairo_surface_t *source,
 {
     struct proxy *proxy;
 
-    proxy = malloc (sizeof (*proxy));
-    if (unlikely (proxy == NULL))
+    proxy = xmemory_alloc (sizeof (*proxy));
+    if (unlikely (proxy == XNULL))
 	return _cairo_surface_create_in_error (CAIRO_STATUS_NO_MEMORY);
 
-    _cairo_surface_init (&proxy->base, &proxy_backend, NULL, target->content);
+    _cairo_surface_init (&proxy->base, &proxy_backend, XNULL, target->content);
 
     proxy->target = target;
-    _cairo_surface_attach_snapshot (source, &proxy->base, NULL);
+    _cairo_surface_attach_snapshot (source, &proxy->base, XNULL);
 
     return &proxy->base;
 }
@@ -147,13 +147,13 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
     cairo_matrix_t p2d;
     cairo_status_t status, analysis_status;
 
-    assert (pattern->type == CAIRO_PATTERN_TYPE_SURFACE);
+    XASSERT (pattern->type == CAIRO_PATTERN_TYPE_SURFACE);
     surface_pattern = (const cairo_surface_pattern_t *) pattern;
-    assert (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING);
+    XASSERT (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING);
     source = surface_pattern->surface;
 
     proxy = _cairo_surface_has_snapshot (source, &proxy_backend);
-    if (proxy != NULL) {
+    if (proxy != XNULL) {
 	/* nothing untoward found so far */
 	return CAIRO_STATUS_SUCCESS;
     }
@@ -166,12 +166,12 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
 
     p2d = pattern->matrix;
     status = cairo_matrix_invert (&p2d);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     cairo_matrix_multiply (&tmp->ctm, &p2d, &surface->ctm);
     tmp->has_ctm = ! _cairo_matrix_is_identity (&tmp->ctm);
 
-    source = _cairo_surface_get_source (source, NULL);
+    source = _cairo_surface_get_source (source, XNULL);
     status = _cairo_recording_surface_replay_and_create_regions (source,
 								 &tmp->base);
     analysis_status = tmp->has_unsupported ? CAIRO_INT_STATUS_IMAGE_FALLBACK : CAIRO_INT_STATUS_SUCCESS;
@@ -226,7 +226,7 @@ _add_operation (cairo_analysis_surface_t *surface,
 	    bbox.p2.y += ty;
 	} else {
 	    _cairo_matrix_transform_bounding_box_fixed (&surface->ctm,
-							&bbox, NULL);
+                            &bbox, XNULL);
 
 	    if (bbox.p1.x == bbox.p2.x || bbox.p1.y == bbox.p2.y) {
 		/* Even though the operation is not visible we must be
@@ -326,7 +326,7 @@ _cairo_analysis_surface_get_extents (void			*abstract_surface,
 static void
 _rectangle_intersect_clip (cairo_rectangle_int_t *extents, const cairo_clip_t *clip)
 {
-    if (clip != NULL)
+    if (clip != XNULL)
 	_cairo_rectangle_intersect (extents, _cairo_clip_get_extents (clip));
 }
 
@@ -361,7 +361,7 @@ _cairo_analysis_surface_paint (void			*abstract_surface,
     cairo_int_status_t	     backend_status;
     cairo_rectangle_int_t  extents;
 
-    if (surface->target->backend->paint == NULL) {
+    if (surface->target->backend->paint == XNULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
 	backend_status =
@@ -392,7 +392,7 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
     cairo_int_status_t	      backend_status;
     cairo_rectangle_int_t   extents;
 
-    if (surface->target->backend->mask == NULL) {
+    if (surface->target->backend->mask == XNULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
 	backend_status =
@@ -408,7 +408,7 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
 
 	if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
 	    cairo_surface_t *src_surface = ((cairo_surface_pattern_t *)source)->surface;
-	    src_surface = _cairo_surface_get_source (src_surface, NULL);
+        src_surface = _cairo_surface_get_source (src_surface, XNULL);
 	    if (_cairo_surface_is_recording (src_surface)) {
 		backend_source_status =
 		    _analyze_recording_surface_pattern (surface, source);
@@ -419,7 +419,7 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
 
 	if (mask->type == CAIRO_PATTERN_TYPE_SURFACE) {
 	    cairo_surface_t *mask_surface = ((cairo_surface_pattern_t *)mask)->surface;
-	    mask_surface = _cairo_surface_get_source (mask_surface, NULL);
+        mask_surface = _cairo_surface_get_source (mask_surface, XNULL);
 	    if (_cairo_surface_is_recording (mask_surface)) {
 		backend_mask_status =
 		    _analyze_recording_surface_pattern (surface, mask);
@@ -463,7 +463,7 @@ _cairo_analysis_surface_stroke (void			*abstract_surface,
     cairo_int_status_t	     backend_status;
     cairo_rectangle_int_t    extents;
 
-    if (surface->target->backend->stroke == NULL) {
+    if (surface->target->backend->stroke == XNULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
 	backend_status =
@@ -514,7 +514,7 @@ _cairo_analysis_surface_fill (void			*abstract_surface,
     cairo_int_status_t	     backend_status;
     cairo_rectangle_int_t    extents;
 
-    if (surface->target->backend->fill == NULL) {
+    if (surface->target->backend->fill == XNULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
 	backend_status =
@@ -559,7 +559,7 @@ _cairo_analysis_surface_show_glyphs (void		  *abstract_surface,
     cairo_rectangle_int_t    extents, glyph_extents;
 
     /* Adapted from _cairo_surface_show_glyphs */
-    if (surface->target->backend->show_glyphs != NULL) {
+    if (surface->target->backend->show_glyphs != XNULL) {
 	backend_status =
 	    surface->target->backend->show_glyphs (surface->target, op,
 						   source,
@@ -569,14 +569,14 @@ _cairo_analysis_surface_show_glyphs (void		  *abstract_surface,
 	if (_cairo_int_status_is_error (backend_status))
 	    return backend_status;
     }
-    else if (surface->target->backend->show_text_glyphs != NULL)
+    else if (surface->target->backend->show_text_glyphs != XNULL)
     {
 	backend_status =
 	    surface->target->backend->show_text_glyphs (surface->target, op,
 							source,
-							NULL, 0,
+                            XNULL, 0,
 							glyphs, num_glyphs,
-							NULL, 0,
+                            XNULL, 0,
 							FALSE,
 							scaled_font,
 							clip);
@@ -600,7 +600,7 @@ _cairo_analysis_surface_show_glyphs (void		  *abstract_surface,
 							  glyphs,
 							  num_glyphs,
 							  &glyph_extents,
-							  NULL);
+                              XNULL);
 	if (unlikely (status))
 	    return status;
 
@@ -638,7 +638,7 @@ _cairo_analysis_surface_show_text_glyphs (void			    *abstract_surface,
 
     /* Adapted from _cairo_surface_show_glyphs */
     backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
-    if (surface->target->backend->show_text_glyphs != NULL) {
+    if (surface->target->backend->show_text_glyphs != XNULL) {
 	backend_status =
 	    surface->target->backend->show_text_glyphs (surface->target, op,
 							source,
@@ -652,7 +652,7 @@ _cairo_analysis_surface_show_text_glyphs (void			    *abstract_surface,
 	    return backend_status;
     }
     if (backend_status == CAIRO_INT_STATUS_UNSUPPORTED &&
-	surface->target->backend->show_glyphs != NULL)
+    surface->target->backend->show_glyphs != XNULL)
     {
 	backend_status =
 	    surface->target->backend->show_glyphs (surface->target, op,
@@ -676,7 +676,7 @@ _cairo_analysis_surface_show_text_glyphs (void			    *abstract_surface,
 							  glyphs,
 							  num_glyphs,
 							  &glyph_extents,
-							  NULL);
+                              XNULL);
 	if (unlikely (status))
 	    return status;
 
@@ -690,32 +690,32 @@ static const cairo_surface_backend_t cairo_analysis_surface_backend = {
     CAIRO_INTERNAL_SURFACE_TYPE_ANALYSIS,
 
     _cairo_analysis_surface_finish,
-    NULL,
+    XNULL,
 
-    NULL, /* create_similar */
-    NULL, /* create_similar_image */
-    NULL, /* map_to_image */
-    NULL, /* unmap */
+    XNULL, /* create_similar */
+    XNULL, /* create_similar_image */
+    XNULL, /* map_to_image */
+    XNULL, /* unmap */
 
-    NULL, /* source */
-    NULL, /* acquire_source_image */
-    NULL, /* release_source_image */
-    NULL, /* snapshot */
+    XNULL, /* source */
+    XNULL, /* acquire_source_image */
+    XNULL, /* release_source_image */
+    XNULL, /* snapshot */
 
-    NULL, /* copy_page */
-    NULL, /* show_page */
+    XNULL, /* copy_page */
+    XNULL, /* show_page */
 
     _cairo_analysis_surface_get_extents,
-    NULL, /* get_font_options */
+    XNULL, /* get_font_options */
 
-    NULL, /* flush */
-    NULL, /* mark_dirty_rectangle */
+    XNULL, /* flush */
+    XNULL, /* mark_dirty_rectangle */
 
     _cairo_analysis_surface_paint,
     _cairo_analysis_surface_mask,
     _cairo_analysis_surface_stroke,
     _cairo_analysis_surface_fill,
-    NULL, /* fill_stroke */
+    XNULL, /* fill_stroke */
     _cairo_analysis_surface_show_glyphs,
     _cairo_analysis_surface_has_show_text_glyphs,
     _cairo_analysis_surface_show_text_glyphs
@@ -731,15 +731,15 @@ _cairo_analysis_surface_create (cairo_surface_t		*target)
     if (unlikely (status))
 	return _cairo_surface_create_in_error (status);
 
-    surface = malloc (sizeof (cairo_analysis_surface_t));
-    if (unlikely (surface == NULL))
+    surface = xmemory_alloc (sizeof (cairo_analysis_surface_t));
+    if (unlikely (surface == XNULL))
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
 
     /* I believe the content type here is truly arbitrary. I'm quite
      * sure nothing will ever use this value. */
     _cairo_surface_init (&surface->base,
 			 &cairo_analysis_surface_backend,
-			 NULL, /* device */
+             XNULL, /* device */
 			 CAIRO_CONTENT_COLOR_ALPHA);
 
     cairo_matrix_init_identity (&surface->ctm);
@@ -882,37 +882,37 @@ typedef cairo_int_status_t
 
 static const cairo_surface_backend_t cairo_null_surface_backend = {
     CAIRO_INTERNAL_SURFACE_TYPE_NULL,
-    NULL, /* finish */
+    XNULL, /* finish */
 
-    NULL, /* only accessed through the surface functions */
+    XNULL, /* only accessed through the surface functions */
 
-    NULL, /* create_similar */
-    NULL, /* create similar image */
-    NULL, /* map to image */
-    NULL, /* unmap image*/
+    XNULL, /* create_similar */
+    XNULL, /* create similar image */
+    XNULL, /* map to image */
+    XNULL, /* unmap image*/
 
-    NULL, /* source */
-    NULL, /* acquire_source_image */
-    NULL, /* release_source_image */
-    NULL, /* snapshot */
+    XNULL, /* source */
+    XNULL, /* acquire_source_image */
+    XNULL, /* release_source_image */
+    XNULL, /* snapshot */
 
-    NULL, /* copy_page */
-    NULL, /* show_page */
+    XNULL, /* copy_page */
+    XNULL, /* show_page */
 
-    NULL, /* get_extents */
-    NULL, /* get_font_options */
+    XNULL, /* get_extents */
+    XNULL, /* get_font_options */
 
-    NULL, /* flush */
-    NULL, /* mark_dirty_rectangle */
+    XNULL, /* flush */
+    XNULL, /* mark_dirty_rectangle */
 
     (_paint_func) _return_success,	    /* paint */
     (_mask_func) _return_success,	    /* mask */
     (_stroke_func) _return_success,	    /* stroke */
     (_fill_func) _return_success,	    /* fill */
-    NULL, /* fill_stroke */
+    XNULL, /* fill_stroke */
     (_show_glyphs_func) _return_success,    /* show_glyphs */
-    NULL, /* has_show_text_glyphs */
-    NULL  /* show_text_glyphs */
+    XNULL, /* has_show_text_glyphs */
+    XNULL  /* show_text_glyphs */
 };
 
 cairo_surface_t *
@@ -920,14 +920,14 @@ _cairo_null_surface_create (cairo_content_t content)
 {
     cairo_surface_t *surface;
 
-    surface = malloc (sizeof (cairo_surface_t));
-    if (unlikely (surface == NULL)) {
+    surface = xmemory_alloc (sizeof (cairo_surface_t));
+    if (unlikely (surface == XNULL)) {
 	return _cairo_surface_create_in_error (_cairo_error (CAIRO_STATUS_NO_MEMORY));
     }
 
     _cairo_surface_init (surface,
 			 &cairo_null_surface_backend,
-			 NULL, /* device */
+             XNULL, /* device */
 			 content);
 
     return surface;

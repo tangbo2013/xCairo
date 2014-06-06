@@ -77,8 +77,8 @@
 static inline void
 _cairo_list_validate (const cairo_list_t *link)
 {
-    assert (link->next->prev == link);
-    assert (link->prev->next == link);
+    XASSERT (link->next->prev == link);
+    XASSERT (link->prev->next == link);
 }
 static inline void
 cairo_list_validate (const cairo_list_t *head)
@@ -93,7 +93,7 @@ cairo_list_is_empty (const cairo_list_t *head);
 static inline void
 cairo_list_validate_is_empty (const cairo_list_t *head)
 {
-    assert (head->next == NULL || (cairo_list_is_empty (head) && head->next == head->prev));
+    XASSERT (head->next == XNULL || (cairo_list_is_empty (head) && head->next == head->prev));
 }
 #else
 #define _cairo_list_validate(link)

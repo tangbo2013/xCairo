@@ -98,7 +98,7 @@ _cairo_no_compositor_glyphs (const cairo_compositor_t *compositor,
 }
 
 const cairo_compositor_t __cairo_no_compositor = {
-    NULL,
+    XNULL,
     _cairo_no_compositor_paint,
     _cairo_no_compositor_mask,
     _cairo_no_compositor_stroke,

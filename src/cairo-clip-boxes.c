@@ -72,8 +72,8 @@ _cairo_clip_contains_rectangle_box (const cairo_clip_t *clip,
 {
     int i;
 
-    /* clip == NULL means no clip, so the clip contains everything */
-    if (clip == NULL)
+    /* clip == XNULL means no clip, so the clip contains everything */
+    if (clip == XNULL)
 	return TRUE;
 
     if (_cairo_clip_is_all_clipped (clip))
@@ -159,9 +159,9 @@ _cairo_clip_intersect_rectangle_box (cairo_clip_t *clip,
     cairo_bool_t changed = FALSE;
     int i, j;
 
-    if (clip == NULL) {
+    if (clip == XNULL) {
 	clip = _cairo_clip_create ();
-	if (clip == NULL)
+	if (clip == XNULL)
 	    return _cairo_clip_set_all_clipped (clip);
     }
 
@@ -169,13 +169,13 @@ _cairo_clip_intersect_rectangle_box (cairo_clip_t *clip,
 	clip->boxes = &clip->embedded_box;
 	clip->boxes[0] = *box;
 	clip->num_boxes = 1;
-	if (clip->path == NULL) {
+	if (clip->path == XNULL) {
 	    clip->extents = *r;
 	} else {
 	    if (! _cairo_rectangle_intersect (&clip->extents, r))
 		clip = _cairo_clip_set_all_clipped (clip);
 	}
-	if (clip->path == NULL)
+	if (clip->path == XNULL)
 	    clip->is_region = _cairo_box_is_pixel_aligned (box);
 	return clip;
     }
@@ -233,7 +233,7 @@ _cairo_clip_intersect_rectangle_box (cairo_clip_t *clip,
 		extents_box.p2.y = clip->boxes[i].p2.y;
     }
 
-    if (clip->path == NULL) {
+    if (clip->path == XNULL) {
 	_cairo_box_round_to_rectangle (&extents_box, &clip->extents);
     } else {
 	cairo_rectangle_int_t extents_rect;
@@ -245,7 +245,7 @@ _cairo_clip_intersect_rectangle_box (cairo_clip_t *clip,
 
     if (clip->region) {
 	cairo_region_destroy (clip->region);
-	clip->region = NULL;
+	clip->region = XNULL;
     }
 
     clip->is_region = FALSE;
@@ -282,7 +282,7 @@ _cairo_clip_intersect_boxes (cairo_clip_t *clip,
     if (boxes->num_boxes == 1)
 	return _cairo_clip_intersect_box (clip, boxes->chunks.base);
 
-    if (clip == NULL)
+    if (clip == XNULL)
 	clip = _cairo_clip_create ();
 
     if (clip->num_boxes) {
@@ -293,9 +293,9 @@ _cairo_clip_intersect_boxes (cairo_clip_t *clip,
 	}
 
 	if (clip->boxes != &clip->embedded_box)
-	    free (clip->boxes);
+	    xmemory_free (clip->boxes);
 
-	clip->boxes = NULL;
+	clip->boxes = XNULL;
 	boxes = &clip_boxes;
     }
 
@@ -312,14 +312,14 @@ _cairo_clip_intersect_boxes (cairo_clip_t *clip,
     _cairo_boxes_extents (boxes, &limits);
 
     _cairo_box_round_to_rectangle (&limits, &extents);
-    if (clip->path == NULL)
+    if (clip->path == XNULL)
 	clip->extents = extents;
     else if (! _cairo_rectangle_intersect (&clip->extents, &extents))
 	clip = _cairo_clip_set_all_clipped (clip);
 
     if (clip->region) {
 	cairo_region_destroy (clip->region);
-	clip->region = NULL;
+	clip->region = XNULL;
     }
     clip->is_region = FALSE;
 
@@ -502,12 +502,12 @@ _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
     cairo_status_t status;
 
 	return clip;
-    if (clip->path == NULL)
+    if (clip->path == XNULL)
 	return clip;
 
     r.clip = clip;
-    r.extents.p1.x = r.extents.p1.y = INT_MAX;
-    r.extents.p2.x = r.extents.p2.y = INT_MIN;
+    r.extents.p1.x = r.extents.p1.y = XINT32_MAX;
+    r.extents.p2.x = r.extents.p2.y = XINT32_MIN;
     r.inside = FALSE;
 
     r.limit.p1.x = _cairo_fixed_from_int (clip->extents.x);
@@ -527,13 +527,13 @@ _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
 						   _reduce_close,
 						   &r,
 						   clip_path->tolerance);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	_reduce_close (&r);
     } while ((clip_path = clip_path->prev));
 
     if (! r.inside) {
 	_cairo_clip_path_destroy (clip->path);
-	clip->path = NULL;
+	clip->path = XNULL;
     }
 
     return _cairo_clip_intersect_box (clip, &r.extents);
@@ -549,7 +549,7 @@ _cairo_clip_reduce_to_rectangle (const cairo_clip_t *clip,
 	return (cairo_clip_t *) clip;
 
     if (_cairo_clip_contains_rectangle (clip, r))
-	return _cairo_clip_intersect_rectangle (NULL, r);
+	return _cairo_clip_intersect_rectangle (XNULL, r);
 
     copy = _cairo_clip_copy_intersect_rectangle (clip, r);
     if (_cairo_clip_is_all_clipped (copy))
@@ -573,7 +573,7 @@ _cairo_clip_from_boxes (const cairo_boxes_t *boxes)
 {
     cairo_box_t extents;
     cairo_clip_t *clip = _cairo_clip_create ();
-    if (clip == NULL)
+    if (clip == XNULL)
 	return _cairo_clip_set_all_clipped (clip);
 
     /* XXX cow-boxes? */
@@ -583,7 +583,7 @@ _cairo_clip_from_boxes (const cairo_boxes_t *boxes)
 	clip->num_boxes = 1;
     } else {
 	clip->boxes = _cairo_boxes_to_array (boxes, &clip->num_boxes, TRUE);
-	if (clip->boxes == NULL)
+	if (clip->boxes == XNULL)
 	    return _cairo_clip_set_all_clipped (clip);
     }
 

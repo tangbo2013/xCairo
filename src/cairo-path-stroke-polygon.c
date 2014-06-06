@@ -100,8 +100,8 @@ static cairo_uint64_t
 point_distance_sq (const cairo_point_t *p1,
 			const cairo_point_t *p2)
 {
-    int32_t dx = p1->x - p2->x;
-    int32_t dy = p1->y - p2->y;
+    xint32_t dx = p1->x - p2->x;
+    xint32_t dy = p1->y - p2->y;
     return _cairo_int32x32_64_mul (dx, dx) + _cairo_int32x32_64_mul (dy, dy);
 }
 
@@ -172,7 +172,7 @@ add_fan (struct stroker *stroker,
 	! _cairo_box_contains_point (&stroker->bounds, midpt))
 	return;
 
-    assert (stroker->pen.num_vertices);
+    XASSERT (stroker->pen.num_vertices);
 
     if (clockwise) {
 	_cairo_pen_find_active_cw_vertices (pen,
@@ -826,7 +826,7 @@ normalize_slope (double *dx, double *dy)
     double dx0 = *dx, dy0 = *dy;
     double mag;
 
-    assert (dx0 != 0.0 || dy0 != 0.0);
+    XASSERT (dx0 != 0.0 || dy0 != 0.0);
 
     if (dx0 == 0.0) {
 	*dx = 0.0;
@@ -949,11 +949,11 @@ add_caps (struct stroker *stroker)
 
 #if DEBUG
 	{
-	    FILE *file = fopen ("contours.txt", "a");
+	    xfile_t *file = xfile_open ("contours.txt", "a");
 	    _cairo_debug_print_contour (file, &stroker->path);
 	    _cairo_debug_print_contour (file, &stroker->cw.contour);
 	    _cairo_debug_print_contour (file, &stroker->ccw.contour);
-	    fclose (file);
+	    xfile_close (file);
 	    _cairo_contour_reset (&stroker->path);
 	}
 #endif
@@ -967,9 +967,9 @@ add_caps (struct stroker *stroker)
 	    add_leading_cap (stroker, &stroker->first_face, &stroker->ccw);
 #if DEBUG
 	    {
-		FILE *file = fopen ("contours.txt", "a");
+		xfile_t *file = xfile_open ("contours.txt", "a");
 		_cairo_debug_print_contour (file, &stroker->ccw.contour);
-		fclose (file);
+		xfile_close (file);
 	    }
 #endif
 
@@ -1228,11 +1228,11 @@ close_path (void *closure)
 
 #if DEBUG
 	{
-	    FILE *file = fopen ("contours.txt", "a");
+	    xfile_t *file = xfile_open ("contours.txt", "a");
 	    _cairo_debug_print_contour (file, &stroker->path);
 	    _cairo_debug_print_contour (file, &stroker->cw.contour);
 	    _cairo_debug_print_contour (file, &stroker->ccw.contour);
-	    fclose (file);
+	    xfile_close (file);
 
 	    _cairo_contour_reset (&stroker->path);
 	}
@@ -1364,9 +1364,9 @@ _cairo_path_fixed_stroke_to_polygon (const cairo_path_fixed_t	*path,
 
 #if DEBUG
     {
-	FILE *file = fopen ("polygons.txt", "a");
+	xfile_t *file = xfile_open ("polygons.txt", "a");
 	_cairo_debug_print_polygon (file, polygon);
-	fclose (file);
+	xfile_close (file);
     }
 #endif
 

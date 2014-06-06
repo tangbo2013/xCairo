@@ -31,8 +31,8 @@
 #define VG(x)
 #endif
 
-#ifndef NULL
-#define NULL (void *) 0
+#ifndef XNULL
+#define XNULL (void *) 0
 #endif
 
 /* Initialise a freelist that will be responsible for allocating
@@ -92,7 +92,7 @@ static inline void *
 _cairo_freepool_alloc_from_pool (cairo_freepool_t *freepool)
 {
     cairo_freelist_pool_t *pool;
-    uint8_t *ptr;
+    xuint8_t *ptr;
 
     pool = freepool->pools;
     if (unlikely (freepool->nodesize > pool->rem))
@@ -111,7 +111,7 @@ _cairo_freepool_alloc (cairo_freepool_t *freepool)
     cairo_freelist_node_t *node;
 
     node = freepool->first_free_node;
-    if (node == NULL)
+    if (node == XNULL)
 	return _cairo_freepool_alloc_from_pool (freepool);
 
     VG (VALGRIND_MAKE_MEM_DEFINED (node, sizeof (node->next)));

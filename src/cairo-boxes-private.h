@@ -37,8 +37,8 @@
 #include "cairo-types-private.h"
 #include "cairo-compiler-private.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <xC/xfile.h>
+#include <xC/xmemory.h>
 
 struct _cairo_boxes_t {
     cairo_status_t status;
@@ -117,7 +117,7 @@ cairo_private void
 _cairo_boxes_fini (cairo_boxes_t *boxes);
 
 cairo_private void
-_cairo_debug_print_boxes (FILE *stream,
+_cairo_debug_print_boxes (xfile_t *stream,
 			  const cairo_boxes_t *boxes);
 
 #endif /* CAIRO_BOXES_H */

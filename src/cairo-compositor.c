@@ -59,7 +59,7 @@ _cairo_compositor_paint (const cairo_compositor_t	*compositor,
 	return status;
 
     do {
-	while (compositor->paint == NULL)
+	while (compositor->paint == XNULL)
 	    compositor = compositor->delegate;
 
 	status = compositor->paint (compositor, &extents);
@@ -100,7 +100,7 @@ _cairo_compositor_mask (const cairo_compositor_t	*compositor,
 	return status;
 
     do {
-	while (compositor->mask == NULL)
+	while (compositor->mask == XNULL)
 	    compositor = compositor->delegate;
 
 	status = compositor->mask (compositor, &extents);
@@ -151,7 +151,7 @@ _cairo_compositor_stroke (const cairo_compositor_t	*compositor,
 	return status;
 
     do {
-	while (compositor->stroke == NULL)
+	while (compositor->stroke == XNULL)
 	    compositor = compositor->delegate;
 
 	status = compositor->stroke (compositor, &extents,
@@ -197,7 +197,7 @@ _cairo_compositor_fill (const cairo_compositor_t	*compositor,
 	return status;
 
     do {
-	while (compositor->fill == NULL)
+	while (compositor->fill == XNULL)
 	    compositor = compositor->delegate;
 
 	status = compositor->fill (compositor, &extents,
@@ -244,7 +244,7 @@ _cairo_compositor_glyphs (const cairo_compositor_t		*compositor,
 	return status;
 
     do {
-	while (compositor->glyphs == NULL)
+	while (compositor->glyphs == XNULL)
 	    compositor = compositor->delegate;
 
 	status = compositor->glyphs (compositor, &extents,

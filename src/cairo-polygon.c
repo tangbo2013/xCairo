@@ -53,21 +53,21 @@ assert_last_edge_is_valid(cairo_polygon_t *polygon,
 
     edge = &polygon->edges[polygon->num_edges-1];
 
-    assert (edge->bottom > edge->top);
-    assert (edge->top >= limit->p1.y);
-    assert (edge->bottom <= limit->p2.y);
+    XASSERT (edge->bottom > edge->top);
+    XASSERT (edge->top >= limit->p1.y);
+    XASSERT (edge->bottom <= limit->p2.y);
 
     x = _cairo_edge_compute_intersection_x_for_y (&edge->line.p1,
 						  &edge->line.p2,
 						  edge->top);
-    assert (x >= limit->p1.x);
-    assert (x <= limit->p2.x);
+    XASSERT (x >= limit->p1.x);
+    XASSERT (x <= limit->p2.x);
 
     x = _cairo_edge_compute_intersection_x_for_y (&edge->line.p1,
 						  &edge->line.p2,
 						  edge->bottom);
-    assert (x >= limit->p1.x);
-    assert (x <= limit->p2.x);
+    XASSERT (x >= limit->p1.x);
+    XASSERT (x <= limit->p2.x);
 }
 #else
 #define assert_last_edge_is_valid(p, l)
@@ -166,17 +166,17 @@ _cairo_polygon_init_boxes (cairo_polygon_t *polygon,
 	polygon->edges_size = 2 * boxes->num_boxes;
 	polygon->edges = _cairo_malloc_ab (polygon->edges_size,
 					   2*sizeof(cairo_edge_t));
-	if (unlikely (polygon->edges == NULL))
+	if (unlikely (polygon->edges == XNULL))
 	    return polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
     polygon->extents.p1.x = polygon->extents.p1.y = INT32_MAX;
     polygon->extents.p2.x = polygon->extents.p2.y = INT32_MIN;
 
-    polygon->limits = NULL;
+    polygon->limits = XNULL;
     polygon->num_limits = 0;
 
-    for (chunk = &boxes->chunks; chunk != NULL; chunk = chunk->next) {
+    for (chunk = &boxes->chunks; chunk != XNULL; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++) {
 	    cairo_point_t p1, p2;
 
@@ -214,14 +214,14 @@ _cairo_polygon_init_box_array (cairo_polygon_t *polygon,
 	polygon->edges_size = 2 * num_boxes;
 	polygon->edges = _cairo_malloc_ab (polygon->edges_size,
 					   2*sizeof(cairo_edge_t));
-	if (unlikely (polygon->edges == NULL))
+	if (unlikely (polygon->edges == XNULL))
 	    return polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
     polygon->extents.p1.x = polygon->extents.p1.y = INT32_MAX;
     polygon->extents.p2.x = polygon->extents.p2.y = INT32_MIN;
 
-    polygon->limits = NULL;
+    polygon->limits = XNULL;
     polygon->num_limits = 0;
 
     for (i = 0; i < num_boxes; i++) {
@@ -246,7 +246,7 @@ void
 _cairo_polygon_fini (cairo_polygon_t *polygon)
 {
     if (polygon->edges != polygon->edges_embedded)
-	free (polygon->edges);
+	xmemory_free (polygon->edges);
 
     VG (VALGRIND_MAKE_MEM_NOACCESS (polygon, sizeof (cairo_polygon_t)));
 }
@@ -266,14 +266,14 @@ _cairo_polygon_grow (cairo_polygon_t *polygon)
 
     if (polygon->edges == polygon->edges_embedded) {
 	new_edges = _cairo_malloc_ab (new_size, sizeof (cairo_edge_t));
-	if (new_edges != NULL)
-	    memcpy (new_edges, polygon->edges, old_size * sizeof (cairo_edge_t));
+	if (new_edges != XNULL)
+	    xmemory_copy (new_edges, polygon->edges, old_size * sizeof (cairo_edge_t));
     } else {
 	new_edges = _cairo_realloc_ab (polygon->edges,
 		                       new_size, sizeof (cairo_edge_t));
     }
 
-    if (unlikely (new_edges == NULL)) {
+    if (unlikely (new_edges == XNULL)) {
 	polygon->status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	return FALSE;
     }
@@ -293,7 +293,7 @@ _add_edge (cairo_polygon_t *polygon,
 {
     cairo_edge_t *edge;
 
-    assert (top < bottom);
+    XASSERT (top < bottom);
 
     if (unlikely (polygon->num_edges == polygon->edges_size)) {
 	if (! _cairo_polygon_grow (polygon))
@@ -563,7 +563,7 @@ _cairo_polygon_add_contour (cairo_polygon_t *polygon,
 			    const cairo_contour_t *contour)
 {
     const struct _cairo_contour_chain *chain;
-    const cairo_point_t *prev = NULL;
+    const cairo_point_t *prev = XNULL;
     int i;
 
     if (contour->chain.num_points <= 1)

@@ -106,7 +106,7 @@ _cairo_surface_wrapper_get_inverse_transform (cairo_surface_wrapper_t *wrapper,
 
 	inv = wrapper->transform;
 	status = cairo_matrix_invert (&inv);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 	cairo_matrix_multiply (m, &inv, m);
     }
 
@@ -156,7 +156,7 @@ _cairo_surface_wrapper_paint (cairo_surface_wrapper_t *wrapper,
 	_cairo_surface_wrapper_get_transform (wrapper, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -194,7 +194,7 @@ _cairo_surface_wrapper_mask (cairo_surface_wrapper_t *wrapper,
 	_cairo_surface_wrapper_get_transform (wrapper, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -250,7 +250,7 @@ _cairo_surface_wrapper_stroke (cairo_surface_wrapper_t *wrapper,
 	cairo_matrix_multiply (&dev_ctm, &dev_ctm, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	cairo_matrix_multiply (&dev_ctm_inverse, &m, &dev_ctm_inverse);
 
@@ -318,7 +318,7 @@ _cairo_surface_wrapper_fill_stroke (cairo_surface_wrapper_t *wrapper,
 	cairo_matrix_multiply (&dev_ctm, &dev_ctm, &m);
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	cairo_matrix_multiply (&dev_ctm_inverse, &m, &dev_ctm_inverse);
 
@@ -381,7 +381,7 @@ _cairo_surface_wrapper_fill (cairo_surface_wrapper_t	*wrapper,
 	dev_path = &path_copy;
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -451,7 +451,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 
 	if (num_glyphs > ARRAY_LENGTH (stack_glyphs)) {
 	    dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-	    if (unlikely (dev_glyphs == NULL)) {
+	    if (unlikely (dev_glyphs == XNULL)) {
 		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		goto FINISH;
 	    }
@@ -465,7 +465,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 	}
 
 	status = cairo_matrix_invert (&m);
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	_copy_transformed_pattern (&source_copy.base, source, &m);
 	source = &source_copy.base;
@@ -483,13 +483,13 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
 	 */
 	if (num_glyphs > ARRAY_LENGTH (stack_glyphs)) {
 	    dev_glyphs = _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-	    if (unlikely (dev_glyphs == NULL)) {
+	    if (unlikely (dev_glyphs == XNULL)) {
 		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 		goto FINISH;
 	    }
 	}
 
-	memcpy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
+	xmemory_copy (dev_glyphs, glyphs, sizeof (cairo_glyph_t) * num_glyphs);
     }
 
     status = _cairo_surface_show_text_glyphs (wrapper->target, op, source,
@@ -502,7 +502,7 @@ _cairo_surface_wrapper_show_text_glyphs (cairo_surface_wrapper_t *wrapper,
  FINISH:
     _cairo_clip_destroy (dev_clip);
     if (dev_glyphs != stack_glyphs)
-	free (dev_glyphs);
+	xmemory_free (dev_glyphs);
     if (dev_scaled_font != scaled_font)
 	cairo_scaled_font_destroy (dev_scaled_font);
     return status;
@@ -563,7 +563,7 @@ _cairo_surface_wrapper_set_inverse_transform (cairo_surface_wrapper_t *wrapper,
 {
     cairo_status_t status;
 
-    if (transform == NULL || _cairo_matrix_is_identity (transform)) {
+    if (transform == XNULL || _cairo_matrix_is_identity (transform)) {
 	cairo_matrix_init_identity (&wrapper->transform);
 
 	wrapper->needs_transform =
@@ -572,7 +572,7 @@ _cairo_surface_wrapper_set_inverse_transform (cairo_surface_wrapper_t *wrapper,
 	wrapper->transform = *transform;
 	status = cairo_matrix_invert (&wrapper->transform);
 	/* should always be invertible unless given pathological input */
-	assert (status == CAIRO_STATUS_SUCCESS);
+	XASSERT (status == CAIRO_STATUS_SUCCESS);
 
 	wrapper->needs_transform = TRUE;
     }
@@ -598,7 +598,7 @@ _cairo_surface_wrapper_snapshot (cairo_surface_wrapper_t *wrapper)
     if (wrapper->target->backend->snapshot)
 	return wrapper->target->backend->snapshot (wrapper->target);
 
-    return NULL;
+    return XNULL;
 }
 
 cairo_bool_t
@@ -615,7 +615,7 @@ _cairo_surface_wrapper_init (cairo_surface_wrapper_t *wrapper,
     cairo_matrix_init_identity (&wrapper->transform);
     wrapper->has_extents = FALSE;
     wrapper->extents.x = wrapper->extents.y = 0;
-    wrapper->clip = NULL;
+    wrapper->clip = XNULL;
 
     wrapper->needs_transform = FALSE;
     if (target) {
@@ -660,7 +660,7 @@ _cairo_surface_wrapper_get_target_extents (cairo_surface_wrapper_t *wrapper,
 	x2 = clip.x + clip.width;
 	y2 = clip.y + clip.height;
 
-	_cairo_matrix_transform_bounding_box (&m, &x1, &y1, &x2, &y2, NULL);
+	_cairo_matrix_transform_bounding_box (&m, &x1, &y1, &x2, &y2, XNULL);
 
 	clip.x = floor (x1);
 	clip.y = floor (y1);

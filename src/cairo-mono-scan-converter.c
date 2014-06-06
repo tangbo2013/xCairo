@@ -27,23 +27,23 @@
 #include "cairo-spans-private.h"
 #include "cairo-error-private.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <xC/xmemory.h>
+#include <xClib/string.h>
+//#include <limits.h>
 
 struct quorem {
-    int32_t quo;
-    int32_t rem;
+    xint32_t quo;
+    xint32_t rem;
 };
 
 struct edge {
     struct edge *next, *prev;
 
-    int32_t height_left;
-    int32_t dir;
-    int32_t vertical;
+    xint32_t height_left;
+    xint32_t dir;
+    xint32_t vertical;
 
-    int32_t dy;
+    xint32_t dy;
     struct quorem x;
     struct quorem dxdy;
 };
@@ -53,7 +53,7 @@ struct edge {
  * converting. */
 struct polygon {
     /* The vertical clip extents. */
-    int32_t ymin, ymax;
+    xint32_t ymin, ymax;
 
     int num_edges;
     struct edge *edges;
@@ -79,8 +79,8 @@ struct mono_scan_converter {
     int num_spans;
 
     /* Clip box. */
-    int32_t xmin, xmax;
-    int32_t ymin, ymax;
+    xint32_t xmin, xmax;
+    xint32_t ymin, ymax;
 };
 
 #define I(x) _cairo_fixed_integer_round_down(x)
@@ -124,10 +124,10 @@ polygon_init (struct polygon *polygon, int ymin, int ymax)
     polygon->y_buckets = polygon->y_buckets_embedded;
     if (h > ARRAY_LENGTH (polygon->y_buckets_embedded)) {
 	polygon->y_buckets = _cairo_malloc_ab (h, sizeof (struct edge *));
-	if (unlikely (NULL == polygon->y_buckets))
+    if (unlikely (XNULL == polygon->y_buckets))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
-    memset (polygon->y_buckets, 0, h * sizeof (struct edge *));
+    xmemory_set (polygon->y_buckets, 0, h * sizeof (struct edge *));
     polygon->y_buckets[h-1] = (void *)-1;
 
     polygon->ymin = ymin;
@@ -139,10 +139,10 @@ static void
 polygon_fini (struct polygon *polygon)
 {
     if (polygon->y_buckets != polygon->y_buckets_embedded)
-	free (polygon->y_buckets);
+	xmemory_free (polygon->y_buckets);
 
     if (polygon->edges != polygon->edges_embedded)
-	free (polygon->edges);
+	xmemory_free (polygon->edges);
 }
 
 static void
@@ -154,7 +154,7 @@ _polygon_insert_edge_into_its_y_bucket(struct polygon *polygon,
     if (*ptail)
 	(*ptail)->prev = e;
     e->next = *ptail;
-    e->prev = NULL;
+    e->prev = XNULL;
     *ptail = e;
 }
 
@@ -210,7 +210,7 @@ static struct edge *
 merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 {
     struct edge *head, **next, *prev;
-    int32_t x;
+    xint32_t x;
 
     prev = head_a->prev;
     next = &head;
@@ -224,7 +224,7 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
     do {
 	x = head_b->x.quo;
-	while (head_a != NULL && head_a->x.quo <= x) {
+    while (head_a != XNULL && head_a->x.quo <= x) {
 	    prev = head_a;
 	    next = &head_a->next;
 	    head_a = head_a->next;
@@ -232,12 +232,12 @@ merge_sorted_edges (struct edge *head_a, struct edge *head_b)
 
 	head_b->prev = prev;
 	*next = head_b;
-	if (head_a == NULL)
+    if (head_a == XNULL)
 	    return head;
 
 start_with_b:
 	x = head_a->x.quo;
-	while (head_b != NULL && head_b->x.quo <= x) {
+    while (head_b != XNULL && head_b->x.quo <= x) {
 	    prev = head_b;
 	    next = &head_b->next;
 	    head_b = head_b->next;
@@ -245,7 +245,7 @@ start_with_b:
 
 	head_a->prev = prev;
 	*next = head_a;
-	if (head_b == NULL)
+    if (head_b == XNULL)
 	    return head;
     } while (1);
 }
@@ -260,21 +260,21 @@ sort_edges (struct edge *list,
 
     head_other = list->next;
 
-    if (head_other == NULL) {
+    if (head_other == XNULL) {
 	*head_out = list;
-	return NULL;
+    return XNULL;
     }
 
     remaining = head_other->next;
     if (list->x.quo <= head_other->x.quo) {
 	*head_out = list;
-	head_other->next = NULL;
+    head_other->next = XNULL;
     } else {
 	*head_out = head_other;
 	head_other->prev = list->prev;
 	head_other->next = list;
 	list->prev = head_other;
-	list->next = NULL;
+    list->next = XNULL;
     }
 
     for (i = 0; i < level && remaining; i++) {
@@ -288,7 +288,7 @@ sort_edges (struct edge *list,
 static struct edge *
 merge_unsorted_edges (struct edge *head, struct edge *unsorted)
 {
-    sort_edges (unsorted, UINT_MAX, &unsorted);
+    sort_edges (unsorted, XUINT32_MAX, &unsorted);
     return merge_sorted_edges (head, unsorted);
 }
 
@@ -328,7 +328,7 @@ inline static void
 row (struct mono_scan_converter *c, unsigned int mask)
 {
     struct edge *edge = c->head.next;
-    int xstart = INT_MIN, prev_x = INT_MIN;
+    int xstart = XINT32_MIN, prev_x = XINT32_MIN;
     int winding = 0;
 
     c->num_spans = 0;
@@ -368,9 +368,9 @@ row (struct mono_scan_converter *c, unsigned int mask)
 	if ((winding & mask) == 0) {
 	    if (I(next->x.quo) > xend + 1) {
 		add_span (c, xstart, xend);
-		xstart = INT_MIN;
+        xstart = XINT32_MIN;
 	    }
-	} else if (xstart == INT_MIN)
+    } else if (xstart == XINT32_MIN)
 	    xstart = xend;
 
 	edge = next;
@@ -402,7 +402,7 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
     if (max_num_spans > ARRAY_LENGTH(c->spans_embedded)) {
 	c->spans = _cairo_malloc_ab (max_num_spans,
 				     sizeof (cairo_half_open_span_t));
-	if (unlikely (c->spans == NULL)) {
+    if (unlikely (c->spans == XNULL)) {
 	    polygon_fini (c->polygon);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
@@ -415,14 +415,14 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
     c->ymax = ymax;
 
     c->head.vertical = 1;
-    c->head.height_left = INT_MAX;
-    c->head.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (INT_MIN));
-    c->head.prev = NULL;
+    c->head.height_left = XINT32_MAX;
+    c->head.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MIN));
+    c->head.prev = XNULL;
     c->head.next = &c->tail;
     c->tail.prev = &c->head;
-    c->tail.next = NULL;
-    c->tail.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (INT_MAX));
-    c->tail.height_left = INT_MAX;
+    c->tail.next = XNULL;
+    c->tail.x.quo = _cairo_fixed_from_int (_cairo_fixed_integer_part (XINT32_MAX));
+    c->tail.height_left = XINT32_MAX;
     c->tail.vertical = 1;
 
     c->is_vertical = 1;
@@ -433,7 +433,7 @@ static void
 _mono_scan_converter_fini(struct mono_scan_converter *self)
 {
     if (self->spans != self->spans_embedded)
-	free (self->spans);
+	xmemory_free (self->spans);
 
     polygon_fini(self->polygon);
 }
@@ -447,7 +447,7 @@ mono_scan_converter_allocate_edges(struct mono_scan_converter *c,
     c->polygon->edges = c->polygon->edges_embedded;
     if (num_edges > ARRAY_LENGTH (c->polygon->edges_embedded)) {
 	c->polygon->edges = _cairo_malloc_ab (num_edges, sizeof (struct edge));
-	if (unlikely (c->polygon->edges == NULL))
+    if (unlikely (c->polygon->edges == XNULL))
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
     }
 
@@ -502,7 +502,7 @@ mono_scan_converter_render(struct mono_scan_converter *c,
 		e = e->next;
 	    }
 
-	    while (--min_height >= 1 && polygon->y_buckets[j] == NULL)
+        while (--min_height >= 1 && polygon->y_buckets[j] == XNULL)
 		j++;
 	    if (j != i + 1)
 		step_edges (c, j - (i + 1));
@@ -538,7 +538,7 @@ _cairo_mono_scan_converter_destroy (void *converter)
 {
     cairo_mono_scan_converter_t *self = converter;
     _mono_scan_converter_fini (self->converter);
-    free(self);
+    xmemory_free(self);
 }
 
 cairo_status_t
@@ -550,9 +550,9 @@ _cairo_mono_scan_converter_add_polygon (void		*converter,
     int i;
 
 #if 0
-    FILE *file = fopen ("polygon.txt", "w");
+    xfile_t *file = xfile_open ("polygon.txt", "w");
     _cairo_debug_print_polygon (file, polygon);
-    fclose (file);
+    xfile_close (file);
 #endif
 
     status = mono_scan_converter_allocate_edges (self->converter,
@@ -587,8 +587,8 @@ _cairo_mono_scan_converter_create (int			xmin,
     cairo_mono_scan_converter_t *self;
     cairo_status_t status;
 
-    self = malloc (sizeof(struct _cairo_mono_scan_converter));
-    if (unlikely (self == NULL)) {
+    self = xmemory_alloc (sizeof(struct _cairo_mono_scan_converter));
+    if (unlikely (self == XNULL)) {
 	status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	goto bail_nomem;
     }

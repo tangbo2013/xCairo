@@ -168,10 +168,10 @@ sqlen (cairo_point_double_t p0, cairo_point_double_t p1)
     return delta.x * delta.x + delta.y * delta.y;
 }
 
-static inline int16_t
-_color_delta_to_shifted_short (int32_t from, int32_t to, int shift)
+static inline xint16_t
+_color_delta_to_shifted_short (xint32_t from, xint32_t to, int shift)
 {
-    int32_t delta = to - from;
+    xint32_t delta = to - from;
 
     /* We need to round toward zero, because otherwise adding the
      * delta 2^shift times can overflow */
@@ -282,7 +282,7 @@ fd_fwd (double f[4])
  * i[0] is 9.23 fixed point, other differences are 4.28 fixed point.
  */
 static inline void
-fd_fixed (double d[4], int32_t i[4])
+fd_fixed (double d[4], xint32_t i[4])
 {
     i[0] = _cairo_fixed_16_16_from_double (256 *  2 * d[0]);
     i[1] = _cairo_fixed_16_16_from_double (256 * 16 * d[1]);
@@ -300,7 +300,7 @@ fd_fixed (double d[4], int32_t i[4])
  * f[0] is 9.23 fixed point, other differences are 4.28 fixed point.
  */
 static inline void
-fd_fixed_fwd (int32_t f[4])
+fd_fixed_fwd (xint32_t f[4])
 {
     f[0] += (f[1] >> 5) + ((f[1] >> 4) & 1);
     f[1] += f[2];
@@ -455,10 +455,10 @@ intersect_interval (double a, double b, double c, double d)
  */
 static inline void
 draw_pixel (unsigned char *data, int width, int height, int stride,
-	    int x, int y, uint16_t r, uint16_t g, uint16_t b, uint16_t a)
+	    int x, int y, xuint16_t r, xuint16_t g, xuint16_t b, xuint16_t a)
 {
     if (likely (0 <= x && 0 <= y && x < width && y < height)) {
-	uint32_t tr, tg, tb, ta;
+	xuint32_t tr, tg, tb, ta;
 
 	/* Premultiply and round */
 	ta = a;
@@ -470,7 +470,7 @@ draw_pixel (unsigned char *data, int width, int height, int stride,
 	tg += tg >> 16;
 	tb += tb >> 16;
 
-	*((uint32_t*) (data + y*stride + 4*x)) = ((ta << 16) & 0xff000000) |
+	*((xuint32_t*) (data + y*stride + 4*x)) = ((ta << 16) & 0xff000000) |
 	    ((tr >> 8) & 0xff0000) | ((tg >> 16) & 0xff00) | (tb >> 24);
     }
 }
@@ -501,17 +501,17 @@ draw_pixel (unsigned char *data, int width, int height, int stride,
 static inline void
 rasterize_bezier_curve (unsigned char *data, int width, int height, int stride,
 			int ushift, double dxu[4], double dyu[4],
-			uint16_t r0, uint16_t g0, uint16_t b0, uint16_t a0,
-			uint16_t r3, uint16_t g3, uint16_t b3, uint16_t a3)
+            xuint16_t r0, xuint16_t g0, xuint16_t b0, xuint16_t a0,
+            xuint16_t r3, xuint16_t g3, xuint16_t b3, xuint16_t a3)
 {
-    int32_t xu[4], yu[4];
+    xint32_t xu[4], yu[4];
     int x0, y0, u, usteps = 1 << ushift;
 
-    uint16_t r = r0, g = g0, b = b0, a = a0;
-    int16_t dr = _color_delta_to_shifted_short (r0, r3, ushift);
-    int16_t dg = _color_delta_to_shifted_short (g0, g3, ushift);
-    int16_t db = _color_delta_to_shifted_short (b0, b3, ushift);
-    int16_t da = _color_delta_to_shifted_short (a0, a3, ushift);
+    xuint16_t r = r0, g = g0, b = b0, a = a0;
+    xint16_t dr = _color_delta_to_shifted_short (r0, r3, ushift);
+    xint16_t dg = _color_delta_to_shifted_short (g0, g3, ushift);
+    xint16_t db = _color_delta_to_shifted_short (b0, b3, ushift);
+    xint16_t da = _color_delta_to_shifted_short (a0, a3, ushift);
 
     fd_fixed (dxu, xu);
     fd_fixed (dyu, yu);
@@ -891,12 +891,12 @@ _cairo_mesh_pattern_rasterize (const cairo_mesh_pattern_t *mesh,
     const cairo_mesh_patch_t *patch;
     const cairo_color_t *c;
 
-    assert (mesh->base.status == CAIRO_STATUS_SUCCESS);
-    assert (mesh->current_patch == NULL);
+    XASSERT (mesh->base.status == CAIRO_STATUS_SUCCESS);
+    XASSERT (mesh->current_patch == XNULL);
 
     p2u = mesh->base.matrix;
     status = cairo_matrix_invert (&p2u);
-    assert (status == CAIRO_STATUS_SUCCESS);
+    XASSERT (status == CAIRO_STATUS_SUCCESS);
 
     n = _cairo_array_num_elements (&mesh->patches);
     patch = _cairo_array_index_const (&mesh->patches, 0);

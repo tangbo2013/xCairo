@@ -83,11 +83,11 @@ _cairo_stock_color (cairo_stock_t stock)
  * then special-casing the result of an input value of 1.0 so that it
  * maps to 65535 instead of 65536.
  */
-uint16_t
+xuint16_t
 _cairo_color_double_to_short (double d)
 {
-    uint32_t i;
-    i = (uint32_t) (d * 65536);
+    xuint32_t i;
+    i = (xuint32_t) (d * 65536);
     i -= (i >> 16);
     return i;
 }
