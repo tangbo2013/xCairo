@@ -132,30 +132,14 @@ HEADERS += \
     ../../cairo-deprecated.h \
     ../../cairo-features.h \
     ../cairoint.h \
-    ../cairo-xml.h \
-    ../cairo-xlib.h \
-    ../cairo-xlib-xrender.h \
-    ../cairo-xlib-xrender-private.h \
-    ../cairo-xlib-surface-private.h \
-    ../cairo-xlib-private.h \
-    ../cairo-xcb.h \
-    ../cairo-xcb-private.h \
-    ../cairo-win32.h \
     ../cairo-wideint-type-private.h \
     ../cairo-wideint-private.h \
-    ../cairo-vg.h \
     ../cairo-user-font-private.h \
     ../cairo-types-private.h \
     ../cairo-type3-glyph-surface-private.h \
-    ../cairo-type1-private.h \
-    ../cairo-truetype-subset-private.h \
     ../cairo-tristrip-private.h \
     ../cairo-traps-private.h \
     ../cairo-time-private.h \
-    ../cairo-tee.h \
-    ../cairo-tee-surface-private.h \
-    ../cairo-svg.h \
-    ../cairo-svg-surface-private.h \
     ../cairo-surface-wrapper-private.h \
     ../cairo-surface-subsurface-private.h \
     ../cairo-surface-subsurface-inline.h \
@@ -173,9 +157,6 @@ HEADERS += \
     ../cairo-spans-private.h \
     ../cairo-spans-compositor-private.h \
     ../cairo-slope-private.h \
-    ../cairo-skia.h \
-    ../cairo-script.h \
-    ../cairo-script-private.h \
     ../cairo-scaled-font-subsets-private.h \
     ../cairo-scaled-font-private.h \
     ../cairo-rtree-private.h \
@@ -183,18 +164,8 @@ HEADERS += \
     ../cairo-reference-count-private.h \
     ../cairo-recording-surface-private.h \
     ../cairo-recording-surface-inline.h \
-    ../cairo-quartz.h \
-    ../cairo-quartz-private.h \
-    ../cairo-quartz-image.h \
-    ../cairo-qt.h \
-    ../cairo-ps.h \
-    ../cairo-ps-surface-private.h \
     ../cairo-private.h \
     ../cairo-pixman-private.h \
-    ../cairo-pdf.h \
-    ../cairo-pdf-surface-private.h \
-    ../cairo-pdf-shading-private.h \
-    ../cairo-pdf-operators-private.h \
     ../cairo-pattern-private.h \
     ../cairo-pattern-inline.h \
     ../cairo-path-private.h \
@@ -202,8 +173,6 @@ HEADERS += \
     ../cairo-paginated-surface-private.h \
     ../cairo-paginated-private.h \
     ../cairo-output-stream-private.h \
-    ../cairo-os2.h \
-    ../cairo-os2-private.h \
     ../cairo-mutex-type-private.h \
     ../cairo-mutex-private.h \
     ../cairo-mutex-list-private.h \
@@ -217,13 +186,6 @@ HEADERS += \
     ../cairo-image-info-private.h \
     ../cairo-hash-private.h \
     ../cairo-gstate-private.h \
-    ../cairo-gl.h \
-    ../cairo-gl-private.h \
-    ../cairo-gl-gradient-private.h \
-    ../cairo-gl-ext-def-private.h \
-    ../cairo-gl-dispatch-private.h \
-    ../cairo-ft.h \
-    ../cairo-ft-private.h \
     ../cairo-freelist-type-private.h \
     ../cairo-freelist-private.h \
     ../cairo-freed-pool-private.h \
@@ -232,8 +194,6 @@ HEADERS += \
     ../cairo-fixed-private.h \
     ../cairo-error-private.h \
     ../cairo-error-inline.h \
-    ../cairo-drm.h \
-    ../cairo-directfb.h \
     ../cairo-device-private.h \
     ../cairo-default-context-private.h \
     ../cairo-damage-private.h \
@@ -243,23 +203,19 @@ HEADERS += \
     ../cairo-composite-rectangles-private.h \
     ../cairo-compiler-private.h \
     ../cairo-combsort-inline.h \
-    ../cairo-cogl.h \
-    ../cairo-cogl-utils-private.h \
-    ../cairo-cogl-private.h \
-    ../cairo-cogl-gradient-private.h \
-    ../cairo-cogl-context-private.h \
     ../cairo-clip-private.h \
     ../cairo-clip-inline.h \
     ../cairo-cache-private.h \
     ../cairo-boxes-private.h \
     ../cairo-box-inline.h \
-    ../cairo-beos.h \
     ../cairo-backend-private.h \
     ../cairo-atomic-private.h \
     ../cairo-array-private.h \
     ../cairo-arc-private.h \
     ../cairo-analysis-surface-private.h \
-    ../config.h
+    ../config.h \
+    ../cairo-tee.h \
+    ../cairo-tee-surface-private.h
 unix:!symbian {
     maemo5 {
         target.path = /opt/usr/lib
