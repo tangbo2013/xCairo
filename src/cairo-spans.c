@@ -40,7 +40,7 @@ _cairo_nil_destroy (void *abstract)
 
 static cairo_status_t
 _cairo_nil_scan_converter_generate (void *abstract_converter,
-				    cairo_span_renderer_t *renderer)
+                    cairo_span_renderer_t *renderer)
 {
     (void) abstract_converter;
     (void) renderer;
@@ -56,21 +56,21 @@ _cairo_scan_converter_status (void *abstract_converter)
 
 cairo_status_t
 _cairo_scan_converter_set_error (void *abstract_converter,
-				 cairo_status_t error)
+                 cairo_status_t error)
 {
     cairo_scan_converter_t *converter = abstract_converter;
     if (error == CAIRO_STATUS_SUCCESS)
-	ASSERT_NOT_REACHED;
+    ASSERT_NOT_REACHED;
     if (converter->status == CAIRO_STATUS_SUCCESS) {
-	converter->generate = _cairo_nil_scan_converter_generate;
-	converter->status = error;
+    converter->generate = _cairo_nil_scan_converter_generate;
+    converter->status = error;
     }
     return converter->status;
 }
 
 static void
 _cairo_nil_scan_converter_init (cairo_scan_converter_t *converter,
-				cairo_status_t status)
+                cairo_status_t status)
 {
     converter->destroy = _cairo_nil_destroy;
     converter->status = CAIRO_STATUS_SUCCESS;
@@ -81,15 +81,15 @@ cairo_scan_converter_t *
 _cairo_scan_converter_create_in_error (cairo_status_t status)
 {
 #define RETURN_NIL {\
-	    static cairo_scan_converter_t nil;\
-	    _cairo_nil_scan_converter_init (&nil, status);\
-	    return &nil;\
-	}
+        static cairo_scan_converter_t nil;\
+        _cairo_nil_scan_converter_init (&nil, status);\
+        return &nil;\
+    }
     switch (status) {
     case CAIRO_STATUS_SUCCESS:
     case CAIRO_STATUS_LAST_STATUS:
-	ASSERT_NOT_REACHED;
-	break;
+    ASSERT_NOT_REACHED;
+    break;
     case CAIRO_STATUS_INVALID_RESTORE: RETURN_NIL;
     case CAIRO_STATUS_INVALID_POP_GROUP: RETURN_NIL;
     case CAIRO_STATUS_NO_CURRENT_POINT: RETURN_NIL;
@@ -113,22 +113,15 @@ _cairo_scan_converter_create_in_error (cairo_status_t status)
     case CAIRO_STATUS_CLIP_NOT_REPRESENTABLE: RETURN_NIL;
     case CAIRO_STATUS_TEMP_FILE_ERROR: RETURN_NIL;
     case CAIRO_STATUS_INVALID_STRIDE: RETURN_NIL;
-    case CAIRO_STATUS_FONT_TYPE_MISMATCH: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_IMMUTABLE: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_ERROR: RETURN_NIL;
     case CAIRO_STATUS_NEGATIVE_COUNT: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_CLUSTERS: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_SLANT: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_WEIGHT: RETURN_NIL;
     case CAIRO_STATUS_NO_MEMORY: RETURN_NIL;
     case CAIRO_STATUS_INVALID_SIZE: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_TYPE_MISMATCH: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_ERROR: RETURN_NIL;
     case CAIRO_STATUS_INVALID_MESH_CONSTRUCTION: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_FINISHED: RETURN_NIL;
     default:
-	break;
+    break;
     }
     status = CAIRO_STATUS_NO_MEMORY;
     RETURN_NIL;
@@ -170,19 +163,19 @@ _cairo_span_renderer_set_error (
 {
     cairo_span_renderer_t *renderer = abstract_renderer;
     if (error == CAIRO_STATUS_SUCCESS) {
-	ASSERT_NOT_REACHED;
+    ASSERT_NOT_REACHED;
     }
     if (renderer->status == CAIRO_STATUS_SUCCESS) {
-	renderer->render_rows = _cairo_nil_span_renderer_render_rows;
-	renderer->finish = _cairo_nil_span_renderer_finish;
-	renderer->status = error;
+    renderer->render_rows = _cairo_nil_span_renderer_render_rows;
+    renderer->finish = _cairo_nil_span_renderer_finish;
+    renderer->status = error;
     }
     return renderer->status;
 }
 
 static void
 _cairo_nil_span_renderer_init (cairo_span_renderer_t *renderer,
-			       cairo_status_t status)
+                   cairo_status_t status)
 {
     renderer->destroy = _cairo_nil_destroy;
     renderer->status = CAIRO_STATUS_SUCCESS;
@@ -193,15 +186,15 @@ cairo_span_renderer_t *
 _cairo_span_renderer_create_in_error (cairo_status_t status)
 {
 #define RETURN_NIL {\
-	    static cairo_span_renderer_t nil;\
-	    _cairo_nil_span_renderer_init (&nil, status);\
-	    return &nil;\
-	}
+        static cairo_span_renderer_t nil;\
+        _cairo_nil_span_renderer_init (&nil, status);\
+        return &nil;\
+    }
     switch (status) {
     case CAIRO_STATUS_SUCCESS:
     case CAIRO_STATUS_LAST_STATUS:
-	ASSERT_NOT_REACHED;
-	break;
+    ASSERT_NOT_REACHED;
+    break;
     case CAIRO_STATUS_INVALID_RESTORE: RETURN_NIL;
     case CAIRO_STATUS_INVALID_POP_GROUP: RETURN_NIL;
     case CAIRO_STATUS_NO_CURRENT_POINT: RETURN_NIL;
@@ -225,22 +218,15 @@ _cairo_span_renderer_create_in_error (cairo_status_t status)
     case CAIRO_STATUS_CLIP_NOT_REPRESENTABLE: RETURN_NIL;
     case CAIRO_STATUS_TEMP_FILE_ERROR: RETURN_NIL;
     case CAIRO_STATUS_INVALID_STRIDE: RETURN_NIL;
-    case CAIRO_STATUS_FONT_TYPE_MISMATCH: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_IMMUTABLE: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_ERROR: RETURN_NIL;
     case CAIRO_STATUS_NEGATIVE_COUNT: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_CLUSTERS: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_SLANT: RETURN_NIL;
-    case CAIRO_STATUS_INVALID_WEIGHT: RETURN_NIL;
     case CAIRO_STATUS_NO_MEMORY: RETURN_NIL;
     case CAIRO_STATUS_INVALID_SIZE: RETURN_NIL;
-    case CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_TYPE_MISMATCH: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_ERROR: RETURN_NIL;
     case CAIRO_STATUS_INVALID_MESH_CONSTRUCTION: RETURN_NIL;
     case CAIRO_STATUS_DEVICE_FINISHED: RETURN_NIL;
     default:
-	break;
+    break;
     }
     status = CAIRO_STATUS_NO_MEMORY;
     RETURN_NIL;

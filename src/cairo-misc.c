@@ -49,7 +49,7 @@ COMPILE_TIME_ASSERT (CAIRO_INT_STATUS_LAST_STATUS <= 127);
  * @Title: Error handling
  * @Short_Description: Decoding cairo's status
  * @See_Also: cairo_status(), cairo_surface_status(), cairo_pattern_status(),
- *            cairo_font_face_status(), cairo_scaled_font_status(), 
+ *            cairo_font_face_status(), cairo_scaled_font_status(),
  *            cairo_region_status()
  *
  * Cairo uses a single status type to represent all kinds of errors.  A status
@@ -81,260 +81,73 @@ cairo_status_to_string (cairo_status_t status)
 {
     switch (status) {
     case CAIRO_STATUS_SUCCESS:
-	return "no error has occurred";
+    return "no error has occurred";
     case CAIRO_STATUS_NO_MEMORY:
-	return "out of memory";
+    return "out of memory";
     case CAIRO_STATUS_INVALID_RESTORE:
-	return "cairo_restore() without matching cairo_save()";
+    return "cairo_restore() without matching cairo_save()";
     case CAIRO_STATUS_INVALID_POP_GROUP:
-	return "no saved group to pop, i.e. cairo_pop_group() without matching cairo_push_group()";
+    return "no saved group to pop, i.e. cairo_pop_group() without matching cairo_push_group()";
     case CAIRO_STATUS_NO_CURRENT_POINT:
-	return "no current point defined";
+    return "no current point defined";
     case CAIRO_STATUS_INVALID_MATRIX:
-	return "invalid matrix (not invertible)";
+    return "invalid matrix (not invertible)";
     case CAIRO_STATUS_INVALID_STATUS:
-	return "invalid value for an input cairo_status_t";
+    return "invalid value for an input cairo_status_t";
     case CAIRO_STATUS_NULL_POINTER:
-	return "NULL pointer";
+    return "NULL pointer";
     case CAIRO_STATUS_INVALID_STRING:
-	return "input string not valid UTF-8";
+    return "input string not valid UTF-8";
     case CAIRO_STATUS_INVALID_PATH_DATA:
-	return "input path data not valid";
+    return "input path data not valid";
     case CAIRO_STATUS_READ_ERROR:
-	return "error while reading from input stream";
+    return "error while reading from input stream";
     case CAIRO_STATUS_WRITE_ERROR:
-	return "error while writing to output stream";
+    return "error while writing to output stream";
     case CAIRO_STATUS_SURFACE_FINISHED:
-	return "the target surface has been finished";
+    return "the target surface has been finished";
     case CAIRO_STATUS_SURFACE_TYPE_MISMATCH:
-	return "the surface type is not appropriate for the operation";
+    return "the surface type is not appropriate for the operation";
     case CAIRO_STATUS_PATTERN_TYPE_MISMATCH:
-	return "the pattern type is not appropriate for the operation";
+    return "the pattern type is not appropriate for the operation";
     case CAIRO_STATUS_INVALID_CONTENT:
-	return "invalid value for an input cairo_content_t";
+    return "invalid value for an input cairo_content_t";
     case CAIRO_STATUS_INVALID_FORMAT:
-	return "invalid value for an input cairo_format_t";
+    return "invalid value for an input cairo_format_t";
     case CAIRO_STATUS_INVALID_VISUAL:
-	return "invalid value for an input Visual*";
+    return "invalid value for an input Visual*";
     case CAIRO_STATUS_FILE_NOT_FOUND:
-	return "file not found";
+    return "file not found";
     case CAIRO_STATUS_INVALID_DASH:
-	return "invalid value for a dash setting";
+    return "invalid value for a dash setting";
     case CAIRO_STATUS_INVALID_DSC_COMMENT:
-	return "invalid value for a DSC comment";
+    return "invalid value for a DSC comment";
     case CAIRO_STATUS_INVALID_INDEX:
-	return "invalid index passed to getter";
+    return "invalid index passed to getter";
     case CAIRO_STATUS_CLIP_NOT_REPRESENTABLE:
         return "clip region not representable in desired format";
     case CAIRO_STATUS_TEMP_FILE_ERROR:
-	return "error creating or writing to a temporary file";
+    return "error creating or writing to a temporary file";
     case CAIRO_STATUS_INVALID_STRIDE:
-	return "invalid value for stride";
-    case CAIRO_STATUS_FONT_TYPE_MISMATCH:
-	return "the font type is not appropriate for the operation";
-    case CAIRO_STATUS_USER_FONT_IMMUTABLE:
-	return "the user-font is immutable";
-    case CAIRO_STATUS_USER_FONT_ERROR:
-	return "error occurred in a user-font callback function";
+    return "invalid value for stride";
     case CAIRO_STATUS_NEGATIVE_COUNT:
-	return "negative number used where it is not allowed";
-    case CAIRO_STATUS_INVALID_CLUSTERS:
-	return "input clusters do not represent the accompanying text and glyph arrays";
-    case CAIRO_STATUS_INVALID_SLANT:
-	return "invalid value for an input cairo_font_slant_t";
-    case CAIRO_STATUS_INVALID_WEIGHT:
-	return "invalid value for an input cairo_font_weight_t";
+    return "negative number used where it is not allowed";
     case CAIRO_STATUS_INVALID_SIZE:
-	return "invalid value (typically too big) for the size of the input (surface, pattern, etc.)";
-    case CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED:
-	return "user-font method not implemented";
+    return "invalid value (typically too big) for the size of the input (surface, pattern, etc.)";
     case CAIRO_STATUS_DEVICE_TYPE_MISMATCH:
-	return "the device type is not appropriate for the operation";
+    return "the device type is not appropriate for the operation";
     case CAIRO_STATUS_DEVICE_ERROR:
-	return "an operation to the device caused an unspecified error";
+    return "an operation to the device caused an unspecified error";
     case CAIRO_STATUS_INVALID_MESH_CONSTRUCTION:
-	return "invalid operation during mesh pattern construction";
+    return "invalid operation during mesh pattern construction";
     case CAIRO_STATUS_DEVICE_FINISHED:
-	return "the target device has been finished";
+    return "the target device has been finished";
     default:
     case CAIRO_STATUS_LAST_STATUS:
-	return "<unknown error status>";
+    return "<unknown error status>";
     }
 }
 
-
-/**
- * cairo_glyph_allocate:
- * @num_glyphs: number of glyphs to allocate
- *
- * Allocates an array of #cairo_glyph_t's.
- * This function is only useful in implementations of
- * #cairo_user_scaled_font_text_to_glyphs_func_t where the user
- * needs to allocate an array of glyphs that cairo will free.
- * For all other uses, user can use their own allocation method
- * for glyphs.
- *
- * This function returns %NULL if @num_glyphs is not positive,
- * or if out of memory.  That means, the %NULL return value
- * signals out-of-memory only if @num_glyphs was positive.
- *
- * Returns: the newly allocated array of glyphs that should be
- *          freed using cairo_glyph_free()
- *
- * Since: 1.8
- **/
-cairo_glyph_t *
-cairo_glyph_allocate (int num_glyphs)
-{
-    if (num_glyphs <= 0)
-    return XNULL;
-
-    return _cairo_malloc_ab (num_glyphs, sizeof (cairo_glyph_t));
-}
-slim_hidden_def (cairo_glyph_allocate);
-
-/**
- * cairo_glyph_free:
- * @glyphs: array of glyphs to free, or %NULL
- *
- * Frees an array of #cairo_glyph_t's allocated using cairo_glyph_allocate().
- * This function is only useful to free glyph array returned
- * by cairo_scaled_font_text_to_glyphs() where cairo returns
- * an array of glyphs that the user will free.
- * For all other uses, user can use their own allocation method
- * for glyphs.
- *
- * Since: 1.8
- **/
-void
-cairo_glyph_free (cairo_glyph_t *glyphs)
-{
-    xmemory_free (glyphs);
-}
-slim_hidden_def (cairo_glyph_free);
-
-/**
- * cairo_text_cluster_allocate:
- * @num_clusters: number of text_clusters to allocate
- *
- * Allocates an array of #cairo_text_cluster_t's.
- * This function is only useful in implementations of
- * #cairo_user_scaled_font_text_to_glyphs_func_t where the user
- * needs to allocate an array of text clusters that cairo will free.
- * For all other uses, user can use their own allocation method
- * for text clusters.
- *
- * This function returns %NULL if @num_clusters is not positive,
- * or if out of memory.  That means, the %NULL return value
- * signals out-of-memory only if @num_clusters was positive.
- *
- * Returns: the newly allocated array of text clusters that should be
- *          freed using cairo_text_cluster_free()
- *
- * Since: 1.8
- **/
-cairo_text_cluster_t *
-cairo_text_cluster_allocate (int num_clusters)
-{
-    if (num_clusters <= 0)
-    return XNULL;
-
-    return _cairo_malloc_ab (num_clusters, sizeof (cairo_text_cluster_t));
-}
-slim_hidden_def (cairo_text_cluster_allocate);
-
-/**
- * cairo_text_cluster_free:
- * @clusters: array of text clusters to free, or %NULL
- *
- * Frees an array of #cairo_text_cluster's allocated using cairo_text_cluster_allocate().
- * This function is only useful to free text cluster array returned
- * by cairo_scaled_font_text_to_glyphs() where cairo returns
- * an array of text clusters that the user will free.
- * For all other uses, user can use their own allocation method
- * for text clusters.
- *
- * Since: 1.8
- **/
-void
-cairo_text_cluster_free (cairo_text_cluster_t *clusters)
-{
-    xmemory_free (clusters);
-}
-slim_hidden_def (cairo_text_cluster_free);
-
-
-/* Private stuff */
-
-/**
- * _cairo_validate_text_clusters:
- * @utf8: UTF-8 text
- * @utf8_len: length of @utf8 in bytes
- * @glyphs: array of glyphs
- * @num_glyphs: number of glyphs
- * @clusters: array of cluster mapping information
- * @num_clusters: number of clusters in the mapping
- * @cluster_flags: cluster flags
- *
- * Check that clusters cover the entire glyphs and utf8 arrays,
- * and that cluster boundaries are UTF-8 boundaries.
- *
- * Return value: %CAIRO_STATUS_SUCCESS upon success, or
- *               %CAIRO_STATUS_INVALID_CLUSTERS on error.
- *               The error is either invalid UTF-8 input,
- *               or bad cluster mapping.
- **/
-cairo_status_t
-_cairo_validate_text_clusters (const char		   *utf8,
-			       int			    utf8_len,
-			       const cairo_glyph_t	   *glyphs,
-			       int			    num_glyphs,
-			       const cairo_text_cluster_t  *clusters,
-			       int			    num_clusters,
-			       cairo_text_cluster_flags_t   cluster_flags)
-{
-    cairo_status_t status;
-    unsigned int n_bytes  = 0;
-    unsigned int n_glyphs = 0;
-    int i;
-
-    for (i = 0; i < num_clusters; i++) {
-	int cluster_bytes  = clusters[i].num_bytes;
-	int cluster_glyphs = clusters[i].num_glyphs;
-
-	if (cluster_bytes < 0 || cluster_glyphs < 0)
-	    goto BAD;
-
-	/* A cluster should cover at least one character or glyph.
-	 * I can't see any use for a 0,0 cluster.
-	 * I can't see an immediate use for a zero-text cluster
-	 * right now either, but they don't harm.
-	 * Zero-glyph clusters on the other hand are useful for
-	 * things like U+200C ZERO WIDTH NON-JOINER */
-	if (cluster_bytes == 0 && cluster_glyphs == 0)
-	    goto BAD;
-
-	/* Since n_bytes and n_glyphs are unsigned, but the rest of
-	 * values involved are signed, we can detect overflow easily */
-	if (n_bytes+cluster_bytes > (unsigned int)utf8_len || n_glyphs+cluster_glyphs > (unsigned int)num_glyphs)
-	    goto BAD;
-
-	/* Make sure we've got valid UTF-8 for the cluster */
-    status = _cairo_utf8_to_ucs4 (utf8+n_bytes, cluster_bytes, XNULL, XNULL);
-	if (unlikely (status))
-	    return _cairo_error (CAIRO_STATUS_INVALID_CLUSTERS);
-
-	n_bytes  += cluster_bytes ;
-	n_glyphs += cluster_glyphs;
-    }
-
-    if (n_bytes != (unsigned int) utf8_len || n_glyphs != (unsigned int) num_glyphs) {
-      BAD:
-	return _cairo_error (CAIRO_STATUS_INVALID_CLUSTERS);
-    }
-
-    return CAIRO_STATUS_SUCCESS;
-}
 
 /**
  * _cairo_operator_bounded_by_mask:
@@ -378,12 +191,12 @@ _cairo_operator_bounded_by_mask (cairo_operator_t op)
     case CAIRO_OPERATOR_HSL_SATURATION:
     case CAIRO_OPERATOR_HSL_COLOR:
     case CAIRO_OPERATOR_HSL_LUMINOSITY:
-	return TRUE;
+    return TRUE;
     case CAIRO_OPERATOR_OUT:
     case CAIRO_OPERATOR_IN:
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
-	return FALSE;
+    return FALSE;
     }
 
     ASSERT_NOT_REACHED;
@@ -431,14 +244,14 @@ _cairo_operator_bounded_by_source (cairo_operator_t op)
     case CAIRO_OPERATOR_HSL_SATURATION:
     case CAIRO_OPERATOR_HSL_COLOR:
     case CAIRO_OPERATOR_HSL_LUMINOSITY:
-	return TRUE;
+    return TRUE;
     case CAIRO_OPERATOR_CLEAR:
     case CAIRO_OPERATOR_SOURCE:
     case CAIRO_OPERATOR_OUT:
     case CAIRO_OPERATOR_IN:
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
-	return FALSE;
+    return FALSE;
     }
 
     ASSERT_NOT_REACHED;
@@ -450,7 +263,7 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
 {
     switch (op) {
     default:
-	ASSERT_NOT_REACHED;
+    ASSERT_NOT_REACHED;
     case CAIRO_OPERATOR_OVER:
     case CAIRO_OPERATOR_ATOP:
     case CAIRO_OPERATOR_DEST:
@@ -474,15 +287,15 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
     case CAIRO_OPERATOR_HSL_SATURATION:
     case CAIRO_OPERATOR_HSL_COLOR:
     case CAIRO_OPERATOR_HSL_LUMINOSITY:
-	return CAIRO_OPERATOR_BOUND_BY_MASK | CAIRO_OPERATOR_BOUND_BY_SOURCE;
+    return CAIRO_OPERATOR_BOUND_BY_MASK | CAIRO_OPERATOR_BOUND_BY_SOURCE;
     case CAIRO_OPERATOR_CLEAR:
     case CAIRO_OPERATOR_SOURCE:
-	return CAIRO_OPERATOR_BOUND_BY_MASK;
+    return CAIRO_OPERATOR_BOUND_BY_MASK;
     case CAIRO_OPERATOR_OUT:
     case CAIRO_OPERATOR_IN:
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
-	return 0;
+    return 0;
     }
 
 }
@@ -707,8 +520,8 @@ xuint16_t
 _cairo_half_from_float (float f)
 {
     union {
-	xuint32_t ui;
-	float f;
+    xuint32_t ui;
+    float f;
     } u;
     int s, e, m;
 
@@ -717,43 +530,43 @@ _cairo_half_from_float (float f)
     e = ((u.ui >> 23) & 0x000000ff) - (127 - 15);
     m =   u.ui        & 0x007fffff;
     if (e <= 0) {
-	if (e < -10) {
-	    /* underflow */
-	    return 0;
-	}
+    if (e < -10) {
+        /* underflow */
+        return 0;
+    }
 
-	m = (m | 0x00800000) >> (1 - e);
+    m = (m | 0x00800000) >> (1 - e);
 
-	/* round to nearest, round 0.5 up. */
-	if (m &  0x00001000)
-	    m += 0x00002000;
-	return s | (m >> 13);
+    /* round to nearest, round 0.5 up. */
+    if (m &  0x00001000)
+        m += 0x00002000;
+    return s | (m >> 13);
     } else if (e == 0xff - (127 - 15)) {
-	if (m == 0) {
-	    /* infinity */
-	    return s | 0x7c00;
-	} else {
-	    /* nan */
-	    m >>= 13;
-	    return s | 0x7c00 | m | (m == 0);
-	}
+    if (m == 0) {
+        /* infinity */
+        return s | 0x7c00;
     } else {
-	/* round to nearest, round 0.5 up. */
-	if (m &  0x00001000) {
-	    m += 0x00002000;
+        /* nan */
+        m >>= 13;
+        return s | 0x7c00 | m | (m == 0);
+    }
+    } else {
+    /* round to nearest, round 0.5 up. */
+    if (m &  0x00001000) {
+        m += 0x00002000;
 
-	    if (m & 0x00800000) {
-		m =  0;
-		e += 1;
-	    }
-	}
+        if (m & 0x00800000) {
+        m =  0;
+        e += 1;
+        }
+    }
 
-	if (e > 30) {
-	    /* overflow -> infinity */
-	    return s | 0x7c00;
-	}
+    if (e > 30) {
+        /* overflow -> infinity */
+        return s | 0x7c00;
+    }
 
-	return s | (e << 10) | (m >> 13);
+    return s | (e << 10) | (m >> 13);
     }
 }
 
@@ -797,26 +610,26 @@ _cairo_win32_tmpfile (void)
     return XNULL;
 
     handle = CreateFileW (file_name,
-			 GENERIC_READ | GENERIC_WRITE,
-			 0,
+             GENERIC_READ | GENERIC_WRITE,
+             0,
              XNULL,
-			 CREATE_ALWAYS,
+             CREATE_ALWAYS,
              xfile_t_ATTRIBUTE_NORMAL | xfile_t_FLAG_DELETE_ON_CLOSE,
              XNULL);
     if (handle == INVALID_HANDLE_VALUE) {
-	DeleteFileW (file_name);
+    DeleteFileW (file_name);
     return XNULL;
     }
 
     fd = _open_osfhandle((intptr_t) handle, 0);
     if (fd < 0) {
-	CloseHandle (handle);
+    CloseHandle (handle);
     return XNULL;
     }
 
     fp = fdopen(fd, "w+b");
     if (fp == XNULL) {
-	_close(fd);
+    _close(fd);
     return XNULL;
     }
 
@@ -841,7 +654,7 @@ _intern_string_hash (const char *str, int len)
     unsigned int h = *p;
 
     for (p += 1; --len; p++)
-	h = (h << 5) - h + *p;
+    h = (h << 5) - h + *p;
 
     return h;
 }
@@ -853,64 +666,9 @@ _intern_string_equal (const void *_a, const void *_b)
     const cairo_intern_string_t *b = _b;
 
     if (a->len != b->len)
-	return FALSE;
+    return FALSE;
 
     return xmemory_compare (a->string, b->string, a->len) == 0;
-}
-
-cairo_status_t
-_cairo_intern_string (const char **str_inout, int len)
-{
-    char *str = (char *) *str_inout;
-    cairo_intern_string_t tmpl, *istring;
-    cairo_status_t status = CAIRO_STATUS_SUCCESS;
-
-    if (CAIRO_INJECT_FAULT ())
-	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
-
-    if (len < 0)
-	len = strlen (str);
-    tmpl.hash_entry.hash = _intern_string_hash (str, len);
-    tmpl.len = len;
-    tmpl.string = (char *) str;
-
-    CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht == XNULL) {
-	_cairo_intern_string_ht = _cairo_hash_table_create (_intern_string_equal);
-    if (unlikely (_cairo_intern_string_ht == XNULL)) {
-	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-	    goto BAIL;
-	}
-    }
-
-    istring = _cairo_hash_table_lookup (_cairo_intern_string_ht,
-					&tmpl.hash_entry);
-    if (istring == XNULL) {
-    istring = xmemory_alloc (sizeof (cairo_intern_string_t) + len + 1);
-    if (likely (istring != XNULL)) {
-	    istring->hash_entry.hash = tmpl.hash_entry.hash;
-	    istring->len = tmpl.len;
-	    istring->string = (char *) (istring + 1);
-        xmemory_copy (istring->string, str, len);
-	    istring->string[len] = '\0';
-
-	    status = _cairo_hash_table_insert (_cairo_intern_string_ht,
-					       &istring->hash_entry);
-	    if (unlikely (status)) {
-        xmemory_free (istring);
-		goto BAIL;
-	    }
-	} else {
-	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-	    goto BAIL;
-	}
-    }
-
-    *str_inout = istring->string;
-
-  BAIL:
-    CAIRO_MUTEX_UNLOCK (_cairo_intern_string_mutex);
-    return status;
 }
 
 static void
@@ -920,16 +678,3 @@ _intern_string_pluck (void *entry, void *closure)
     xmemory_free (entry);
 }
 
-void
-_cairo_intern_string_reset_static_data (void)
-{
-    CAIRO_MUTEX_LOCK (_cairo_intern_string_mutex);
-    if (_cairo_intern_string_ht != XNULL) {
-	_cairo_hash_table_foreach (_cairo_intern_string_ht,
-				   _intern_string_pluck,
-				   _cairo_intern_string_ht);
-	_cairo_hash_table_destroy(_cairo_intern_string_ht);
-    _cairo_intern_string_ht = XNULL;
-    }
-    CAIRO_MUTEX_UNLOCK (_cairo_intern_string_mutex);
-}

@@ -68,10 +68,8 @@ typedef struct _cairo_contour_chain cairo_contour_chain_t;
 typedef struct _cairo_contour_iter cairo_contour_iter_t;
 typedef struct _cairo_damage cairo_damage_t;
 typedef struct _cairo_device_backend cairo_device_backend_t;
-typedef struct _cairo_font_face_backend     cairo_font_face_backend_t;
 typedef struct _cairo_gstate cairo_gstate_t;
 typedef struct _cairo_gstate_backend cairo_gstate_backend_t;
-typedef struct _cairo_glyph_text_info cairo_glyph_text_info_t;
 typedef struct _cairo_hash_entry cairo_hash_entry_t;
 typedef struct _cairo_hash_table cairo_hash_table_t;
 typedef struct _cairo_image_surface cairo_image_surface_t;
@@ -80,8 +78,6 @@ typedef struct _cairo_observer cairo_observer_t;
 typedef struct _cairo_output_stream cairo_output_stream_t;
 typedef struct _cairo_paginated_surface_backend cairo_paginated_surface_backend_t;
 typedef struct _cairo_path_fixed cairo_path_fixed_t;
-typedef struct _cairo_rectangle_int16 cairo_glyph_size_t;
-typedef struct _cairo_scaled_font_subsets cairo_scaled_font_subsets_t;
 typedef struct _cairo_solid_pattern cairo_solid_pattern_t;
 typedef struct _cairo_surface_attributes cairo_surface_attributes_t;
 typedef struct _cairo_surface_backend cairo_surface_backend_t;
@@ -91,15 +87,10 @@ typedef struct _cairo_surface_subsurface cairo_surface_subsurface_t;
 typedef struct _cairo_surface_wrapper cairo_surface_wrapper_t;
 typedef struct _cairo_traps cairo_traps_t;
 typedef struct _cairo_tristrip cairo_tristrip_t;
-typedef struct _cairo_unscaled_font_backend cairo_unscaled_font_backend_t;
 typedef struct _cairo_xlib_screen_info cairo_xlib_screen_info_t;
 
 typedef cairo_array_t cairo_user_data_array_t;
 
-typedef struct _cairo_scaled_font_private cairo_scaled_font_private_t;
-typedef struct _cairo_scaled_font_backend   cairo_scaled_font_backend_t;
-typedef struct _cairo_scaled_glyph cairo_scaled_glyph_t;
-typedef struct _cairo_scaled_glyph_private cairo_scaled_glyph_private_t;
 
 typedef struct cairo_compositor cairo_compositor_t;
 typedef struct cairo_fallback_compositor cairo_fallback_compositor_t;
@@ -156,55 +147,6 @@ struct _cairo_array {
     unsigned int element_size;
     char *elements;
 };
-
-/**
- * cairo_lcd_filter_t:
- * @CAIRO_LCD_FILTER_DEFAULT: Use the default LCD filter for
- *   font backend and target device
- * @CAIRO_LCD_FILTER_NONE: Do not perform LCD filtering
- * @CAIRO_LCD_FILTER_INTRA_PIXEL: Intra-pixel filter
- * @CAIRO_LCD_FILTER_FIR3: FIR filter with a 3x3 kernel
- * @CAIRO_LCD_FILTER_FIR5: FIR filter with a 5x5 kernel
- *
- * The LCD filter specifies the low-pass filter applied to LCD-optimized
- * bitmaps generated with an antialiasing mode of %CAIRO_ANTIALIAS_SUBPIXEL.
- *
- * Note: This API was temporarily made available in the public
- * interface during the 1.7.x development series, but was made private
- * before 1.8.
- **/
-typedef enum _cairo_lcd_filter {
-    CAIRO_LCD_FILTER_DEFAULT,
-    CAIRO_LCD_FILTER_NONE,
-    CAIRO_LCD_FILTER_INTRA_PIXEL,
-    CAIRO_LCD_FILTER_FIR3,
-    CAIRO_LCD_FILTER_FIR5
-} cairo_lcd_filter_t;
-
-typedef enum _cairo_round_glyph_positions {
-    CAIRO_ROUND_GLYPH_POS_DEFAULT,
-    CAIRO_ROUND_GLYPH_POS_ON,
-    CAIRO_ROUND_GLYPH_POS_OFF
-} cairo_round_glyph_positions_t;
-
-struct _cairo_font_options {
-    cairo_antialias_t antialias;
-    cairo_subpixel_order_t subpixel_order;
-    cairo_lcd_filter_t lcd_filter;
-    cairo_hint_style_t hint_style;
-    cairo_hint_metrics_t hint_metrics;
-    cairo_round_glyph_positions_t round_glyph_positions;
-};
-
-struct _cairo_glyph_text_info {
-    const char *utf8;
-    int utf8_len;
-
-    const cairo_text_cluster_t *clusters;
-    int num_clusters;
-    cairo_text_cluster_flags_t cluster_flags;
-};
-
 
 /* XXX: Right now, the _cairo_color structure puts unpremultiplied
    color in the doubles and premultiplied color in the shorts. Yes,
@@ -331,8 +273,8 @@ typedef struct _cairo_polygon {
 
 typedef cairo_warn cairo_status_t
 (*cairo_spline_add_point_func_t) (void *closure,
-				  const cairo_point_t *point,
-				  const cairo_slope_t *tangent);
+                  const cairo_point_t *point,
+                  const cairo_slope_t *tangent);
 
 typedef struct _cairo_spline_knots {
     cairo_point_t a, b, c, d;
@@ -415,15 +357,6 @@ struct _cairo_mime_data {
     void *closure;
 };
 
-/*
- * A #cairo_unscaled_font_t is just an opaque handle we use in the
- * glyph cache.
- */
-typedef struct _cairo_unscaled_font {
-    cairo_hash_entry_t			 hash_entry;
-    cairo_reference_count_t		 ref_count;
-    const cairo_unscaled_font_backend_t	*backend;
-} cairo_unscaled_font_t;
 CAIRO_END_DECLS
 
 #endif /* CAIRO_TYPES_PRIVATE_H */

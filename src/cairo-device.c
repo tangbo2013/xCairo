@@ -81,7 +81,7 @@
  *
  *   // Do the custom operations on the device here.
  *   // But do not call any Cairo functions that might acquire devices.
- *   
+ *
  *   // Release the device when done.
  *   cairo_device_release (device);
  * }
@@ -114,16 +114,16 @@ _cairo_device_create_in_error (cairo_status_t status)
 {
     switch (status) {
     case CAIRO_STATUS_NO_MEMORY:
-	return (cairo_device_t *) &_nil_device;
+    return (cairo_device_t *) &_nil_device;
     case CAIRO_STATUS_DEVICE_ERROR:
-	return (cairo_device_t *) &_invalid_device;
+    return (cairo_device_t *) &_invalid_device;
     case CAIRO_STATUS_DEVICE_TYPE_MISMATCH:
-	return (cairo_device_t *) &_mismatch_device;
+    return (cairo_device_t *) &_mismatch_device;
 
     case CAIRO_STATUS_SUCCESS:
     case CAIRO_STATUS_LAST_STATUS:
-	ASSERT_NOT_REACHED;
-	/* fall-through */
+    ASSERT_NOT_REACHED;
+    /* fall-through */
     case CAIRO_STATUS_SURFACE_TYPE_MISMATCH:
     case CAIRO_STATUS_INVALID_STATUS:
     case CAIRO_STATUS_INVALID_FORMAT:
@@ -147,26 +147,19 @@ _cairo_device_create_in_error (cairo_status_t status)
     case CAIRO_STATUS_INVALID_DSC_COMMENT:
     case CAIRO_STATUS_INVALID_INDEX:
     case CAIRO_STATUS_CLIP_NOT_REPRESENTABLE:
-    case CAIRO_STATUS_FONT_TYPE_MISMATCH:
-    case CAIRO_STATUS_USER_FONT_IMMUTABLE:
-    case CAIRO_STATUS_USER_FONT_ERROR:
     case CAIRO_STATUS_NEGATIVE_COUNT:
-    case CAIRO_STATUS_INVALID_CLUSTERS:
-    case CAIRO_STATUS_INVALID_SLANT:
-    case CAIRO_STATUS_INVALID_WEIGHT:
-    case CAIRO_STATUS_USER_FONT_NOT_IMPLEMENTED:
     case CAIRO_STATUS_INVALID_CONTENT:
     case CAIRO_STATUS_INVALID_MESH_CONSTRUCTION:
     case CAIRO_STATUS_DEVICE_FINISHED:
     default:
-	_cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
-	return (cairo_device_t *) &_nil_device;
+    _cairo_error_throw (CAIRO_STATUS_NO_MEMORY);
+    return (cairo_device_t *) &_nil_device;
     }
 }
 
 void
 _cairo_device_init (cairo_device_t *device,
-		    const cairo_device_backend_t *backend)
+            const cairo_device_backend_t *backend)
 {
     CAIRO_REFERENCE_COUNT_INIT (&device->ref_count, 1);
     device->status = CAIRO_STATUS_SUCCESS;
@@ -200,9 +193,9 @@ cairo_device_t *
 cairo_device_reference (cairo_device_t *device)
 {
     if (device == XNULL ||
-	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
+    CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
-	return device;
+    return device;
     }
 
     XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
@@ -228,7 +221,7 @@ cairo_status_t
 cairo_device_status (cairo_device_t *device)
 {
     if (device == XNULL)
-	return CAIRO_STATUS_NULL_POINTER;
+    return CAIRO_STATUS_NULL_POINTER;
 
     return device->status;
 }
@@ -239,7 +232,7 @@ cairo_device_status (cairo_device_t *device)
  *
  * Finish any pending operations for the device and also restore any
  * temporary modifications cairo has made to the device's state.
- * This function must be called before switching from using the 
+ * This function must be called before switching from using the
  * device with Cairo to operating on it directly with native APIs.
  * If the device doesn't support direct access, then this function
  * does nothing.
@@ -254,15 +247,15 @@ cairo_device_flush (cairo_device_t *device)
     cairo_status_t status;
 
     if (device == XNULL || device->status)
-	return;
+    return;
 
     if (device->finished)
-	return;
+    return;
 
     if (device->backend->flush != XNULL) {
-	status = device->backend->flush (device);
-	if (unlikely (status))
-	    status = _cairo_device_set_error (device, status);
+    status = device->backend->flush (device);
+    if (unlikely (status))
+        status = _cairo_device_set_error (device, status);
     }
 }
 slim_hidden_def (cairo_device_flush);
@@ -290,18 +283,18 @@ void
 cairo_device_finish (cairo_device_t *device)
 {
     if (device == XNULL ||
-	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
+    CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
-	return;
+    return;
     }
 
     if (device->finished)
-	return;
+    return;
 
     cairo_device_flush (device);
 
     if (device->backend->finish != XNULL)
-	device->backend->finish (device);
+    device->backend->finish (device);
 
     /* We only finish the device after the backend's callback returns because
      * the device might still be needed during the callback
@@ -329,14 +322,14 @@ cairo_device_destroy (cairo_device_t *device)
     cairo_user_data_array_t user_data;
 
     if (device == XNULL ||
-	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
+    CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
-	return;
+    return;
     }
 
     XASSERT (CAIRO_REFERENCE_COUNT_HAS_REFERENCE (&device->ref_count));
     if (! _cairo_reference_count_dec_and_test (&device->ref_count))
-	return;
+    return;
 
     cairo_device_finish (device);
 
@@ -367,9 +360,9 @@ cairo_device_type_t
 cairo_device_get_type (cairo_device_t *device)
 {
     if (device == XNULL ||
-	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
+    CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
     {
-	return CAIRO_DEVICE_TYPE_INVALID;
+    return CAIRO_DEVICE_TYPE_INVALID;
     }
 
     return device->backend->type;
@@ -409,18 +402,18 @@ cairo_status_t
 cairo_device_acquire (cairo_device_t *device)
 {
     if (device == XNULL)
-	return CAIRO_STATUS_SUCCESS;
+    return CAIRO_STATUS_SUCCESS;
 
     if (unlikely (device->status))
-	return device->status;
+    return device->status;
 
     if (unlikely (device->finished))
-	return _cairo_device_set_error (device, CAIRO_STATUS_DEVICE_FINISHED);
+    return _cairo_device_set_error (device, CAIRO_STATUS_DEVICE_FINISHED);
 
     CAIRO_MUTEX_LOCK (device->mutex);
     if (device->mutex_depth++ == 0) {
-	if (device->backend->lock != XNULL)
-	    device->backend->lock (device);
+    if (device->backend->lock != XNULL)
+        device->backend->lock (device);
     }
 
     return CAIRO_STATUS_SUCCESS;
@@ -440,13 +433,13 @@ void
 cairo_device_release (cairo_device_t *device)
 {
     if (device == XNULL)
-	return;
+    return;
 
     XASSERT (device->mutex_depth > 0);
 
     if (--device->mutex_depth == 0) {
-	if (device->backend->unlock != XNULL)
-	    device->backend->unlock (device);
+    if (device->backend->unlock != XNULL)
+        device->backend->unlock (device);
     }
 
     CAIRO_MUTEX_UNLOCK (device->mutex);
@@ -455,7 +448,7 @@ slim_hidden_def (cairo_device_release);
 
 cairo_status_t
 _cairo_device_set_error (cairo_device_t *device,
-			 cairo_status_t  status)
+             cairo_status_t  status)
 {
     if (status == CAIRO_STATUS_SUCCESS)
         return CAIRO_STATUS_SUCCESS;
@@ -480,8 +473,8 @@ unsigned int
 cairo_device_get_reference_count (cairo_device_t *device)
 {
     if (device == XNULL ||
-	CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
-	return 0;
+    CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
+    return 0;
 
     return CAIRO_REFERENCE_COUNT_GET_VALUE (&device->ref_count);
 }
@@ -502,10 +495,10 @@ cairo_device_get_reference_count (cairo_device_t *device)
  **/
 void *
 cairo_device_get_user_data (cairo_device_t		 *device,
-			    const cairo_user_data_key_t *key)
+                const cairo_user_data_key_t *key)
 {
     return _cairo_user_data_array_get_data (&device->user_data,
-					    key);
+                        key);
 }
 
 /**
@@ -528,13 +521,13 @@ cairo_device_get_user_data (cairo_device_t		 *device,
  **/
 cairo_status_t
 cairo_device_set_user_data (cairo_device_t		 *device,
-			    const cairo_user_data_key_t *key,
-			    void			 *user_data,
-			    cairo_destroy_func_t	  destroy)
+                const cairo_user_data_key_t *key,
+                void			 *user_data,
+                cairo_destroy_func_t	  destroy)
 {
     if (CAIRO_REFERENCE_COUNT_IS_INVALID (&device->ref_count))
-	return device->status;
+    return device->status;
 
     return _cairo_user_data_array_set_data (&device->user_data,
-					    key, user_data, destroy);
+                        key, user_data, destroy);
 }
