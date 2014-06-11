@@ -48,7 +48,6 @@ typedef enum {
     CAIRO_COMMAND_MASK,
     CAIRO_COMMAND_STROKE,
     CAIRO_COMMAND_FILL,
-    CAIRO_COMMAND_SHOW_TEXT_GLYPHS,
 } cairo_command_type_t;
 
 typedef enum {
@@ -99,19 +98,6 @@ typedef struct _cairo_command_fill {
     cairo_antialias_t		 antialias;
 } cairo_command_fill_t;
 
-typedef struct _cairo_command_show_text_glyphs {
-    cairo_command_header_t       header;
-    cairo_pattern_union_t	 source;
-    char			*utf8;
-    int				 utf8_len;
-    cairo_glyph_t		*glyphs;
-    unsigned int		 num_glyphs;
-    cairo_text_cluster_t	*clusters;
-    int				 num_clusters;
-    cairo_text_cluster_flags_t   cluster_flags;
-    cairo_scaled_font_t		*scaled_font;
-} cairo_command_show_text_glyphs_t;
-
 typedef union _cairo_command {
     cairo_command_header_t      header;
 
@@ -119,7 +105,6 @@ typedef union _cairo_command {
     cairo_command_mask_t			mask;
     cairo_command_stroke_t			stroke;
     cairo_command_fill_t			fill;
-    cairo_command_show_text_glyphs_t		show_text_glyphs;
 } cairo_command_t;
 
 typedef struct _cairo_recording_surface {
@@ -138,9 +123,9 @@ typedef struct _cairo_recording_surface {
     cairo_bool_t optimize_clears;
 
     struct bbtree {
-	cairo_box_t extents;
-	struct bbtree *left, *right;
-	cairo_command_header_t *chain;
+    cairo_box_t extents;
+    struct bbtree *left, *right;
+    cairo_command_header_t *chain;
     } bbtree;
 } cairo_recording_surface_t;
 
@@ -148,40 +133,40 @@ slim_hidden_proto (cairo_recording_surface_create);
 
 cairo_private cairo_int_status_t
 _cairo_recording_surface_get_path (cairo_surface_t	 *surface,
-				   cairo_path_fixed_t *path);
+                   cairo_path_fixed_t *path);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_replay_one (cairo_recording_surface_t	*surface,
-				     long unsigned index,
-				     cairo_surface_t *target);
+                     long unsigned index,
+                     cairo_surface_t *target);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_replay (cairo_surface_t *surface,
-				 cairo_surface_t *target);
+                 cairo_surface_t *target);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_replay_with_clip (cairo_surface_t *surface,
-					   const cairo_matrix_t *surface_transform,
-					   cairo_surface_t *target,
-					   const cairo_clip_t *target_clip);
+                       const cairo_matrix_t *surface_transform,
+                       cairo_surface_t *target,
+                       const cairo_clip_t *target_clip);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_replay_and_create_regions (cairo_surface_t *surface,
-						    cairo_surface_t *target);
+                            cairo_surface_t *target);
 cairo_private cairo_status_t
 _cairo_recording_surface_replay_region (cairo_surface_t			*surface,
-					const cairo_rectangle_int_t *surface_extents,
-					cairo_surface_t			*target,
-					cairo_recording_region_type_t	region);
+                    const cairo_rectangle_int_t *surface_extents,
+                    cairo_surface_t			*target,
+                    cairo_recording_region_type_t	region);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_get_bbox (cairo_recording_surface_t *recording,
-				   cairo_box_t *bbox,
-				   const cairo_matrix_t *transform);
+                   cairo_box_t *bbox,
+                   const cairo_matrix_t *transform);
 
 cairo_private cairo_status_t
 _cairo_recording_surface_get_ink_bbox (cairo_recording_surface_t *surface,
-				       cairo_box_t *bbox,
-				       const cairo_matrix_t *transform);
+                       cairo_box_t *bbox,
+                       const cairo_matrix_t *transform);
 
 #endif /* CAIRO_RECORDING_SURFACE_H */

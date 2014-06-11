@@ -148,27 +148,27 @@ struct _cairo_backend {
     cairo_status_t (*in_fill) (void *cr, double x, double y, cairo_bool_t *inside);
     cairo_status_t (*fill_extents) (void *cr, double *x1, double *y1, double *x2, double *y2);
 
-    cairo_status_t (*set_font_face) (void *cr, cairo_font_face_t *font_face);
-    cairo_font_face_t *(*get_font_face) (void *cr);
+    cairo_status_t (*set_font_face) (void *cr, void *font_face);
+    void *(*get_font_face) (void *cr);
     cairo_status_t (*set_font_size) (void *cr, double size);
     cairo_status_t (*set_font_matrix) (void *cr, const cairo_matrix_t *matrix);
     void (*get_font_matrix) (void *cr, cairo_matrix_t *matrix);
-    cairo_status_t (*set_font_options) (void *cr, const cairo_font_options_t *options);
-    void (*get_font_options) (void *cr, cairo_font_options_t *options);
-    cairo_status_t (*set_scaled_font) (void *cr, cairo_scaled_font_t *scaled_font);
-    cairo_scaled_font_t *(*get_scaled_font) (void *cr);
-    cairo_status_t (*font_extents) (void *cr, cairo_font_extents_t *extents);
+    cairo_status_t (*set_font_options) (void *cr, const void *options);
+    void (*get_font_options) (void *cr, void *options);
+    cairo_status_t (*set_scaled_font) (void *cr, void *scaled_font);
+    void *(*get_scaled_font) (void *cr);
+    cairo_status_t (*font_extents) (void *cr, void *extents);
 
     cairo_status_t (*glyphs) (void *cr,
-			      const cairo_glyph_t *glyphs, int num_glyphs,
-			      cairo_glyph_text_info_t *info);
+                  const void *glyphs, int num_glyphs,
+                  void *info);
     cairo_status_t (*glyph_path) (void *cr,
-				  const cairo_glyph_t *glyphs, int num_glyphs);
+                  const void *glyphs, int num_glyphs);
 
     cairo_status_t (*glyph_extents) (void *cr,
-				     const cairo_glyph_t *glyphs,
-				     int num_glyphs,
-				     cairo_text_extents_t *extents);
+                     const void *glyphs,
+                     int num_glyphs,
+                     void *extents);
 
     cairo_status_t (*copy_page) (void *cr);
     cairo_status_t (*show_page) (void *cr);
