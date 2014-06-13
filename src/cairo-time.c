@@ -42,7 +42,6 @@
 #endif
 #endif
 
-#include <sys/time.h>
 #include <xC/xtime.h>
 
 static cairo_always_inline double
