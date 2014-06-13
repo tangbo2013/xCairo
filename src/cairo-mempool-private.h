@@ -40,7 +40,7 @@
 #include "cairo-compiler-private.h"
 #include "cairo-error-private.h"
 
-//#include <stddef.h> /* for size_t */
+//#include <stddef.h> /* for xsize_t */
 #include <xC/xpointer.h>
 
 CAIRO_BEGIN_DECLS
@@ -61,19 +61,19 @@ struct _cairo_mempool {
     int num_sizes;
     int max_free_bits;
 
-    size_t free_bytes;
-    size_t max_bytes;
+    xsize_t free_bytes;
+    xsize_t max_bytes;
 };
 
 cairo_private cairo_status_t
 _cairo_mempool_init (cairo_mempool_t *pool,
 		     void *base,
-		     size_t bytes,
+		     xsize_t bytes,
 		     int min_bits,
 		     int num_sizes);
 
 cairo_private void *
-_cairo_mempool_alloc (cairo_mempool_t *pi, size_t bytes);
+_cairo_mempool_alloc (cairo_mempool_t *pi, xsize_t bytes);
 
 cairo_private void
 _cairo_mempool_free (cairo_mempool_t *pi, void *storage);

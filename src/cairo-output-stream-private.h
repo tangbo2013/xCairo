@@ -119,12 +119,12 @@ _cairo_output_stream_destroy (cairo_output_stream_t *stream);
 
 cairo_private void
 _cairo_output_stream_write (cairo_output_stream_t *stream,
-			    const void *data, size_t length);
+			    const void *data, xsize_t length);
 
 cairo_private void
 _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
 				       const unsigned char *data,
-				       size_t length);
+				       xsize_t length);
 
 cairo_private void
 _cairo_output_stream_vprintf (cairo_output_stream_t *stream,

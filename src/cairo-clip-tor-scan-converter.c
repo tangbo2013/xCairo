@@ -227,10 +227,10 @@ struct quorem {
 /* Header for a chunk of memory in a memory pool. */
 struct _pool_chunk {
     /* # bytes used in this chunk. */
-    size_t size;
+    xsize_t size;
 
     /* # bytes total in this chunk */
-    size_t capacity;
+    xsize_t capacity;
 
     /* Pointer to the previous chunk or %NULL if this is the sentinel
      * chunk in the pool header. */
@@ -254,7 +254,7 @@ struct pool {
     struct _pool_chunk *first_free;
 
     /* The default capacity of a chunk. */
-    size_t default_capacity;
+    xsize_t default_capacity;
 
     /* Header for the sentinel chunk.  Directly following the pool
      * struct should be some space for embedded elements from which
@@ -452,7 +452,7 @@ static struct _pool_chunk *
 _pool_chunk_init(
     struct _pool_chunk *p,
     struct _pool_chunk *prev_chunk,
-    size_t capacity)
+    xsize_t capacity)
 {
     p->prev_chunk = prev_chunk;
     p->size = 0;
@@ -461,7 +461,7 @@ _pool_chunk_init(
 }
 
 static struct _pool_chunk *
-_pool_chunk_create(struct pool *pool, size_t size)
+_pool_chunk_create(struct pool *pool, xsize_t size)
 {
     struct _pool_chunk *p;
 
@@ -475,8 +475,8 @@ _pool_chunk_create(struct pool *pool, size_t size)
 static void
 pool_init(struct pool *pool,
       xjmp_buf_t *jmp,
-	  size_t default_capacity,
-	  size_t embedded_capacity)
+	  xsize_t default_capacity,
+	  xsize_t embedded_capacity)
 {
     pool->jmp = jmp;
     pool->current = pool->sentinel;
@@ -508,11 +508,11 @@ pool_fini(struct pool *pool)
 static void *
 _pool_alloc_from_new_chunk(
     struct pool *pool,
-    size_t size)
+    xsize_t size)
 {
     struct _pool_chunk *chunk;
     void *obj;
-    size_t capacity;
+    xsize_t capacity;
 
     /* If the allocation is smaller than the default chunk size then
      * try getting a chunk off the free list.  Force alloc of a new
@@ -544,7 +544,7 @@ _pool_alloc_from_new_chunk(
  * allocation failures.	 The pool retains ownership of the returned
  * memory. */
 inline static void *
-pool_alloc (struct pool *pool, size_t size)
+pool_alloc (struct pool *pool, xsize_t size)
 {
     struct _pool_chunk *chunk = pool->current;
 

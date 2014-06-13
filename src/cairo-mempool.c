@@ -48,12 +48,12 @@
 #define BITCLEAR(p, n) ((p)->map[(n) >> 3] &= ~(128 >> ((n) & 7)))
 
 static void
-clear_bits (cairo_mempool_t *pool, size_t first, size_t last)
+clear_bits (cairo_mempool_t *pool, xsize_t first, xsize_t last)
 {
-    size_t i, n = last;
-    size_t first_full = (first + 7) & ~7;
-    size_t past_full = last & ~7;
-    size_t bytes;
+    xsize_t i, n = last;
+    xsize_t first_full = (first + 7) & ~7;
+    xsize_t past_full = last & ~7;
+    xsize_t bytes;
 
     if (n > first_full)
 	n = first_full;
@@ -73,7 +73,7 @@ clear_bits (cairo_mempool_t *pool, size_t first, size_t last)
 }
 
 static void
-free_bits (cairo_mempool_t *pool, size_t start, int bits, cairo_bool_t clear)
+free_bits (cairo_mempool_t *pool, xsize_t start, int bits, cairo_bool_t clear)
 {
     struct _cairo_memblock *block;
 
@@ -93,11 +93,11 @@ free_bits (cairo_mempool_t *pool, size_t start, int bits, cairo_bool_t clear)
 /* Add a chunk to the free list */
 static void
 free_blocks (cairo_mempool_t *pool,
-	     size_t first,
-	     size_t last,
+	     xsize_t first,
+	     xsize_t last,
 	     cairo_bool_t clear)
 {
-    size_t i, len;
+    xsize_t i, len;
     int bits = 0;
 
     for (i = first, len = 1; i < last; i += len) {
@@ -122,8 +122,8 @@ free_blocks (cairo_mempool_t *pool,
 	 * back again.
 	 */
 	while (bits < pool->num_sizes - 1) {
-	    size_t next_bits = bits + 1;
-	    size_t next_len = len << 1;
+	    xsize_t next_bits = bits + 1;
+	    xsize_t next_len = len << 1;
 
 	    if (i + next_bits > last) {
 		/* off end of chunk to be freed */
@@ -153,7 +153,7 @@ free_blocks (cairo_mempool_t *pool,
 }
 
 static struct _cairo_memblock *
-get_buddy (cairo_mempool_t *pool, size_t offset, int bits)
+get_buddy (cairo_mempool_t *pool, xsize_t offset, int bits)
 {
     struct _cairo_memblock *block;
 
@@ -175,12 +175,12 @@ merge_buddies (cairo_mempool_t *pool,
 	       struct _cairo_memblock *block,
 	       int max_bits)
 {
-    size_t block_offset = block - pool->blocks;
+    xsize_t block_offset = block - pool->blocks;
     int bits = block->bits;
 
     while (bits < max_bits - 1) {
 	/* while you can, merge two blocks and get a legal block size */
-	size_t buddy_offset = block_offset ^ (1 << bits);
+	xsize_t buddy_offset = block_offset ^ (1 << bits);
 
 	block = get_buddy (pool, buddy_offset, bits);
 	if (block == XNULL)
@@ -216,7 +216,7 @@ merge_bits (cairo_mempool_t *pool, int max_bits)
 				       &pool->free[bits],
 				       link)
 	{
-	    size_t buddy_offset = (block - pool->blocks) ^ (1 << bits);
+	    xsize_t buddy_offset = (block - pool->blocks) ^ (1 << bits);
 
 	    buddy = get_buddy (pool, buddy_offset, bits);
 	    if (buddy == XNULL)
@@ -240,7 +240,7 @@ merge_bits (cairo_mempool_t *pool, int max_bits)
 static void *
 buddy_malloc (cairo_mempool_t *pool, int bits)
 {
-    size_t past, offset;
+    xsize_t past, offset;
     struct _cairo_memblock *block;
     int b;
 
@@ -281,7 +281,7 @@ buddy_malloc (cairo_mempool_t *pool, int bits)
 
 cairo_status_t
 _cairo_mempool_init (cairo_mempool_t *pool,
-		      void *base, size_t bytes,
+		      void *base, xsize_t bytes,
 		      int min_bits, int num_sizes)
 {
     unsigned long tmp;
@@ -332,9 +332,9 @@ _cairo_mempool_init (cairo_mempool_t *pool,
 }
 
 void *
-_cairo_mempool_alloc (cairo_mempool_t *pool, size_t bytes)
+_cairo_mempool_alloc (cairo_mempool_t *pool, xsize_t bytes)
 {
-    size_t size;
+    xsize_t size;
     int bits;
 
     size = 1 << pool->min_bits;
@@ -349,7 +349,7 @@ _cairo_mempool_alloc (cairo_mempool_t *pool, size_t bytes)
 void
 _cairo_mempool_free (cairo_mempool_t *pool, void *storage)
 {
-    size_t block_offset;
+    xsize_t block_offset;
     struct _cairo_memblock *block;
 
     block_offset = ((char *)storage - pool->base) >> pool->min_bits;
