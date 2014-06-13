@@ -85,12 +85,6 @@
 
 CAIRO_BEGIN_DECLS
 
-#if _WIN32 && !_WIN32_WCE /* Permissions on WinCE? No worries! */
-cairo_private xfile_t *
-_cairo_win32_tmpfile (void);
-#define tmpfile() _cairo_win32_tmpfile()
-#endif
-
 #undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

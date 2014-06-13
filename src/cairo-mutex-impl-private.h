@@ -175,43 +175,6 @@
 # define CAIRO_RECURSIVE_MUTEX_IMPL_INIT(mutex)
 # define CAIRO_RECURSIVE_MUTEX_IMPL_NIL_INITIALIZER 0
 
-#elif defined(_WIN32) /******************************************************/
-
-#define WIN32_LEAN_AND_MEAN
-/* We require Windows 2000 features such as ETO_PDY */
-#if !defined(WINVER) || (WINVER < 0x0500)
-# define WINVER 0x0500
-#endif
-#if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0500)
-# define _WIN32_WINNT 0x0500
-#endif
-
-# include <windows.h>
-
-  typedef CRITICAL_SECTION cairo_mutex_impl_t;
-
-# define CAIRO_MUTEX_IMPL_WIN32 1
-# define CAIRO_MUTEX_IMPL_LOCK(mutex) EnterCriticalSection (&(mutex))
-# define CAIRO_MUTEX_IMPL_UNLOCK(mutex) LeaveCriticalSection (&(mutex))
-# define CAIRO_MUTEX_IMPL_INIT(mutex) InitializeCriticalSection (&(mutex))
-# define CAIRO_MUTEX_IMPL_FINI(mutex) DeleteCriticalSection (&(mutex))
-# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER { XNULL, 0, 0, XNULL, XNULL, 0 }
-
-#elif defined __OS2__ /******************************************************/
-
-# define INCL_BASE
-# define INCL_PM
-# include <os2.h>
-
-  typedef HMTX cairo_mutex_impl_t;
-
-# define CAIRO_MUTEX_IMPL_OS2 1
-# define CAIRO_MUTEX_IMPL_LOCK(mutex) DosRequestMutexSem(mutex, SEM_INDEFINITE_WAIT)
-# define CAIRO_MUTEX_IMPL_UNLOCK(mutex) DosReleaseMutexSem(mutex)
-# define CAIRO_MUTEX_IMPL_INIT(mutex) DosCreateMutexSem (XNULL, &(mutex), 0L, FALSE)
-# define CAIRO_MUTEX_IMPL_FINI(mutex) DosCloseMutexSem (mutex)
-# define CAIRO_MUTEX_IMPL_NIL_INITIALIZER 0
-
 #elif CAIRO_HAS_BEOS_SURFACE /***********************************************/
 
   typedef BLocker* cairo_mutex_impl_t;

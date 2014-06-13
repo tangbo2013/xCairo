@@ -195,18 +195,6 @@
 #define __attribute__(x)
 #endif
 
-#if (defined(__WIN32__) && !defined(__WINE__)) || defined(_MSC_VER)
-#define access _access
-#define fdopen _fdopen
-#define hypot _hypot
-#define pclose _pclose
-#define popen _popen
-#define string_snprintf _snprintf
-#define strdup _strdup
-#define unlink _unlink
-#define vsnprintf _vsnprintf
-#endif
-
 #ifdef _MSC_VER
 #ifndef __cplusplus
 #undef inline
