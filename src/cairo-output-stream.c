@@ -257,7 +257,7 @@ _cairo_output_stream_destroy (cairo_output_stream_t *stream)
 
 void
 _cairo_output_stream_write (cairo_output_stream_t *stream,
-			    const void *data, size_t length)
+			    const void *data, xsize_t length)
 {
     if (length == 0)
 	return;
@@ -272,7 +272,7 @@ _cairo_output_stream_write (cairo_output_stream_t *stream,
 void
 _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
 				       const unsigned char *data,
-				       size_t length)
+				       xsize_t length)
 {
     const char hex_chars[] = "0123456789abcdef";
     char buffer[2];
@@ -301,7 +301,7 @@ _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
  * into cairo (see COPYING). -- Kristian Høgsberg <krh@redhat.com>
  */
 static void
-_cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precision)
+_cairo_dtostr (char *buffer, xsize_t size, double d, cairo_bool_t limited_precision)
 {
 //    struct lconv *locale_data;
 //    const char *decimal_point;

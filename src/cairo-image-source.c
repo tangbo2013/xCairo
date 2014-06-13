@@ -86,7 +86,7 @@ _pixman_transparent_image (void)
     if (unlikely (image == XNULL))
         return XNULL;
 
-	if (_cairo_atomic_ptr_cmpxchg (&__pixman_transparent_image,
+    if (_cairo_atomic_ptr_cmpxchg ((void **)(&__pixman_transparent_image),
                        XNULL, image))
 	{
 	    pixman_image_ref (image);
@@ -118,7 +118,7 @@ _pixman_black_image (void)
     if (unlikely (image == XNULL))
         return XNULL;
 
-	if (_cairo_atomic_ptr_cmpxchg (&__pixman_black_image,
+    if (_cairo_atomic_ptr_cmpxchg ((void **)(&__pixman_black_image),
                        XNULL, image))
 	{
 	    pixman_image_ref (image);
@@ -150,7 +150,7 @@ _pixman_white_image (void)
     if (unlikely (image == XNULL))
         return XNULL;
 
-	if (_cairo_atomic_ptr_cmpxchg (&__pixman_white_image,
+    if (_cairo_atomic_ptr_cmpxchg ((void **)(&__pixman_white_image),
                        XNULL, image))
 	{
 	    pixman_image_ref (image);
