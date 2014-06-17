@@ -9,13 +9,96 @@ QT       -= core gui
 TARGET = xCairo
 TEMPLATE = lib
 CONFIG += staticlib
-INCLUDEPATH += ../../../
 
+INCLUDEPATH = ../../../
 DEFINES += HAVE_CONFIG_H
-#DEFINES += HAVE_LOCKDEP
-
 QMAKE_CFLAGS_WARN_ON += -Wno-unused-parameter -Wno-enum-conversion -Wno-unused-variable -Wno-missing-field-initializers -Wno-unused-function -Wno-parentheses-equality
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wno-enum-conversion -Wno-unused-variable -Wno-missing-field-initializers -Wno-unused-function -Wno-parentheses-equality
+
+HEADERS += \
+    ../../cairo.h \
+    ../../cairo-version.h \
+    ../../cairo-deprecated.h \
+    ../../cairo-features.h \
+    ../cairoint.h \
+    ../cairo-wideint-type-private.h \
+    ../cairo-wideint-private.h \
+    ../cairo-types-private.h \
+    ../cairo-tristrip-private.h \
+    ../cairo-traps-private.h \
+    ../cairo-time-private.h \
+    ../cairo-surface-wrapper-private.h \
+    ../cairo-surface-subsurface-private.h \
+    ../cairo-surface-subsurface-inline.h \
+    ../cairo-surface-snapshot-private.h \
+    ../cairo-surface-snapshot-inline.h \
+    ../cairo-surface-private.h \
+    ../cairo-surface-offset-private.h \
+    ../cairo-surface-observer-private.h \
+    ../cairo-surface-observer-inline.h \
+    ../cairo-surface-inline.h \
+    ../cairo-surface-fallback-private.h \
+    ../cairo-surface-clipper-private.h \
+    ../cairo-surface-backend-private.h \
+    ../cairo-stroke-dash-private.h \
+    ../cairo-spans-private.h \
+    ../cairo-spans-compositor-private.h \
+    ../cairo-slope-private.h \
+    ../cairo-rtree-private.h \
+    ../cairo-region-private.h \
+    ../cairo-reference-count-private.h \
+    ../cairo-recording-surface-private.h \
+    ../cairo-recording-surface-inline.h \
+    ../cairo-private.h \
+    ../cairo-pixman-private.h \
+    ../cairo-pattern-private.h \
+    ../cairo-pattern-inline.h \
+    ../cairo-path-private.h \
+    ../cairo-path-fixed-private.h \
+    ../cairo-paginated-surface-private.h \
+    ../cairo-paginated-private.h \
+    ../cairo-output-stream-private.h \
+    ../cairo-mutex-type-private.h \
+    ../cairo-mutex-private.h \
+    ../cairo-mutex-list-private.h \
+    ../cairo-mutex-impl-private.h \
+    ../cairo-mempool-private.h \
+    ../cairo-malloc-private.h \
+    ../cairo-list-private.h \
+    ../cairo-list-inline.h \
+    ../cairo-image-surface-private.h \
+    ../cairo-image-surface-inline.h \
+    ../cairo-image-info-private.h \
+    ../cairo-hash-private.h \
+    ../cairo-gstate-private.h \
+    ../cairo-freelist-type-private.h \
+    ../cairo-freelist-private.h \
+    ../cairo-freed-pool-private.h \
+    ../cairo-fixed-type-private.h \
+    ../cairo-fixed-private.h \
+    ../cairo-error-private.h \
+    ../cairo-error-inline.h \
+    ../cairo-device-private.h \
+    ../cairo-default-context-private.h \
+    ../cairo-damage-private.h \
+    ../cairo-contour-private.h \
+    ../cairo-contour-inline.h \
+    ../cairo-compositor-private.h \
+    ../cairo-composite-rectangles-private.h \
+    ../cairo-compiler-private.h \
+    ../cairo-combsort-inline.h \
+    ../cairo-clip-private.h \
+    ../cairo-clip-inline.h \
+    ../cairo-cache-private.h \
+    ../cairo-boxes-private.h \
+    ../cairo-box-inline.h \
+    ../cairo-backend-private.h \
+    ../cairo-atomic-private.h \
+    ../cairo-array-private.h \
+    ../cairo-arc-private.h \
+    ../cairo-analysis-surface-private.h \
+    ../config.h \
+    ../cairo-tee.h \
+    ../cairo-tee-surface-private.h
 
 SOURCES += \
     ../cairo.c \
@@ -114,100 +197,3 @@ SOURCES += \
     ../cairo-arc.c \
     ../cairo-analysis-surface.c
 
-HEADERS += \
-    ../../cairo.h \
-    ../../cairo-version.h \
-    ../../cairo-deprecated.h \
-    ../../cairo-features.h \
-    ../cairoint.h \
-    ../cairo-wideint-type-private.h \
-    ../cairo-wideint-private.h \
-    ../cairo-types-private.h \
-    ../cairo-tristrip-private.h \
-    ../cairo-traps-private.h \
-    ../cairo-time-private.h \
-    ../cairo-surface-wrapper-private.h \
-    ../cairo-surface-subsurface-private.h \
-    ../cairo-surface-subsurface-inline.h \
-    ../cairo-surface-snapshot-private.h \
-    ../cairo-surface-snapshot-inline.h \
-    ../cairo-surface-private.h \
-    ../cairo-surface-offset-private.h \
-    ../cairo-surface-observer-private.h \
-    ../cairo-surface-observer-inline.h \
-    ../cairo-surface-inline.h \
-    ../cairo-surface-fallback-private.h \
-    ../cairo-surface-clipper-private.h \
-    ../cairo-surface-backend-private.h \
-    ../cairo-stroke-dash-private.h \
-    ../cairo-spans-private.h \
-    ../cairo-spans-compositor-private.h \
-    ../cairo-slope-private.h \
-    ../cairo-rtree-private.h \
-    ../cairo-region-private.h \
-    ../cairo-reference-count-private.h \
-    ../cairo-recording-surface-private.h \
-    ../cairo-recording-surface-inline.h \
-    ../cairo-private.h \
-    ../cairo-pixman-private.h \
-    ../cairo-pattern-private.h \
-    ../cairo-pattern-inline.h \
-    ../cairo-path-private.h \
-    ../cairo-path-fixed-private.h \
-    ../cairo-paginated-surface-private.h \
-    ../cairo-paginated-private.h \
-    ../cairo-output-stream-private.h \
-    ../cairo-mutex-type-private.h \
-    ../cairo-mutex-private.h \
-    ../cairo-mutex-list-private.h \
-    ../cairo-mutex-impl-private.h \
-    ../cairo-mempool-private.h \
-    ../cairo-malloc-private.h \
-    ../cairo-list-private.h \
-    ../cairo-list-inline.h \
-    ../cairo-image-surface-private.h \
-    ../cairo-image-surface-inline.h \
-    ../cairo-image-info-private.h \
-    ../cairo-hash-private.h \
-    ../cairo-gstate-private.h \
-    ../cairo-freelist-type-private.h \
-    ../cairo-freelist-private.h \
-    ../cairo-freed-pool-private.h \
-    ../cairo-fixed-type-private.h \
-    ../cairo-fixed-private.h \
-    ../cairo-error-private.h \
-    ../cairo-error-inline.h \
-    ../cairo-device-private.h \
-    ../cairo-default-context-private.h \
-    ../cairo-damage-private.h \
-    ../cairo-contour-private.h \
-    ../cairo-contour-inline.h \
-    ../cairo-compositor-private.h \
-    ../cairo-composite-rectangles-private.h \
-    ../cairo-compiler-private.h \
-    ../cairo-combsort-inline.h \
-    ../cairo-clip-private.h \
-    ../cairo-clip-inline.h \
-    ../cairo-cache-private.h \
-    ../cairo-boxes-private.h \
-    ../cairo-box-inline.h \
-    ../cairo-backend-private.h \
-    ../cairo-atomic-private.h \
-    ../cairo-array-private.h \
-    ../cairo-arc-private.h \
-    ../cairo-analysis-surface-private.h \
-    ../config.h \
-    ../cairo-tee.h \
-    ../cairo-tee-surface-private.h
-unix:!symbian {
-    maemo5 {
-        target.path = /opt/usr/lib
-    } else {
-        target.path = /usr/lib
-    }
-    INSTALLS += target
-}
-
-OTHER_FILES += \
-    ../cairo-uninstalled.pc.in \
-    ../cairo-features-uninstalled.pc.in
